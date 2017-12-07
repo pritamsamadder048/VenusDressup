@@ -17,12 +17,16 @@ public class AnimateLoading : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(shouldRotate)
+        
+	}
+
+    private void FixedUpdate()
+    {
+        if (shouldRotate)
         {
             DoRotating();
         }
-	}
-
+    }
 
     public IEnumerator StartRotating()
     {
@@ -66,5 +70,6 @@ public class AnimateLoading : MonoBehaviour {
             currentRotation = 0f;
         }
         transform.eulerAngles = new Vector3(0, 0, currentRotation);
+        print("rotating..");
     }
 }

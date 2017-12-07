@@ -16,6 +16,7 @@ public class ShoeProperties : MonoBehaviour
     public int wearingCode;
     public int mfType = 1;
     public string imgName;
+    public string lockStatus="";
     public string finalImageUrl;
     public string finalSavePath;
     public GameController gameController;
@@ -74,7 +75,13 @@ public class ShoeProperties : MonoBehaviour
 
         imgName = mo.GetField("icon", "");
 
+        lockStatus = mo.GetField("lock_status", "false");
 
+        if (!gameController.IsPaidUser && lockStatus=="true")
+        {
+            GetComponent<Button>().interactable = false;
+            transform.GetChild(0).gameObject.SetActive(true);
+        }
 
         switch (wearingCode)
         {

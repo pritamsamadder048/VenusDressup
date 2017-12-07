@@ -16,6 +16,7 @@ public class FemaleWigProperties : MonoBehaviour
     public string imgName;
     public string finalImageUrl;
     public string finalSavePath;
+    public string lockStatus = "";
     public GameController gameController;
 
     private bool _isInitialized = false;
@@ -73,7 +74,13 @@ public class FemaleWigProperties : MonoBehaviour
 
         imgName = mo.GetField("icon", "");
 
+        lockStatus = mo.GetField("lock_status", "false");
 
+        if (!gameController.IsPaidUser && lockStatus == "true")
+        {
+            GetComponent<Button>().interactable = false;
+            transform.GetChild(0).gameObject.SetActive(true);
+        }
 
         switch (wearingCode)
         {

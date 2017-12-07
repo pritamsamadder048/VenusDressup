@@ -164,25 +164,33 @@ public class CameraController : MonoBehaviour
 
     public void OnImageSaved(string path, ImageOrientation orientation)
     {
-        gameController.ShowLoading();
+
 #if UNITY_EDITOR
+        gameController.ShowLoading();
+        
         //			DownloadImage ("http://dentedpixel.com/wp-content/uploads/2014/12/Unity5-0.png");
         StartCoroutine(DownloadImage("http://i.telegraph.co.uk/multimedia/archive/03249/archetypal-female-_3249633c.jpg"));
         //DownloadImage("https://i.pinimg.com/originals/99/96/b4/9996b4944a37318dfc00c9a34ed78c6b.png");
         //			DownloadImage("file:///C:/Users/Arun/Desktop/Gimp.jpg");
 #elif UNITY_ANDROID
+        //Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
+        //gameController.ShowLoadingPanelOnly();
+        //Handheld.StartActivityIndicator();
         path = "file://" + path;
             print("image path is ........ : " + path);
             StartCoroutine(DownloadImage(path,orientation));
 
 #elif UNITY_IPHONE
 
-            
+        //Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.iOSActivityIndicatorStyle.WhiteLarge);
+        //gameController.ShowLoadingPanelOnly();
+        //Handheld.StartActivityIndicator();
             path = "file://" + path;
             Debug.Log("image path is ........ : " + path);
             StartCoroutine(DownloadImage(path,orientation));
 
 #endif
+
     }
 
     public void OnError(string message)
@@ -194,7 +202,21 @@ public class CameraController : MonoBehaviour
     private IEnumerator DownloadImage(string imageUrl, ImageOrientation imageOrientation = ImageOrientation.UP)
     {
 
+        bool success = false;
 
+
+#if UNITY_ANDROID
+        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
+        
+#elif UNITY_IPHONE
+        Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.iOSActivityIndicatorStyle.WhiteLarge);
+
+#elif UNITY_TIZEN
+            Handheld.SetActivityIndicatorStyle(TizenActivityIndicatorStyle.Small);
+#endif
+
+        Handheld.StartActivityIndicator();
+        gameController.ShowLoadingPanelOnly();
 
         using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageUrl))
         {
@@ -255,23 +277,42 @@ public class CameraController : MonoBehaviour
                     touchController.actualImage = new Texture2D(t2d.width, t2d.height);
                     touchController.actualImage.SetPixels(t2d.GetPixels());
                     touchController.actualImage.Apply();
-                    GoToImageCrop();
+                    
                     DestroyImmediate(t2d, true);
+                    success = true;
                 }
                 catch (Exception e)
                 {
+                    success = false;
                     Debug.Log(string.Format("Error while downloading image : ", e));
+                    //yield return new WaitForEndOfFrame();
+                    //print("stopping loading for camera..");
+                    //gameController.HideLoading();
                 }
 
             }
 
-
+           
 
         }
 
-        yield return new WaitForEndOfFrame();
-        gameController.HideLoading();
-
+        if (success)
+        {
+            yield return new WaitForSeconds(1.5f);
+            Handheld.StopActivityIndicator();
+            gameController.HideLoading();
+            gameController.HideLoadingPanelOnly();
+            GoToImageCrop();
+        }
+        else
+        {
+            yield return new WaitForFixedUpdate();
+            Handheld.StopActivityIndicator();
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoading();
+        }
+       
+        //gameController.HideLoading(); 
 
 
 
@@ -396,6 +437,7 @@ public class CameraController : MonoBehaviour
         imagePanel.SetActive(true);
 
         sceneEditorControllerObj.SetActive(false);
+        //gameController.HideLoading();
 
     }
     public void CancelCamera()

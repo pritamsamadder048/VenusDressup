@@ -43,7 +43,7 @@ public class SaveData
 
         try
         {
-            
+
             string dataPath = Application.persistentDataPath;
 
             if (Application.platform != RuntimePlatform.OSXPlayer)
@@ -87,36 +87,34 @@ public class SaveData
                     }
                     saveImageName = Path.Combine(saveImageName, save_name);
 
-                    
 
 
 
 
 
-                    if (Application.platform!=RuntimePlatform.Android && Application.platform!=RuntimePlatform.IPhonePlayer)
-                    {
+
+
 #if UNITY_EDITOR
-                        MonoBehaviour.print(string.Format("Editor saving screenshot to : {0}", saveImageName));
-                        gc.CallBackFromSaveWearings(saveImageName);
-
-#endif
-                    }
-                    else if(Application.platform==RuntimePlatform.Android)
-                    {
-#if UNITY_ANDROID
+                    MonoBehaviour.print(string.Format("Editor saving screenshot to : {0}", saveImageName));
+                    gc.CallBackFromSaveWearings(saveImageName);
+#elif UNITY_ANDROID
 
                         string tsn = string.Format("wearingsdata/screenshots/{0}", save_name);
                         MonoBehaviour.print(string.Format("Android saving screenshot to : {0}", tsn));
                         gc.CallBackFromSaveWearings(tsn);
+#elif UNITY_IPHONE
+
+                    string tsn = string.Format("wearingsdata/screenshots/{0}", save_name);
+                    Debug.Log(string.Format("Iphone saving screenshot to : {0}", tsn));
+                    gc.CallBackFromSaveWearings(tsn);
+
 #endif
-                    }
                     return 1;
                 }
                 else
                 {
                     return 0;
                 }
-
             }
             else
             {
@@ -143,30 +141,33 @@ public class SaveData
                 }
                 saveImageName = Path.Combine(saveImageName, save_name);
 
-                if (Application.platform != RuntimePlatform.Android && Application.platform != RuntimePlatform.IPhonePlayer)
-                {
-#if UNITY_EDITOR
-                    MonoBehaviour.print(string.Format("Editor saving screenshot to : {0}", saveImageName));
-                    gc.CallBackFromSaveWearings(saveImageName);
 
-#endif
-                }
-                else if (Application.platform == RuntimePlatform.Android)
-                {
-#if UNITY_ANDROID
+#if UNITY_EDITOR
+                MonoBehaviour.print(string.Format("Editor saving screenshot to : {0}", saveImageName));
+                gc.CallBackFromSaveWearings(saveImageName);
+
+
+#elif UNITY_ANDROID
 
                     string tsn = string.Format("wearingsdata/screenshots/{0}", save_name);
                     MonoBehaviour.print(string.Format("Android saving screenshot to : {0}", tsn));
                     gc.CallBackFromSaveWearings(tsn);
-#endif
-                }
+#elif UNITY_IPHONE
 
-                
+                    string tsn = string.Format("wearingsdata/screenshots/{0}", save_name);
+                    MonoBehaviour.print(string.Format("Android saving screenshot to : {0}", tsn));
+                    gc.CallBackFromSaveWearings(tsn);
+
+#endif
+
+
+
                 return 1;
 
 
             }
 
+            
         }
         catch (Exception e)
         {

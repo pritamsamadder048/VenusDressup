@@ -85,7 +85,7 @@ public class Gallery : MonoBehaviour {
         gameController.HideAcceptCropButton();
         touchController.ToggleMask(1);
         imagePanel.SetActive(true);
-        gameController.HideLoading();
+        //gameController.HideLoading();
         www = null;
         sceneEditorControllerObj.SetActive(false);
     }
@@ -124,6 +124,7 @@ public class Gallery : MonoBehaviour {
         //gameController.InstantiateInfoPopup(filePath);
 
 #if UNITY_EDITOR
+        gameController.ShowLoading();
         //StartCoroutine(DownloadImage("http://i.telegraph.co.uk/multimedia/archive/03249/archetypal-female-_3249633c.jpg",orientation));
         StartCoroutine(DownloadImage("https://i.pinimg.com/originals/a0/1c/0e/a01c0e0c42c83752ea1533121174db34.jpg", orientation));
 #elif UNITY_ANDROID
@@ -139,8 +140,24 @@ public class Gallery : MonoBehaviour {
     private IEnumerator DownloadImage(string imageUrl,ImageOrientation imageOrientation=ImageOrientation.UP)
     {
 
+        bool success = false;
 
-        gameController.ShowLoading();
+#if UNITY_ANDROID
+        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
+
+#elif UNITY_IPHONE
+        Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.iOSActivityIndicatorStyle.WhiteLarge);
+
+#elif UNITY_TIZEN
+            Handheld.SetActivityIndicatorStyle(TizenActivityIndicatorStyle.Small);
+#endif
+
+        Handheld.StartActivityIndicator();
+
+#if !UNITY_EDITOR
+        gameController.ShowLoadingPanelOnly();
+#endif
+
         using (UnityEngine.Networking.UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageUrl))
         {
             //print(www.url);
@@ -202,14 +219,15 @@ public class Gallery : MonoBehaviour {
                     touchController.actualImage = new Texture2D(t2d.width, t2d.height);
                     touchController.actualImage.SetPixels(t2d.GetPixels());
                     touchController.actualImage.Apply();
-                    GoToImageCrop();
                     DestroyImmediate(t2d, true);
+                    success = true;
                     //gameController.InstantiateInfoPopup("Image Loading complete..");
                 }
                 catch (Exception e)
                 {
+                    success = false;
                     Debug.Log(string.Format("Error while downloading image : {0}", e.Message));
-                    //gameController.InstantiateInfoPopup(e.Message);
+                    gameController.InstantiateInfoPopup(e.Message);
                 }
 
             }
@@ -218,7 +236,19 @@ public class Gallery : MonoBehaviour {
         }
 
 
-
+        if (success)
+        {
+            yield return new WaitForSeconds(1.5f);
+            gameController.HideLoading();
+            Handheld.StopActivityIndicator();
+            GoToImageCrop();
+        }
+        else
+        {
+            yield return new WaitForFixedUpdate();
+            gameController.HideLoading();
+            Handheld.StopActivityIndicator();
+        }
 
     }
 
