@@ -78,7 +78,7 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
         GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(m);
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(m);
         
 
         wearingCode = mo.GetField("type_id", -1);
@@ -213,10 +213,10 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "ornament";
 
-        GetComponent<Button>().onClick.AddListener(UseThisDress);
+        //GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(m);
+        serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(m);
 
 
         wearingCode = mo.GetField("type_id", -1);
@@ -225,11 +225,11 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         lockStatus = mo.GetField("lock_status", "false");
 
-        if (!gameController.IsPaidUser && lockStatus == "true")
-        {
-            GetComponent<Button>().interactable = false;
-            transform.GetChild(0).gameObject.SetActive(true);
-        }
+        //if (!gameController.IsPaidUser && lockStatus == "true")
+        //{
+        //    GetComponent<Button>().interactable = false;
+        //    transform.GetChild(0).gameObject.SetActive(true);
+        //}
 
 
         switch (wearingCode)
@@ -325,7 +325,8 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
 
         _isInitialized = true;
-        StartCoroutine(SetImage());
+        print("successfully init ornament property");
+        //StartCoroutine(SetImage());
 
     }
 

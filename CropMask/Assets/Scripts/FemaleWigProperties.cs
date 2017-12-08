@@ -78,8 +78,11 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
             rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
         }
 
+        propertyType = "wig";
+        GetComponent<Button>().onClick.AddListener(UseThisWig);
+
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(m);
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(m);
 
 
         wearingCode = mo.GetField("type_id", -1);
@@ -211,8 +214,11 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
             rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
         }
 
+        propertyType = "wig";
+        //GetComponent<Button>().onClick.AddListener(UseThisWig);
+
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(m);
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(m);
 
 
         wearingCode = mo.GetField("type_id", -1);
@@ -221,11 +227,11 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
 
         lockStatus = mo.GetField("lock_status", "false");
 
-        if (!gameController.IsPaidUser && lockStatus == "true")
-        {
-            GetComponent<Button>().interactable = false;
-            transform.GetChild(0).gameObject.SetActive(true);
-        }
+        //if (!gameController.IsPaidUser && lockStatus == "true")
+        //{
+        //    GetComponent<Button>().interactable = false;
+        //    transform.GetChild(0).gameObject.SetActive(true);
+        //}
 
         switch (wearingCode)
         {
@@ -320,7 +326,8 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
         }
 
         _isInitialized = true;
-        StartCoroutine(SetImage());
+        print("successfully init female wig property");
+        //StartCoroutine(SetImage());
     }
 
     public void UseThisWig()

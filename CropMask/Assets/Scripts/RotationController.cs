@@ -133,6 +133,7 @@ public class RotationController : MonoBehaviour {
     public void SelectThisModel(float rotation,int index=0)
     {
         currentRotation = rotation;
+
         print("current rotation is : " + currentRotation);
         RotatorParent.transform.localEulerAngles=new Vector3(0f, currentRotation, 0f);
         GetSelectedShapeIndex();

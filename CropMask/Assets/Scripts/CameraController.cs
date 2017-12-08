@@ -206,8 +206,9 @@ public class CameraController : MonoBehaviour
 
 
 #if UNITY_ANDROID
-        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
         
+        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
+
 #elif UNITY_IPHONE
         Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.iOSActivityIndicatorStyle.WhiteLarge);
 
@@ -216,8 +217,9 @@ public class CameraController : MonoBehaviour
 #endif
 
         Handheld.StartActivityIndicator();
+#if !UNITY_EDITOR
         gameController.ShowLoadingPanelOnly();
-
+#endif
         using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageUrl))
         {
             //print(www.url);

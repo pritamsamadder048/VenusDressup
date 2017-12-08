@@ -77,7 +77,7 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(mo);
+        serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(mo);
 
         wearingCode = mo.GetField("type_id", -1);
 
@@ -208,10 +208,10 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "ornament";
 
-        GetComponent<Button>().onClick.AddListener(UseThisDress);
+        //GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(mo);
+        serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(mo);
 
         wearingCode = mo.GetField("type_id", -1);
 
@@ -219,11 +219,11 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         lockStatus = mo.GetField("lock_status", "false");
 
-        if (!gameController.IsPaidUser && lockStatus == "true")
-        {
-            GetComponent<Button>().interactable = false;
-            transform.GetChild(0).gameObject.SetActive(true);
-        }
+        //if (!gameController.IsPaidUser && lockStatus == "true")
+        //{
+        //    GetComponent<Button>().interactable = false;
+        //    transform.GetChild(0).gameObject.SetActive(true);
+        //}
 
         switch (wearingCode)
         {
@@ -318,7 +318,8 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
 
         _isInitialized = true;
-        StartCoroutine(SetImage());
+        print("successfully init shoe property");
+        //StartCoroutine(SetImage());
 
     }
 

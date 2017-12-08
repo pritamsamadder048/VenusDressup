@@ -25,8 +25,9 @@ public class DressData
     public string lockStatus = "";
     public string serializedJsonObject = "";
     public bool _isInitialized = false;
+    public float[] pColor=new float[] { 1, 1, 1, 1 };
 
-    public void EncodeData(DressProperties p)
+    public void EncodeData(DressProperties p, Color pcolor)
     {
 
         wearingCode = p.wearingCode;
@@ -37,6 +38,7 @@ public class DressData
         lockStatus = p.lockStatus;
         serializedJsonObject = p.serializedJsonObject;
         _isInitialized = false;
+        pColor = new float []{ pcolor.r, pcolor.g,pcolor.b,pcolor.a};
     }
 
     public void DecodeData(out DressProperties p)
@@ -52,6 +54,7 @@ public class DressData
             lockStatus = lockStatus,
             serializedJsonObject = serializedJsonObject,
         };
+        
     }
 }
 
@@ -68,8 +71,9 @@ public class FemaleWigData
     public string lockStatus = "";
     public string serializedJsonObject = "";
     public bool _isInitialized = false;
+    public float[] pColor = new float[] { 1, 1, 1, 1 };
 
-    public void EncodeData(FemaleWigProperties p)
+    public void EncodeData(FemaleWigProperties p, Color pcolor)
     {
         wearingCode = p.wearingCode;
         mfType = p.mfType;
@@ -79,6 +83,7 @@ public class FemaleWigData
         lockStatus = p.lockStatus;
         serializedJsonObject = p.serializedJsonObject;
         _isInitialized = false;
+        pColor = new float[] { pcolor.r, pcolor.g, pcolor.b, pcolor.a };
     }
 
     public void DecodeData(out FemaleWigProperties p)
@@ -92,8 +97,9 @@ public class FemaleWigData
             finalSavePath = finalSavePath,
             lockStatus = lockStatus,
             serializedJsonObject = serializedJsonObject
-        };
-
+            
+    };
+        
     }
 }
 
@@ -179,6 +185,7 @@ public class ShoeData
             serializedJsonObject = serializedJsonObject
         };
 
+
     }
 }
 #endregion APPARELDATA
@@ -188,6 +195,8 @@ public class ShoeData
 public class SaveData
 {
     public string saveName;
+    public int modelIndex;
+    public float modelRotation;
     public string modelNameame;
     public string bodytoneName;
     public string eyeName;
@@ -211,14 +220,15 @@ public class SaveData
     public ShoeData shoeData;
 
 
-    private void Initialize(string model,string bodytone,string eye, string dress="", string wig="", string ornament="", string shoe="")
+    private void Initialize(int modelindex,float modelrotation,string model,string bodytone,string eye,GameController gameController, string dress="", string wig="", string ornament="", string shoe="")
     {
         dressData = new DressData();
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
         shoeData = new ShoeData();
 
-
+        modelindex = modelIndex;
+        modelRotation = modelrotation;
         modelNameame = model;
         bodytoneName = bodytone;
         eyeName = eye;
@@ -230,13 +240,14 @@ public class SaveData
         
     }
 
-    public void Initialize(string model, string bodytone, string eye, DressProperties dressproperty = null, FemaleWigProperties wigproperty = null, OrnamentProperties ornamentproperty = null, ShoeProperties shoeproperty = null)
+    public void Initialize(int modelindex,float modelrotation, string model, string bodytone, string eye, GameController gameController, DressProperties dressproperty = null, FemaleWigProperties wigproperty = null, OrnamentProperties ornamentproperty = null, ShoeProperties shoeproperty = null)
     {
         dressData = new DressData();
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
         shoeData = new ShoeData();
-
+        modelIndex = modelindex;
+        modelRotation = modelrotation;
         modelNameame = model;
         bodytoneName = bodytone;
         eyeName = eye;
@@ -247,14 +258,14 @@ public class SaveData
         if(dressProperty!=null)
         {
             
-            dressData.EncodeData(dressProperty);
+            dressData.EncodeData(dressProperty,gameController.currentDressColor);
 
             dressName = dressProperty.imgName;
         }
         if(femaleWigProperty!=null)
         {
             
-            femaleWigData.EncodeData(femaleWigProperty);
+            femaleWigData.EncodeData(femaleWigProperty,gameController.currentWigColor);
 
             wigName = femaleWigProperty.imgName;
         }
@@ -277,7 +288,7 @@ public class SaveData
 
     }
 
-    public void ReCheckData()
+    public void ReCheckData(GameController gameController)
     {
 
         dressData = new DressData();
@@ -289,14 +300,14 @@ public class SaveData
         if (dressProperty != null)
         {
 
-            dressData.EncodeData(dressProperty);
+            dressData.EncodeData(dressProperty,gameController.currentDressColor);
 
             dressName = dressProperty.imgName;
         }
         if (femaleWigProperty != null)
         {
 
-            femaleWigData.EncodeData(femaleWigProperty);
+            femaleWigData.EncodeData(femaleWigProperty,gameController.currentWigColor);
 
             wigName = femaleWigProperty.imgName;
         }
@@ -322,11 +333,22 @@ public class SaveData
     public void InverseRecheckData()
     {
         dressData.DecodeData(out this.dressProperty);
+        dressProperty.InitializeDressProperty(dressData.serializedJsonObject);
         femaleWigData.DecodeData(out this.femaleWigProperty);
         ornamentData.DecodeData(out this.ornamentProperty);
         shoeData.DecodeData(out this.shoeProperty);
     }
-
+    public void InitializeProperties()
+    {
+        dressProperty = new DressProperties();
+        dressProperty.InitializeDressProperty(dressData.serializedJsonObject);
+        femaleWigProperty = new FemaleWigProperties();
+        femaleWigProperty.InitializeWigProperty(femaleWigData.serializedJsonObject);
+        ornamentProperty = new OrnamentProperties();
+        ornamentProperty.InitializeOrnamentProperty(ornamentData.serializedJsonObject);
+        shoeProperty = new ShoeProperties();
+        shoeProperty.InitializeShoeProperty(shoeData.serializedJsonObject);
+    }
     public static int SaveWearings(string saveDataFileName, SaveData sd,GameController gc)
     {
 
@@ -631,10 +653,8 @@ public class SaveData
                         {
                             for(int i=0;i<saveDatas.Count;i++)
                             {
-                                saveDatas[i].dressData.DecodeData(out saveDatas[i].dressProperty);
-                                saveDatas[i].femaleWigData.DecodeData(out saveDatas[i].femaleWigProperty);
-                                saveDatas[i].ornamentData.DecodeData(out saveDatas[i].ornamentProperty);
-                                saveDatas[i].shoeData.DecodeData(out saveDatas[i].shoeProperty);
+                                saveDatas[i].InitializeProperties();
+                                
                             }
                         }
                     }
@@ -642,7 +662,7 @@ public class SaveData
                 }
                 catch (Exception e)
                 {
-                    MonoBehaviour.print(string.Format("error writting save file : {0} ", e));
+                    MonoBehaviour.print(string.Format("error loading save file : {0} ", e));
                     fileStream.Close();
                     fileStream.Dispose();
                     return null;

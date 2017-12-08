@@ -241,6 +241,7 @@ public class Gallery : MonoBehaviour {
             yield return new WaitForSeconds(1.5f);
             gameController.HideLoading();
             Handheld.StopActivityIndicator();
+            gameController.HideLoadingPanelOnly();
             GoToImageCrop();
         }
         else
@@ -248,6 +249,7 @@ public class Gallery : MonoBehaviour {
             yield return new WaitForFixedUpdate();
             gameController.HideLoading();
             Handheld.StopActivityIndicator();
+            gameController.HideLoadingPanelOnly(); 
         }
 
     }

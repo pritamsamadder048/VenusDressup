@@ -50,15 +50,15 @@ public class SelectDressController : MonoBehaviour {
     public bool ornamentDataLoadingComplete = false;
     public bool shoeDataLoadingComplete = false;
 
-    private string currentDressName = null;
-    private string currentWigName = null;
-    private string currentOrnamentName = null;
-    private string currentShoeName = null;
+    public string currentDressName = null;
+    public string currentWigName = null;
+    public string currentOrnamentName = null;
+    public string currentShoeName = null;
 
-    private bool isWearingDress=false;
-    private bool isWearingWig = false;
-    private bool isWearingOrnament = false;
-    private bool isWearingShoe = false;
+    public bool isWearingDress=false;
+    public bool isWearingWig = false;
+    public bool isWearingOrnament = false;
+    public bool isWearingShoe = false;
 
 
 
@@ -474,7 +474,8 @@ public class SelectDressController : MonoBehaviour {
 
     public void PutOnLongDressDynamically(DressProperties dp,bool resetDress=false)  //for dynamically loading dress
     {
-		string dressName = dp.imgName;
+        gameController = gameControllerObject.GetComponent<GameController>();
+        string dressName = dp.imgName;
 
 
         if(!resetDress)
@@ -536,7 +537,18 @@ public class SelectDressController : MonoBehaviour {
 
         }
 
-
+        else
+        {
+            dress.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            if (!dress.gameObject.activeSelf)
+            {
+                dress.gameObject.SetActive(true);
+            }
+            if (!dress.transform.parent.gameObject.activeSelf)
+            {
+                dress.transform.parent.gameObject.SetActive(true);
+            }
+        }
 
         Texture2D tempTex = new Texture2D(10,10);
         if(File.Exists(dp.finalSavePath))
@@ -548,6 +560,7 @@ public class SelectDressController : MonoBehaviour {
             dress.color = Color.white;
             gameController.currentDressColor = Color.white;
             isWearingDress = true;
+            editButtons[0].SetActive(true);
             currentDressName = dressName;
             
             dress.gameObject.GetComponent<Image>().DOFade(0f, 0f);
@@ -563,6 +576,7 @@ public class SelectDressController : MonoBehaviour {
             gameController.currentDressTexture.Apply();
             gameController.currentDressProperty = new DressProperties();
             gameController.currentDressProperty = dp;
+            gameController.currentDressColor = Color.white;
         }
 
 
@@ -685,7 +699,7 @@ public class SelectDressController : MonoBehaviour {
 
     public void PutOnWigDynamically(FemaleWigProperties fwp,bool resetWig=false)
     {
-
+        gameController = gameControllerObject.GetComponent<GameController>();
 
         string wigName = fwp.imgName;
 
@@ -748,7 +762,18 @@ public class SelectDressController : MonoBehaviour {
 
 
         }
-
+        else
+        {
+            wig.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            if (!wig.gameObject.activeSelf)
+            {
+                wig.gameObject.SetActive(true);
+            }
+            if (!wig.transform.parent.gameObject.activeSelf)
+            {
+                wig.transform.parent.gameObject.SetActive(true);
+            }
+        }
 
 
 
@@ -761,6 +786,7 @@ public class SelectDressController : MonoBehaviour {
             wig.color = Color.white;
             gameController.currentWigColor = Color.white;
             isWearingWig = true;
+            editButtons[1].SetActive(true);
             currentWigName = wigName;
             wig.gameObject.GetComponent<Image>().DOFade(0f, 0f);
             print("image assigned");
@@ -775,6 +801,7 @@ public class SelectDressController : MonoBehaviour {
             gameController.currentWigTexture.Apply();
             gameController.currentFemaleWigProperty = new FemaleWigProperties();
             gameController.currentFemaleWigProperty = fwp;
+            gameController.currentWigColor = Color.white;
         }
 
 
@@ -861,6 +888,7 @@ public class SelectDressController : MonoBehaviour {
 
     public void PutOnOrnamentDynamically(OrnamentProperties op)
     {
+        gameController = gameControllerObject.GetComponent<GameController>();
         string ornamentName = op.imgName;
         
             if (!ornament.transform.parent.gameObject.activeSelf && ornament.color.a > 0.5f && ornamentName == currentOrnamentName)
@@ -911,7 +939,7 @@ public class SelectDressController : MonoBehaviour {
 
 
 
-            if(File.Exists(op.finalSavePath))
+        if(File.Exists(op.finalSavePath))
         {
             Texture2D tempTex = new Texture2D(10, 10);
             tempTex.LoadImage(File.ReadAllBytes(op.finalSavePath));
@@ -1009,6 +1037,7 @@ public class SelectDressController : MonoBehaviour {
 
     public void PutOnShoeDynamically(ShoeProperties sp)
     {
+        gameController = gameControllerObject.GetComponent<GameController>();
         string shoeName = sp.imgName;
             if (!shoe.transform.parent.gameObject.activeSelf && shoe.color.a > 0.5f && shoeName == currentShoeName)
             {

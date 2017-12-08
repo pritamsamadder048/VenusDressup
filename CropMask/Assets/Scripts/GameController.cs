@@ -114,20 +114,19 @@ public class GameController : MonoBehaviour
 	[SerializeField]
 	private int currentShapeIndex;
 
-	[SerializeField]
-	private GameObject mainModel;
+	public GameObject mainModel;
 
-	[SerializeField]
-	private Image dress;
 
-	[SerializeField]
-	private Image wig;
+	public Image dress;
 
-	[SerializeField]
-	private Image shoe;
 
-	[SerializeField]
-	private Image ornament;
+	public Image wig;
+
+	public Image shoe;
+
+	public Image ornament;
+
+
 
 	[SerializeField]
 	private SaveData saveData;
@@ -1636,7 +1635,7 @@ public class GameController : MonoBehaviour
 
             SaveData sd = new SaveData();
 
-            sd.Initialize(mainBodyShape, mainBodyTone, mainEyeColor);
+            sd.Initialize(mainModelIndex,mainCarouselRotation,mainBodyShape, mainBodyTone, mainEyeColor,this);
             if (wig.gameObject.activeSelf && wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f)
             {
                 //sd.wigName = wig.sprite.texture.name;
@@ -1658,7 +1657,7 @@ public class GameController : MonoBehaviour
                 sd.shoeProperty = currentShoeProperty;
             }
 
-            sd.ReCheckData();
+            sd.ReCheckData(this);
 
 
             SaveData.SaveWearings("wearingsdata.dat", sd, this);
@@ -1739,6 +1738,7 @@ public class GameController : MonoBehaviour
 		{
 			this.wigEditButton.SetActive(false);
 		}
+        //selectDressController.isWearingWig = false;
 	}
 
 	public void ToggleDress(bool changeEditButtonState = false)
@@ -1759,6 +1759,8 @@ public class GameController : MonoBehaviour
 		{
 			this.dressEditButton.SetActive(false);
 		}
+        //selectDressController.isWearingDress = false;
+
 	}
 
 	public void ToggleOrnament(bool changeEditButtonState = false)
@@ -1767,6 +1769,7 @@ public class GameController : MonoBehaviour
 		if (changeEditButtonState)
 		{
 		}
+        //selectDressController.isWearingOrnament = false;
 	}
 
 	public void ToggleShoe(bool changeEditButtonState = false)
@@ -1775,6 +1778,7 @@ public class GameController : MonoBehaviour
 		if (changeEditButtonState)
 		{
 		}
+        //selectDressController.isWearingShoe = false;
 	}
 
 	public string GetMainBodyShape()
@@ -2054,4 +2058,22 @@ public class GameController : MonoBehaviour
 		this.isShowingMale = true;
 		this.maleController.OnClickSelectWigsForMale(true);
 	}
+
+
+
+    public void ChangeToGrayScale(Image targetImage)
+    {
+        Color[] pixels = targetImage.sprite.texture.GetPixels();
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (pixels[i].a > 0.5f)
+            {
+                pixels[i] = new Color(pixels[i].grayscale, pixels[i].grayscale, pixels[i].grayscale, pixels[i].a);
+            }
+        }
+        Texture2D texture2D = new Texture2D(targetImage.sprite.texture.width, targetImage.sprite.texture.height);
+        texture2D.SetPixels(pixels);
+        texture2D.Apply();
+        targetImage.sprite = Sprite.Create(texture2D, new Rect(0f, 0f, (float)texture2D.width, (float)texture2D.height), new Vector2(0.5f, 0.5f), 100f);
+    }
 }

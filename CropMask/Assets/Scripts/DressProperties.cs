@@ -83,7 +83,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         GetComponent<Button>().onClick.AddListener(UseThisDress);
         
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(mo);
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(mo);
 
         wearingCode = mo.GetField("type_id", -1);
         
@@ -215,10 +215,10 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "dress";
 
-        GetComponent<Button>().onClick.AddListener(UseThisDress);
+        //GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
-        serializedJsonObject = MiniJSON.jsonEncode(mo);
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(mo);
 
         wearingCode = mo.GetField("type_id", -1);
 
@@ -226,11 +226,11 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         lockStatus = mo.GetField("lock_status", "false");
 
-        if (!gameController.IsPaidUser && lockStatus == "true")
-        {
-            GetComponent<Button>().interactable = false;
-            transform.GetChild(0).gameObject.SetActive(true);
-        }
+        //if (!gameController.IsPaidUser && lockStatus == "true")
+        //{
+        //    GetComponent<Button>().interactable = false;
+        //    transform.GetChild(0).gameObject.SetActive(true);
+        //}
 
         switch (wearingCode)
         {
@@ -325,7 +325,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
 
         _isInitialized = true;
-        StartCoroutine(SetImage());
+        print("successfully init dressproperty");
+        //StartCoroutine(SetImage());
 
     }
 
