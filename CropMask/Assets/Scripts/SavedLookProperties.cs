@@ -53,7 +53,7 @@ public class SavedLookProperties : MonoBehaviour {
         finalSavePath = Path.Combine(finalSavePath, imageName);
         sd = s;
         
-
+        
     }
 
     public void LoadSavedLook()

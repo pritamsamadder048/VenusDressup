@@ -4,7 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -313,6 +315,8 @@ public class GameController : MonoBehaviour
 	public DressProperties currentDressProperty;
 
 	public FemaleWigProperties currentFemaleWigProperty;
+    public OrnamentProperties currentOrnamentProperty;
+    public ShoeProperties currentShoeProperty;
 
 	private bool isPaidUser = false;
 
@@ -1568,14 +1572,13 @@ public class GameController : MonoBehaviour
 
 	public void Quit()
 	{
-		if (Application.isEditor)
-		{
-			if (EditorApplication.isPlaying)
+#if UNITY_EDITOR
+            if (EditorApplication.isPlaying)
 			{
 				EditorApplication.isPlaying=(false);
 			}
-		}
-		Application.Quit();
+#endif
+        Application.Quit();
 	}
 
 	public void ShowLoading()
@@ -1636,21 +1639,26 @@ public class GameController : MonoBehaviour
             sd.Initialize(mainBodyShape, mainBodyTone, mainEyeColor);
             if (wig.gameObject.activeSelf && wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f)
             {
-                sd.wigName = wig.sprite.texture.name;
+                //sd.wigName = wig.sprite.texture.name;
+                sd.femaleWigProperty = currentFemaleWigProperty;
             }
             if (dress.gameObject.activeSelf && dress.transform.parent.gameObject.activeSelf && dress.color.a > 0.5f)
             {
-                sd.dressName = dress.sprite.texture.name;
+                //sd.dressName = dress.sprite.texture.name;
+                sd.dressProperty = currentDressProperty;
             }
             if (ornament.gameObject.activeSelf && ornament.transform.parent.gameObject.activeSelf && ornament.color.a > 0.5f)
             {
-                sd.ornamentName = ornament.sprite.texture.name;
+                //sd.ornamentName = ornament.sprite.texture.name;
+                sd.ornamentProperty = currentOrnamentProperty;
             }
             if (shoe.gameObject.activeSelf && shoe.transform.parent.gameObject.activeSelf && shoe.color.a > 0.5f)
             {
                 sd.shoeName = shoe.sprite.texture.name;
-
+                sd.shoeProperty = currentShoeProperty;
             }
+
+            sd.ReCheckData();
 
 
             SaveData.SaveWearings("wearingsdata.dat", sd, this);

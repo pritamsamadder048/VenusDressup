@@ -5,8 +5,11 @@ using System;
 using System.IO;
 using UnityEngine.UI;
 
-public class FemaleWigProperties : MonoBehaviour
+
+[Serializable]
+public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceiver
 {
+    [NonSerialized]
     public MiniJsonObject mo;
 
     public string propertyType = "wig";
@@ -17,10 +20,14 @@ public class FemaleWigProperties : MonoBehaviour
     public string finalImageUrl;
     public string finalSavePath;
     public string lockStatus = "";
+    public string serializedJsonObject = "";
+    [NonSerialized]
     public GameController gameController;
 
+    [SerializeField]
     private bool _isInitialized = false;
 
+    [NonSerialized]
     ResourceFileManager rfm;
     // Use this for initialization
 
@@ -30,6 +37,10 @@ public class FemaleWigProperties : MonoBehaviour
         get
         {
             return _isInitialized;
+        }
+        private set
+        {
+            _isInitialized = value;
         }
     }
 
@@ -68,6 +79,7 @@ public class FemaleWigProperties : MonoBehaviour
         }
 
         mo = m;
+        serializedJsonObject = MiniJSON.jsonEncode(m);
 
 
         wearingCode = mo.GetField("type_id", -1);
@@ -178,6 +190,139 @@ public class FemaleWigProperties : MonoBehaviour
         StartCoroutine(SetImage());
     }
 
+
+
+    public void InitializeWigProperty( string jsonString)
+    {
+        if(jsonString =="" || jsonString==null)
+        {
+            IsInitialized = false;
+            return;
+        }
+
+        MiniJsonObject m = new MiniJsonObject(jsonString);
+        if (gameController == null)
+        {
+            gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        }
+
+        if (rfm == null)
+        {
+            rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
+        }
+
+        mo = m;
+        serializedJsonObject = MiniJSON.jsonEncode(m);
+
+
+        wearingCode = mo.GetField("type_id", -1);
+
+        imgName = mo.GetField("icon", "");
+
+        lockStatus = mo.GetField("lock_status", "false");
+
+        if (!gameController.IsPaidUser && lockStatus == "true")
+        {
+            GetComponent<Button>().interactable = false;
+            transform.GetChild(0).gameObject.SetActive(true);
+        }
+
+        switch (wearingCode)
+        {
+            case 1: //download female dress
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 2:  //download female wig
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 3:  //download female ornament
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 4:  //download female shoe
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 5: //download male wig
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 6: // download male tie
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+        }
+
+        _isInitialized = true;
+        StartCoroutine(SetImage());
+    }
+
     public void UseThisWig()
     {
         if (_isInitialized)
@@ -212,5 +357,15 @@ public class FemaleWigProperties : MonoBehaviour
             }
         }
         yield return null;
+    }
+
+    public void OnBeforeSerialize()
+    {
+        //throw new NotImplementedException();
+    }
+
+    public void OnAfterDeserialize()
+    {
+        //throw new NotImplementedException();
     }
 }

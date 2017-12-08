@@ -851,6 +851,10 @@ public class SelectDressController : MonoBehaviour {
             print("last fade");
 
 
+
+            
+
+
         }
     }
 
@@ -922,6 +926,11 @@ public class SelectDressController : MonoBehaviour {
 
             ornament.gameObject.GetComponent<Image>().DOFade(1f, 1f);
             print("last fade");
+
+
+
+            gameController.currentOrnamentProperty = new OrnamentProperties();
+            gameController.currentOrnamentProperty = op;
         }
 
 
@@ -1064,6 +1073,10 @@ public class SelectDressController : MonoBehaviour {
 
             shoe.gameObject.GetComponent<Image>().DOFade(1f, 1f);
             print("last fade");
+
+
+            gameController.currentShoeProperty = new ShoeProperties();
+            gameController.currentShoeProperty = sp;
         }
 
 

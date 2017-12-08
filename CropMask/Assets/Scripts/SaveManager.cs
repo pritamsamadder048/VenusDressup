@@ -49,6 +49,7 @@ public class SaveManager : MonoBehaviour {
         {
             foreach (SaveData s in saveDatas)
             {
+                //s.InverseRecheckData();
                 GameObject g = Instantiate(saveLookPrefab, savedLookContainer.transform);
                 Image img = g.GetComponent<Image>();
 

@@ -9,6 +9,180 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 
 
+
+#region APPARELDATA
+
+[Serializable]
+public class DressData
+{
+    public string propertyType = "dress";
+
+    public int wearingCode;
+    public int mfType = 1;
+    public string imgName;
+    public string finalImageUrl;
+    public string finalSavePath;
+    public string lockStatus = "";
+    public string serializedJsonObject = "";
+    public bool _isInitialized = false;
+
+    public void EncodeData(DressProperties p)
+    {
+
+        wearingCode = p.wearingCode;
+        mfType = p.mfType;
+        imgName = p.imgName;
+        finalImageUrl = p.finalImageUrl;
+        finalSavePath = p.finalSavePath;
+        lockStatus = p.lockStatus;
+        serializedJsonObject = p.serializedJsonObject;
+        _isInitialized = false;
+    }
+
+    public void DecodeData(out DressProperties p)
+    {
+        p = new DressProperties
+        {
+
+            wearingCode = wearingCode,
+            mfType = mfType,
+            imgName = imgName,
+            finalImageUrl = finalImageUrl,
+            finalSavePath = finalSavePath,
+            lockStatus = lockStatus,
+            serializedJsonObject = serializedJsonObject,
+        };
+    }
+}
+
+[Serializable]
+public class FemaleWigData
+{
+    public string propertyType = "wig";
+
+    public int wearingCode;
+    public int mfType = 1;
+    public string imgName;
+    public string finalImageUrl;
+    public string finalSavePath;
+    public string lockStatus = "";
+    public string serializedJsonObject = "";
+    public bool _isInitialized = false;
+
+    public void EncodeData(FemaleWigProperties p)
+    {
+        wearingCode = p.wearingCode;
+        mfType = p.mfType;
+        imgName = p.imgName;
+        finalImageUrl = p.finalImageUrl;
+        finalSavePath = p.finalSavePath;
+        lockStatus = p.lockStatus;
+        serializedJsonObject = p.serializedJsonObject;
+        _isInitialized = false;
+    }
+
+    public void DecodeData(out FemaleWigProperties p)
+    {
+        p = new FemaleWigProperties
+        {
+            wearingCode = wearingCode,
+            mfType = mfType,
+            imgName = imgName,
+            finalImageUrl = finalImageUrl,
+            finalSavePath = finalSavePath,
+            lockStatus = lockStatus,
+            serializedJsonObject = serializedJsonObject
+        };
+
+    }
+}
+
+[Serializable]
+public class OrnamentData
+{
+    public string propertyType = "ornament";
+
+    public int wearingCode;
+    public int mfType = 1;
+    public string imgName;
+    public string finalImageUrl;
+    public string finalSavePath;
+    public string lockStatus = "";
+    public string serializedJsonObject = "";
+    public bool _isInitialized = false;
+
+    public void EncodeData(OrnamentProperties p)
+    {
+        wearingCode = p.wearingCode;
+        mfType = p.mfType;
+        imgName = p.imgName;
+        finalImageUrl = p.finalImageUrl;
+        finalSavePath = p.finalSavePath;
+        lockStatus = p.lockStatus;
+        serializedJsonObject = p.serializedJsonObject;
+        _isInitialized = false;
+    }
+
+    public void DecodeData(out OrnamentProperties p)
+    {
+        p = new OrnamentProperties
+        {
+            wearingCode = wearingCode,
+            mfType = mfType,
+            imgName = imgName,
+            finalImageUrl = finalImageUrl,
+            finalSavePath = finalSavePath,
+            lockStatus = lockStatus,
+            serializedJsonObject = serializedJsonObject
+        };
+
+    }
+}
+
+[Serializable]
+public class ShoeData
+{
+    public string propertyType = "shoe";
+
+    public int wearingCode;
+    public int mfType = 1;
+    public string imgName;
+    public string finalImageUrl;
+    public string finalSavePath;
+    public string lockStatus = "";
+    public string serializedJsonObject = "";
+    public bool _isInitialized = false;
+
+    public void EncodeData(ShoeProperties p)
+    {
+        
+        wearingCode = p.wearingCode;
+        mfType = p.mfType;
+        imgName = p.imgName;
+        finalImageUrl = p.finalImageUrl;
+        finalSavePath = p.finalSavePath;
+        lockStatus = p.lockStatus;
+        serializedJsonObject = p.serializedJsonObject;
+        _isInitialized = false;
+    }
+
+    public void DecodeData(out ShoeProperties p)
+    {
+        p = new ShoeProperties
+        {
+            wearingCode = wearingCode,
+            mfType = mfType,
+            imgName = imgName,
+            finalImageUrl = finalImageUrl,
+            finalSavePath = finalSavePath,
+            lockStatus = lockStatus,
+            serializedJsonObject = serializedJsonObject
+        };
+
+    }
+}
+#endregion APPARELDATA
+
 #region SAVEDATA
 [Serializable]
 public class SaveData
@@ -21,11 +195,30 @@ public class SaveData
     public string wigName;
     public string ornamentName;
     public string shoeName;
-    
+
+    [NonSerialized]
+    public DressProperties dressProperty;
+    [NonSerialized]
+    public FemaleWigProperties femaleWigProperty;
+    [NonSerialized]
+    public OrnamentProperties ornamentProperty;
+    [NonSerialized]
+    public ShoeProperties shoeProperty;
+
+    public DressData dressData;
+    public FemaleWigData femaleWigData;
+    public OrnamentData ornamentData;
+    public ShoeData shoeData;
 
 
-    public void Initialize(string model,string bodytone,string eye, string dress="", string wig="", string ornament="", string shoe="")
+    private void Initialize(string model,string bodytone,string eye, string dress="", string wig="", string ornament="", string shoe="")
     {
+        dressData = new DressData();
+        femaleWigData = new FemaleWigData();
+        ornamentData = new OrnamentData();
+        shoeData = new ShoeData();
+
+
         modelNameame = model;
         bodytoneName = bodytone;
         eyeName = eye;
@@ -35,6 +228,103 @@ public class SaveData
         shoeName = shoe;
 
         
+    }
+
+    public void Initialize(string model, string bodytone, string eye, DressProperties dressproperty = null, FemaleWigProperties wigproperty = null, OrnamentProperties ornamentproperty = null, ShoeProperties shoeproperty = null)
+    {
+        dressData = new DressData();
+        femaleWigData = new FemaleWigData();
+        ornamentData = new OrnamentData();
+        shoeData = new ShoeData();
+
+        modelNameame = model;
+        bodytoneName = bodytone;
+        eyeName = eye;
+        this.dressProperty = dressproperty;
+        this.femaleWigProperty = wigproperty;
+        this.ornamentProperty = ornamentproperty;
+        this.shoeProperty = shoeproperty;
+        if(dressProperty!=null)
+        {
+            
+            dressData.EncodeData(dressProperty);
+
+            dressName = dressProperty.imgName;
+        }
+        if(femaleWigProperty!=null)
+        {
+            
+            femaleWigData.EncodeData(femaleWigProperty);
+
+            wigName = femaleWigProperty.imgName;
+        }
+        if(ornamentProperty!=null)
+        {
+            
+            
+            ornamentData.EncodeData(ornamentProperty);
+
+            ornamentName = ornamentProperty.imgName;
+        }
+        if(shoeProperty!=null)
+        {
+
+            shoeData.EncodeData(shoeProperty);
+
+            shoeName = shoeProperty.imgName;
+        }
+
+
+    }
+
+    public void ReCheckData()
+    {
+
+        dressData = new DressData();
+        femaleWigData = new FemaleWigData();
+        ornamentData = new OrnamentData();
+        shoeData = new ShoeData();
+
+
+        if (dressProperty != null)
+        {
+
+            dressData.EncodeData(dressProperty);
+
+            dressName = dressProperty.imgName;
+        }
+        if (femaleWigProperty != null)
+        {
+
+            femaleWigData.EncodeData(femaleWigProperty);
+
+            wigName = femaleWigProperty.imgName;
+        }
+        if (ornamentProperty != null)
+        {
+
+
+            ornamentData.EncodeData(ornamentProperty);
+
+            ornamentName = ornamentProperty.imgName;
+        }
+        if (shoeProperty != null)
+        {
+
+            shoeData.EncodeData(shoeProperty);
+
+            shoeName = shoeProperty.imgName;
+        }
+
+
+    }
+
+    public void InverseRecheckData()
+    {
+        dressData.DecodeData(out this.dressProperty);
+        femaleWigData.DecodeData(out this.femaleWigProperty);
+        ornamentData.DecodeData(out this.ornamentProperty);
+        shoeData.DecodeData(out this.shoeProperty);
     }
 
     public static int SaveWearings(string saveDataFileName, SaveData sd,GameController gc)
@@ -62,8 +352,16 @@ public class SaveData
                 List<SaveData> saveDatas = new List<SaveData>();
                 saveDatas = LoadData(saveDataFileName);
 
-                int totalSaves = saveDatas.Count;
-                MonoBehaviour.print(string.Format("total faces :{0}", totalSaves));
+                int totalSaves = 0; 
+                if(saveDatas!=null)
+                {
+                    totalSaves=saveDatas.Count;
+                }
+                else
+                {
+                    saveDatas = new List<SaveData>();
+                }
+                MonoBehaviour.print(string.Format("total saves :{0}", totalSaves));
 
 
 
@@ -327,6 +625,19 @@ public class SaveData
                     saveDatas = (List<SaveData>)b.Deserialize(fileStream);
                     fileStream.Close();
                     fileStream.Dispose();
+                    if(saveDatas!=null)
+                    {
+                        if(saveDatas.Count>0)
+                        {
+                            for(int i=0;i<saveDatas.Count;i++)
+                            {
+                                saveDatas[i].dressData.DecodeData(out saveDatas[i].dressProperty);
+                                saveDatas[i].femaleWigData.DecodeData(out saveDatas[i].femaleWigProperty);
+                                saveDatas[i].ornamentData.DecodeData(out saveDatas[i].ornamentProperty);
+                                saveDatas[i].shoeData.DecodeData(out saveDatas[i].shoeProperty);
+                            }
+                        }
+                    }
                     return saveDatas;
                 }
                 catch (Exception e)
