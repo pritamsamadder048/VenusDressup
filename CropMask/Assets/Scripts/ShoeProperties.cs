@@ -72,9 +72,10 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         {
             rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
         }
-        propertyType = "ornament";
+        propertyType = "shoe";
 
-        GetComponent<Button>().onClick.AddListener(UseThisDress);
+        GetComponent<Button>().onClick.RemoveAllListeners();
+        GetComponent<Button>().onClick.AddListener(UseThisShoe);
 
         mo = m;
         serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(mo);
@@ -206,9 +207,10 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         {
             rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
         }
-        propertyType = "ornament";
+        propertyType = "shoe";
 
-        //GetComponent<Button>().onClick.AddListener(UseThisDress);
+        GetComponent<Button>().onClick.RemoveAllListeners();
+        GetComponent<Button>().onClick.AddListener(UseThisShoe);
 
         mo = m;
         serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(mo);
@@ -323,7 +325,7 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
 
     }
 
-    public void UseThisDress()
+    public void UseThisShoe()
     {
         if (_isInitialized)
         {
@@ -339,7 +341,7 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
     {
         if (IsInitialized)
         {
-            print("trying to load ornament image from : " + finalSavePath);
+            print("trying to load shoe image from : " + finalSavePath);
             if (File.Exists(finalSavePath))
             {
                 Texture2D t2d = new Texture2D(10, 10);

@@ -75,6 +75,7 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "ornament";
 
+        GetComponent<Button>().onClick.RemoveAllListeners();
         GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
@@ -213,7 +214,8 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "ornament";
 
-        //GetComponent<Button>().onClick.AddListener(UseThisDress);
+        GetComponent<Button>().onClick.RemoveAllListeners();
+        GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
         serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(m);

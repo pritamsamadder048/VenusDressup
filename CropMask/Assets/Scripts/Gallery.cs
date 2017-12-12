@@ -120,7 +120,8 @@ public class Gallery : MonoBehaviour {
 
     public void OnPhotoPick(string filePath,ImageOrientation orientation=ImageOrientation.UP)
 	{
-		Debug.Log ("filePath : " + filePath);
+        gameController.CollectGurbage(true);
+        Debug.Log ("filePath : " + filePath);
         //gameController.InstantiateInfoPopup(filePath);
 
 #if UNITY_EDITOR
@@ -205,6 +206,7 @@ public class Gallery : MonoBehaviour {
                     }
                     else
                     {
+
                     }
                     t2d = new Texture2D(newTex.width, newTex.height);
                     t2d.SetPixels(newTex.GetPixels());
@@ -294,6 +296,7 @@ public class Gallery : MonoBehaviour {
 ////			print ("caught");
 ////		}
 //	}
+
 
 	private byte[] LoadBytes(string path)
 	{

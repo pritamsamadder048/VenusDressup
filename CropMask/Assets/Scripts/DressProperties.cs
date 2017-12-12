@@ -80,6 +80,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "dress";
 
+        GetComponent<Button>().onClick.RemoveAllListeners();
         GetComponent<Button>().onClick.AddListener(UseThisDress);
         
         mo = m;
@@ -215,7 +216,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "dress";
 
-        //GetComponent<Button>().onClick.AddListener(UseThisDress);
+        GetComponent<Button>().onClick.RemoveAllListeners();
+        GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
         serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(mo);

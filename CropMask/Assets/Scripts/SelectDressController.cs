@@ -37,8 +37,8 @@ public class SelectDressController : MonoBehaviour {
     [SerializeField]
     private GameObject dressOptionPanel;
 
-    [SerializeField]
-    private GameObject[] editButtons;
+    
+    public GameObject[] editButtons;
 
     [SerializeField]
     private GameObject wigEditPanel;
@@ -483,13 +483,17 @@ public class SelectDressController : MonoBehaviour {
 
             if (!dress.transform.parent.gameObject.activeSelf && dress.color.a > 0.5f && dressName == currentDressName)
             {
+                print("!dress.transform.parent.gameObject.activeSelf && dress.color.a > 0.5f && dressName == currentDressName");
                 dress.transform.parent.gameObject.SetActive(true);
+                isWearingDress = true;
                 editButtons[1].SetActive(false);
                 editButtons[0].SetActive(true);
                 return;
             }
             else if (!dress.transform.parent.gameObject.activeSelf && dress.color.a <= 0.5f && dressName == currentDressName)
             {
+                print("!dress.transform.parent.gameObject.activeSelf && dress.color.a <= 0.5f && dressName == currentDressName");
+
                 dress.transform.parent.gameObject.SetActive(true);
                 dress.DOFade(1f, .5f);
                 //print("else if");
@@ -501,6 +505,7 @@ public class SelectDressController : MonoBehaviour {
 
             if (isWearingDress && dressName == currentDressName)
             {
+                print("if (isWearingDress && dressName == currentDressName)");
                 dress.gameObject.GetComponent<Image>().DOFade(0f, .5f);
                 isWearingDress = false;
                 editButtons[0].SetActive(false);
@@ -508,6 +513,7 @@ public class SelectDressController : MonoBehaviour {
             }
             else if (!isWearingDress && dressName == currentDressName)
             {
+                print("else if (!isWearingDress && dressName == currentDressName)");
                 dress.gameObject.GetComponent<Image>().DOFade(1f, .5f);
                 isWearingDress = true;
                 editButtons[0].SetActive(true);
@@ -515,6 +521,7 @@ public class SelectDressController : MonoBehaviour {
             }
             else if (isWearingDress && dressName != currentDressName)
             {
+                print("else if (isWearingDress && dressName != currentDressName)");
                 dress.gameObject.GetComponent<Image>().DOFade(0f, .5f);
                 isWearingDress = false;
                 editButtons[0].SetActive(true);
@@ -539,6 +546,7 @@ public class SelectDressController : MonoBehaviour {
 
         else
         {
+            print("Reset Wig");
             dress.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             if (!dress.gameObject.activeSelf)
             {
@@ -707,13 +715,16 @@ public class SelectDressController : MonoBehaviour {
         {
             if (!wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f && wigName == currentWigName)
             {
+                print(string.Format("if (!wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f && {0} == {1})",wigName,currentWigName));
                 wig.transform.parent.gameObject.SetActive(true);
                 editButtons[0].SetActive(false);
                 editButtons[1].SetActive(true);
+                isWearingWig = true;
                 return;
             }
             else if (!wig.transform.parent.gameObject.activeSelf && wig.color.a <= 0.5f && wigName == currentWigName)
             {
+                print(string.Format("else if (!wig.transform.parent.gameObject.activeSelf && wig.color.a <= 0.5f && {0} == {1})",wigName,currentWigName));
                 wig.transform.parent.gameObject.SetActive(true);
                 wig.DOFade(1f, .5f);
                 print("else if");
@@ -725,6 +736,7 @@ public class SelectDressController : MonoBehaviour {
 
             if (isWearingWig && wigName == currentWigName)
             {
+                print(string.Format("if (isWearingWig && {0} == {1})",wigName,currentWigName));
                 wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
                 isWearingWig = false;
                 editButtons[1].SetActive(false);
@@ -732,6 +744,7 @@ public class SelectDressController : MonoBehaviour {
             }
             else if (!isWearingWig && wigName == currentWigName)
             {
+                print(string.Format("else if (!isWearingWig && {0} == {1})",wigName,currentWigName));
                 wig.gameObject.GetComponent<Image>().DOFade(1f, .5f);
                 isWearingWig = true;
                 editButtons[1].SetActive(true);
@@ -739,6 +752,7 @@ public class SelectDressController : MonoBehaviour {
             }
             else if (isWearingWig && wigName != currentWigName)
             {
+                print(string.Format("else if (isWearingWig && {0} != {1})",wigName,currentWigName));
                 wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
                 isWearingWig = false;
                 editButtons[1].SetActive(true);
@@ -764,6 +778,7 @@ public class SelectDressController : MonoBehaviour {
         }
         else
         {
+            print("resetting wig");
             wig.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             if (!wig.gameObject.activeSelf)
             {
@@ -1549,6 +1564,11 @@ public class SelectDressController : MonoBehaviour {
 
     public IEnumerator ResetAllWearings()
     {
+        StopCoroutine("DeleteAllDresses");
+        StopCoroutine("DeleteAllFemaleWigs");
+        StopCoroutine("DeleteAllOrnaments");
+        StopCoroutine("DeleteAllShoes");
+
         StartCoroutine(DeleteAllDresses());
         StartCoroutine(DeleteAllFemaleWigs());
         StartCoroutine(DeleteAllOrnaments());

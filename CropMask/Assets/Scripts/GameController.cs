@@ -2,7 +2,6 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -362,6 +361,7 @@ public class GameController : MonoBehaviour
 
 	private void Start()
 	{
+        
         this.SetPreviousActiveRootPanel(this.homePanel);
         this.SetPreviousActive(this.sideMenuPanel);
         this.IsPaidUser = (PlayerPrefs.GetInt("isPaidUser", 0) == 1);
@@ -397,22 +397,35 @@ public class GameController : MonoBehaviour
 		this.selectShapeController = this.selectShapeControllerObject.GetComponent<SelectShapeController>();
 		this.HideAcceptCropButton();
 		this.currentShapeIndex = 0;
-	}
+
+        CheckIfFirstTime();
+
+        
+    }
 
 	private void LateUpdate()
 	{
 		this.CollectGurbage();
 	}
 
-	public void CollectGurbage()
+	public void CollectGurbage(bool rightNow=false)
 	{
-		this.currentTimer++;
-		if (this.currentTimer > this.gurbageCollectTime)
-		{
-			GC.Collect();
-			Resources.UnloadUnusedAssets();
-			this.currentTimer = 0;
-		}
+		if(!rightNow)
+        {
+            this.currentTimer++;
+            if (this.currentTimer > this.gurbageCollectTime)
+            {
+                GC.Collect();
+                Resources.UnloadUnusedAssets();
+                this.currentTimer = 0;
+            }
+        }
+        else
+        {
+            GC.Collect();
+            Resources.UnloadUnusedAssets();
+            this.currentTimer = 0;
+        }
 	}
 
 	public void PaidUserDetected(string sku = "")
@@ -679,7 +692,7 @@ public class GameController : MonoBehaviour
 
 	private void Update()
 	{
-		this.CheckIfFirstTime();
+		//this.CheckIfFirstTime();
 		if (Input.GetKeyDown(KeyCode.Escape))
 		{
 			this.Quit();
@@ -1197,6 +1210,7 @@ public class GameController : MonoBehaviour
 		}
 		else
 		{
+            print("showing popup");
 			this.popupController.ShowPopup(3, null);
 		}
 	}
@@ -1300,6 +1314,44 @@ public class GameController : MonoBehaviour
                 this.SetPreviousActive(this.sideMenuPanel);
                 ToggleHomeSideMenu(1);
             }
+            else
+            {
+
+                selectDressController.editButtons[0].SetActive(false);
+                selectDressController.editButtons[1].SetActive(false);
+                if (previousActiveRootPanel ==panels[6])
+                {
+                    if (previousActiveSidePanel.name == "LongDressSidePanel")
+                    {
+                        //if (dress.transform.parent.gameObject.activeSelf && dress.gameObject.activeSelf && dress.color.a > 0.5f)
+                        if(selectDressController.isWearingDress)
+                        {
+                            selectDressController.editButtons[0].SetActive(true);
+                            selectDressController.editButtons[1].SetActive(false);
+                        }
+                        else
+                        {
+                            selectDressController.editButtons[0].SetActive(false);
+                            selectDressController.editButtons[1].SetActive(false);
+                        }
+                    }
+                    else if (previousActiveSidePanel.name == "WigSidePAnel")
+                    {
+                        //if (wig.transform.parent.gameObject.activeSelf && wig.gameObject.activeSelf && wig.color.a > 0.5f)
+                        if(selectDressController.isWearingWig)
+                        {
+                            selectDressController.editButtons[1].SetActive(true);
+                            selectDressController.editButtons[0].SetActive(false);
+                        }
+                        else
+                        {
+                            selectDressController.editButtons[0].SetActive(false);
+                            selectDressController.editButtons[1].SetActive(false);
+                        }
+                    }
+                }
+                
+            }
             //if (!isInHome)
             //{
             //    for (int i = 3; i < panels.Length; i++)
@@ -1340,10 +1392,12 @@ public class GameController : MonoBehaviour
             }
             yield return null;
 
-            if (isFirstTime)
+            
+            if (isFirstTime && (PlayerPrefs.GetInt("selectedEyeColor",0)==1) && (PlayerPrefs.GetInt("selectedBodyTone",0)==1) && (PlayerPrefs.GetInt("selectedBodyShape",0) ==1))
             {
                 popupController.ShowPopup(0, "NOW, SEE THE BEST\nDRESS STYLE FOR YOUR\nBODY TYPE");
             }
+            CheckIfFirstTime();
         }
     }
 

@@ -49,7 +49,7 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
     {
         propertyType = "wig";
 
-        GetComponent<Button>().onClick.AddListener(UseThisWig);
+        //GetComponent<Button>().onClick.AddListener(UseThisWig);
         rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
         gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
     }
@@ -79,6 +79,7 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
         }
 
         propertyType = "wig";
+        GetComponent<Button>().onClick.RemoveAllListeners();
         GetComponent<Button>().onClick.AddListener(UseThisWig);
 
         mo = m;
@@ -215,7 +216,9 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
         }
 
         propertyType = "wig";
-        //GetComponent<Button>().onClick.AddListener(UseThisWig);
+
+        GetComponent<Button>().onClick.RemoveAllListeners();
+        GetComponent<Button>().onClick.AddListener(UseThisWig);
 
         mo = m;
         serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(m);

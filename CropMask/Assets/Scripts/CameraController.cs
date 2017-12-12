@@ -120,6 +120,7 @@ public class CameraController : MonoBehaviour
 
 
 #if UNITY_EDITOR
+        
         OnImageSaved(null, ImageOrientation.UP);
 
 #else
@@ -164,6 +165,7 @@ public class CameraController : MonoBehaviour
 
     public void OnImageSaved(string path, ImageOrientation orientation)
     {
+        gameController.CollectGurbage(true);
 
 #if UNITY_EDITOR
         gameController.ShowLoading();
@@ -319,7 +321,7 @@ public class CameraController : MonoBehaviour
 
 
     }
-
+    
     public void CloseCamera()
     {
         if (backCam != null && backCam.isPlaying)
