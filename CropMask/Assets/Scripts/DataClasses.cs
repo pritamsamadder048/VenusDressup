@@ -296,35 +296,72 @@ public class SaveData
         ornamentData = new OrnamentData();
         shoeData = new ShoeData();
 
-
-        if (dressProperty != null)
+        try
         {
 
-            dressData.EncodeData(dressProperty,gameController.currentDressColor);
+            if (dressProperty != null || dressProperty.imgName != "" || dressProperty.imgName != null)
+            {
 
-            dressName = dressProperty.imgName;
+                dressData.EncodeData(dressProperty, gameController.currentDressColor);
+
+                dressName = dressProperty.imgName;
+            }
+
         }
-        if (femaleWigProperty != null)
+        catch (Exception e)
         {
-
-            femaleWigData.EncodeData(femaleWigProperty,gameController.currentWigColor);
-
-            wigName = femaleWigProperty.imgName;
+            Debug.Log(string.Format("Dress rechec Error : {0}",e.Message));
+            
         }
-        if (ornamentProperty != null)
+
+        try
         {
+            if (femaleWigProperty != null || femaleWigProperty.imgName != "" || femaleWigProperty.imgName != null)
+            {
 
+                femaleWigData.EncodeData(femaleWigProperty, gameController.currentWigColor);
 
-            ornamentData.EncodeData(ornamentProperty);
-
-            ornamentName = ornamentProperty.imgName;
+                wigName = femaleWigProperty.imgName;
+            }
         }
-        if (shoeProperty != null)
+        catch (Exception e)
         {
 
-            shoeData.EncodeData(shoeProperty);
+            Debug.Log(string.Format("Wig rechec Error : {0}", e.Message));
+        }
 
-            shoeName = shoeProperty.imgName;
+        try
+        {
+            if (ornamentProperty != null || ornamentProperty.imgName != "" || ornamentProperty.imgName != null)
+            {
+
+
+                ornamentData.EncodeData(ornamentProperty);
+
+                ornamentName = ornamentProperty.imgName;
+            }
+        }
+        catch (Exception e)
+        {
+
+            Debug.Log(string.Format("Ornament rechec Error : {0}", e.Message));
+
+        }
+
+        try
+        {
+            if (shoeProperty != null || shoeProperty.imgName != "" || shoeProperty.imgName != null)
+            {
+
+                shoeData.EncodeData(shoeProperty);
+
+                shoeName = shoeProperty.imgName;
+            }
+        }
+        catch (Exception e)
+        {
+
+            Debug.Log(string.Format("Shoe rechec Error : {0}", e.Message));
         }
 
 

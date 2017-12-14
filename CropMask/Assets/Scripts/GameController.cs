@@ -1741,21 +1741,27 @@ public class GameController : MonoBehaviour
             if (wig.gameObject.activeSelf && wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f)
             {
                 //sd.wigName = wig.sprite.texture.name;
+                print("wig property set");
+
                 sd.femaleWigProperty = currentFemaleWigProperty;
             }
             if (dress.gameObject.activeSelf && dress.transform.parent.gameObject.activeSelf && dress.color.a > 0.5f)
             {
                 //sd.dressName = dress.sprite.texture.name;
+                print("dress property set");
+                print(currentDressProperty.imgName);
                 sd.dressProperty = currentDressProperty;
             }
             if (ornament.gameObject.activeSelf && ornament.transform.parent.gameObject.activeSelf && ornament.color.a > 0.5f)
             {
                 //sd.ornamentName = ornament.sprite.texture.name;
+                print("ornament property set");
                 sd.ornamentProperty = currentOrnamentProperty;
             }
             if (shoe.gameObject.activeSelf && shoe.transform.parent.gameObject.activeSelf && shoe.color.a > 0.5f)
             {
-                sd.shoeName = shoe.sprite.texture.name;
+                //sd.shoeName = shoe.sprite.texture.name;
+                print("shoe property set");
                 sd.shoeProperty = currentShoeProperty;
             }
 
