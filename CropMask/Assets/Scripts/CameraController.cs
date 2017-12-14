@@ -207,18 +207,20 @@ public class CameraController : MonoBehaviour
         bool success = false;
 
 
-#if UNITY_ANDROID
+//#if UNITY_ANDROID
         
-        Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
+        //Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
 
-#elif UNITY_IPHONE
+#if UNITY_IPHONE
         Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.iOSActivityIndicatorStyle.WhiteLarge);
+		Handheld.StartActivityIndicator();
 
 #elif UNITY_TIZEN
             Handheld.SetActivityIndicatorStyle(TizenActivityIndicatorStyle.Small);
+		Handheld.StartActivityIndicator();
 #endif
 
-        Handheld.StartActivityIndicator();
+        //Handheld.StartActivityIndicator();
 #if !UNITY_EDITOR
         gameController.ShowLoadingPanelOnly();
 #endif

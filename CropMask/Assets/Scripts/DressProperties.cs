@@ -216,8 +216,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "dress";
 
-        GetComponent<Button>().onClick.RemoveAllListeners();
-        GetComponent<Button>().onClick.AddListener(UseThisDress);
+        //GetComponent<Button>().onClick.RemoveAllListeners();
+        //GetComponent<Button>().onClick.AddListener(UseThisDress);
 
         mo = m;
         serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(mo);
@@ -349,7 +349,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
     {
         if (IsInitialized)
         {
-            print("trying to load dress image from : " + finalSavePath);
+            //print("trying to load dress image from : " + finalSavePath);
             if (File.Exists(finalSavePath))
             {
                 Texture2D t2d = new Texture2D(10,10);

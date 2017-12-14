@@ -217,8 +217,8 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
 
         propertyType = "wig";
 
-        GetComponent<Button>().onClick.RemoveAllListeners();
-        GetComponent<Button>().onClick.AddListener(UseThisWig);
+        //GetComponent<Button>().onClick.RemoveAllListeners();
+        //GetComponent<Button>().onClick.AddListener(UseThisWig);
 
         mo = m;
         serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(m);
@@ -347,7 +347,7 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
 
     public IEnumerator SetImage()
     {
-        print("trying to load wig image from : " + finalSavePath);
+        //print("trying to load wig image from : " + finalSavePath);
         if (IsInitialized)
         {
             if (File.Exists(finalSavePath))

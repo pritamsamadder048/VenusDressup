@@ -209,8 +209,8 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         }
         propertyType = "shoe";
 
-        GetComponent<Button>().onClick.RemoveAllListeners();
-        GetComponent<Button>().onClick.AddListener(UseThisShoe);
+        //GetComponent<Button>().onClick.RemoveAllListeners();
+        //GetComponent<Button>().onClick.AddListener(UseThisShoe);
 
         mo = m;
         serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(mo);

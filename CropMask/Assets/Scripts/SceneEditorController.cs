@@ -81,6 +81,10 @@ public class SceneEditorController : MonoBehaviour {
     public void ShowObjectsInScenePanel()
     {
         int totalObjects = 0;
+        if(gameController==null)
+        {
+            gameController = gameControllerObj.GetComponent<GameController>();
+        }
         if(gameController.faceRawImage.color.a>0f && gameController.faceRawImage.gameObject.activeSelf && gameController.faceRawImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectFacePrefab, container.transform);
@@ -99,27 +103,40 @@ public class SceneEditorController : MonoBehaviour {
             sceneObjectFace2.gameObject.SetActive(true);
             totalObjects += 1;
         }
-        if (wigImage.color.a > 0 && wigImage.gameObject.activeSelf && wigImage.transform.parent.gameObject.activeSelf)
-        {
-            GameObject g = Instantiate<GameObject>(sceneObjectWigPrefab, container.transform);
-            sceneObjectWig = g.GetComponent<Image>();
-            sceneObjectWig.gameObject.SetActive(true);
-            totalObjects += 1;
-        }
         if (dressImage.color.a > 0 && dressImage.gameObject.activeSelf && dressImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectDressPrefab, container.transform);
             sceneObjectDress = g.GetComponent<Image>();
-            
+
+            g.GetComponent<Button>().onClick.AddListener(OnclickDressSceneObject);
+
+            sceneObjectDress.sprite = Sprite.Create(gameController.currentDressTexture, new Rect(0, 0, gameController.currentDressTexture.width, gameController.currentDressTexture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectDress.gameObject.SetActive(true);
             totalObjects += 1;
         }
 
+        if (wigImage.color.a > 0 && wigImage.gameObject.activeSelf && wigImage.transform.parent.gameObject.activeSelf)
+        {
+            GameObject g = Instantiate<GameObject>(sceneObjectWigPrefab, container.transform);
+            sceneObjectWig = g.GetComponent<Image>();
+
+            g.GetComponent<Button>().onClick.AddListener(OnclickWigSceneObject);
+
+
+            sceneObjectWig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
+            sceneObjectWig.gameObject.SetActive(true);
+            totalObjects += 1;
+        }
+        
         if (ornamentImage.color.a > 0 && ornamentImage.gameObject.activeSelf && ornamentImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectOrnamentPrefab, container.transform);
             sceneObjectOrnament = g.GetComponent<Image>();
-            
+
+            g.GetComponent<Button>().onClick.AddListener(OnclickOrnamentSceneObject);
+
+
+            sceneObjectOrnament.sprite = Sprite.Create(gameController.ornament.sprite.texture, new Rect(0, 0, gameController.ornament.sprite.texture.width, gameController.ornament.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectOrnament.gameObject.SetActive(true);
             totalObjects += 1;
         }
@@ -127,7 +144,10 @@ public class SceneEditorController : MonoBehaviour {
         {
             GameObject g = Instantiate<GameObject>(sceneObjectShoePrefab, container.transform);
             sceneObjectShoe = g.GetComponent<Image>();
-            
+
+            g.GetComponent<Button>().onClick.AddListener(OnclickShoeSceneObject);
+
+            sceneObjectShoe.sprite = Sprite.Create(gameController.shoe.sprite.texture, new Rect(0, 0, gameController.shoe.sprite.texture.width, gameController.shoe.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectShoe.gameObject.SetActive(true);
             totalObjects += 1;
         }
@@ -156,6 +176,7 @@ public class SceneEditorController : MonoBehaviour {
                 {
                     if (t.gameObject != null)
                     {
+                        t.GetComponent<Button>().onClick.RemoveAllListeners();
                         DestroyImmediate(t.gameObject);
                     }
                 }
@@ -244,5 +265,64 @@ public class SceneEditorController : MonoBehaviour {
     {
         gameController.faceRawImage2.transform.DOPunchScale(new Vector3(2f, 2f, 2f), .2f);
         gameController.currentlySelectedFace = 2;
+    }
+
+
+
+    public void InitGamaController()
+    {
+        if (gameController == null)
+        {
+            gameController = gameControllerObj.GetComponent<GameController>();
+        }
+    }
+
+
+    public void OnclickDressSceneObject()
+    {
+        InitGamaController();
+
+        if(!gameController.panels[6].activeSelf)
+        {
+            gameController.OnPressDressForHerButton(gameController.homeMenuButtonObjects[0]);
+        }
+        gameController.selectDressController.OnClickSelectLongDressButton(true);
+        gameController.selectDressController.OnClickEditDressButton(true);
+    }
+
+    public void OnclickWigSceneObject()
+    {
+        InitGamaController();
+
+        if (!gameController.panels[6].activeSelf)
+        {
+            gameController.OnPressDressForHerButton(gameController.homeMenuButtonObjects[0]);
+        }
+        gameController.selectDressController.OnClickSelectWigButton(true);
+        gameController.selectDressController.OnClickEditWigButton(true);
+    }
+
+    public void OnclickOrnamentSceneObject()
+    {
+        InitGamaController();
+
+        if (!gameController.panels[6].activeSelf)
+        {
+            gameController.OnPressDressForHerButton(gameController.homeMenuButtonObjects[0]);
+        }
+        gameController.selectDressController.OnClickSelectOrnamentButton(true);
+        //gameController.selectDressController.OnClickEditDressButton(true);
+    }
+
+    public void OnclickShoeSceneObject()
+    {
+        InitGamaController();
+
+        if (!gameController.panels[6].activeSelf)
+        {
+            gameController.OnPressDressForHerButton(gameController.homeMenuButtonObjects[0]);
+        }
+        gameController.selectDressController.OnClickSelectShoeButton(true);
+        //gameController.selectDressController.OnClickEditDressButton(true);
     }
 }

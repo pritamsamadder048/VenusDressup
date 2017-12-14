@@ -101,11 +101,11 @@ public class GameController : MonoBehaviour
 
 	public GameObject loadingPanelOnly;
 
-	[SerializeField]
-	private GameObject[] panels;
 
-	[SerializeField]
-	private GameObject[] homeMenuButtonObjects;
+	public GameObject[] panels;
+
+
+	public GameObject[] homeMenuButtonObjects;
 
 	[SerializeField]
 	private GameObject CameraDownMenuPanel;
@@ -149,8 +149,8 @@ public class GameController : MonoBehaviour
 
 	private string fullConfigFilePath;
 
-	[SerializeField]
-	private bool isFirstTime = true;
+	
+	public bool isFirstTime = true;
 
 	[SerializeField]
 	private int selectedBodyShape = 0;
@@ -205,7 +205,15 @@ public class GameController : MonoBehaviour
 
 	public int mainModelIndex = 0;
 
-	[HideInInspector]
+    public Image backGroundImage;
+
+    public GameObject backGroundPanel;
+
+    public bool isShowingBackGroundPanel = false;
+
+    public string currentBackgroundName = "bg0";
+
+    [HideInInspector]
 	public string mainMaleBodyName = "male_1";
 
 	public bool isScreenSpaceCamera = false;
@@ -302,13 +310,7 @@ public class GameController : MonoBehaviour
 
 	public GameObject canvasObject;
 
-	public Image backGroundImage;
-
-	public GameObject backGroundPanel;
-
-	public bool isShowingBackGroundPanel = false;
-
-	public string currentBackgroundName = "bg0";
+	
 
 	public DressProperties currentDressProperty;
 
@@ -316,11 +318,21 @@ public class GameController : MonoBehaviour
     public OrnamentProperties currentOrnamentProperty;
     public ShoeProperties currentShoeProperty;
 
+
+    public bool autoAcceptChange = false;
+
+	[SerializeField]
 	private bool isPaidUser = false;
 
 	public GameObject popupPanelForPurchase;
 
 	public GameObject eventSystem;
+
+
+    public bool shouldShowDressResetWarning = false;
+
+
+    public bool femaleModelAndAllAppearingsAreShown = true;
 
 	public bool IsPaidUser
 	{
@@ -452,7 +464,10 @@ public class GameController : MonoBehaviour
 		else
 		{
 			this.InstantiateInfoPopup(message);
-		}
+			this.InstantiateInfoPopup("Demo All Features Unlocked");
+            this.PaidUserDetected("");
+            this.selectDressController.CheckForChanges();
+        }
 	}
 
 	public bool IsInHome()
@@ -692,13 +707,21 @@ public class GameController : MonoBehaviour
 
 	private void Update()
 	{
+        
 		//this.CheckIfFirstTime();
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			this.Quit();
+		if (Input.GetKeyDown (KeyCode.Escape)) {
+			this.Quit ();
 		}
-		if (!this.isInHome)
+#if UNITY_EDITOR
+        else if (Input.GetKeyDown (KeyCode.Space))
+        {
+			PlayerPrefs.SetInt("isPaidUser", 0);
+			this.IsPaidUser = (PlayerPrefs.GetInt("isPaidUser", 0) == 1);
+		}
+#endif
+        if (!this.isInHome)
 		{
+            
 			this.saveButton.GetComponent<Button>().interactable=(false);
 		}
 		else
@@ -1198,22 +1221,22 @@ public class GameController : MonoBehaviour
 
 	public void ConfirmBodyShapeSelection(GameObject g)
 	{
-		base.StartCoroutine(this.BodyShapeSelectionProcess(true));
+        //base.StartCoroutine(this.BodyShapeSelectionProcess(true));
+        //ResetWearing();
+        selectShapeController.OnClickSelectShapeButton(true);
 		this.popupController.HidePopup();
 	}
 
-	public void OnPressSelectBodyShapeButton(GameObject g)
+	public void OnPressSelectBodyShapeButton(bool mainButton=false)
 	{
-		if (this.isFirstTime)
-		{
-			base.StartCoroutine(this.BodyShapeSelectionProcess(true));
-		}
-		else
-		{
-            print("showing popup");
-			this.popupController.ShowPopup(3, null);
-		}
-	}
+        autoAcceptChange = !mainButton;
+		if(!isFirstTime)
+        {
+            shouldShowDressResetWarning = true;
+        }
+        base.StartCoroutine(this.BodyShapeSelectionProcess(true));
+
+    }
 
 
 	private IEnumerator BodyShapeSelectionProcess(bool shouldHideMainModelImage)
@@ -1241,17 +1264,17 @@ public class GameController : MonoBehaviour
             projectionImage.GetComponent<RawImage>().DOFade(0f, 0f);
             yield return new WaitForSeconds(.3f);
 
-            ornament.DOFade(0f, .3f);
-            dress.DOFade(0f, .3f);
-            wig.DOFade(0f, .3f);
-            shoe.DOFade(0f, .3f);
-            femaleModelImageObject.GetComponent<Image>().DOFade(0f, .3f);
 
+            HideFemaleModelAndAppearings();
 
 
             //yield return new WaitForSeconds(.3f);
             panels[5].SetActive(true);
             selectShapeController.SelectThisParticularModel(mainCarouselRotation, mainModelIndex);
+            if(!isFirstTime)
+            {
+                selectShapeController.OnClickSelectEyeButton(true);
+            }
             projectionImage.GetComponent<RawImage>().DOFade(1f, 0.3f);
             bodyshapeDownPanel.GetComponent<RectTransform>().DOAnchorPosY(0f, .3f);
 
@@ -1269,25 +1292,9 @@ public class GameController : MonoBehaviour
                 }
                 femaleModelImageObject.GetComponent<Image>().DOFade(0f, 0f);
                 projectionImage.GetComponent<RawImage>().DOFade(0f, 0.3f);
-                femaleModelObject.SetActive(true);
+                
                 yield return new WaitForSeconds(.2f);
-                femaleModelImageObject.GetComponent<Image>().DOFade(1f, .3f);
-                if (selectDressController.IsWearingDress())
-                {
-                    dress.DOFade(1f, .3f);
-                }
-                if (selectDressController.IsWearingWig())
-                {
-                    wig.DOFade(1f, .3f);
-                }
-                if (selectDressController.IsWearingOrnament())
-                {
-                    ornament.DOFade(1f, .3f);
-                }
-                if (selectDressController.IsWearingShoe())
-                {
-                    shoe.DOFade(1f, .3f);
-                }
+                ShowFemaleModelAndAppearings();
             }
             else
             {
@@ -1398,6 +1405,47 @@ public class GameController : MonoBehaviour
                 popupController.ShowPopup(0, "NOW, SEE THE BEST\nDRESS STYLE FOR YOUR\nBODY TYPE");
             }
             CheckIfFirstTime();
+        }
+    }
+
+
+    public void HideFemaleModelAndAppearings()
+    {
+        if(femaleModelAndAllAppearingsAreShown)
+        {
+            ornament.DOFade(0f, .3f);
+            dress.DOFade(0f, .3f);
+            wig.DOFade(0f, .3f);
+            shoe.DOFade(0f, .3f);
+            femaleModelImageObject.GetComponent<Image>().DOFade(0f, .3f);
+            femaleModelObject.SetActive(false);
+            femaleModelAndAllAppearingsAreShown = false;
+        }
+    }
+
+    public void ShowFemaleModelAndAppearings()
+    {
+        if(!femaleModelAndAllAppearingsAreShown)
+        {
+            femaleModelObject.SetActive(true);
+            femaleModelImageObject.GetComponent<Image>().DOFade(1f, .3f);
+            if (selectDressController.IsWearingDress())
+            {
+                dress.DOFade(1f, .3f);
+            }
+            if (selectDressController.IsWearingWig())
+            {
+                wig.DOFade(1f, .3f);
+            }
+            if (selectDressController.IsWearingOrnament())
+            {
+                ornament.DOFade(1f, .3f);
+            }
+            if (selectDressController.IsWearingShoe())
+            {
+                shoe.DOFade(1f, .3f);
+            }
+            femaleModelAndAllAppearingsAreShown = true;
         }
     }
 
@@ -1878,8 +1926,9 @@ public class GameController : MonoBehaviour
 			this.mainEyeColor = b3;
 			this.mainCarouselRotation = this.selectShapeController.GetcarouselSelectedRotation();
 			this.mainModelIndex = this.selectShapeController.GetCarouselSelectedModelIndex();
-			this.selectShapeController.OnClickSelectEyeButton(true);
-			this.ResetWearing();
+            ResetWearing();
+            this.selectShapeController.OnClickSelectEyeButton(true);
+			
 		}
 		catch (UnityException arg)
 		{
@@ -1887,14 +1936,14 @@ public class GameController : MonoBehaviour
 		}
 	}
 
-	public void AcceptBodyToneChange()
+	public void AcceptBodyToneChange(bool autoAccept = false)
 	{
 		GameObject selectedShape = this.rotationController.GetSelectedShape();
 		try
 		{
 			string name = selectedShape.GetComponent<SpriteRenderer>().sprite.texture.name;
 			this.femaleModelImageObject.GetComponent<Image>().sprite=(selectedShape.GetComponent<SpriteRenderer>().sprite);
-			this.ResetWearing();
+			//this.ResetWearing();
 			string b = name.Split(new char[]
 			{
 				'_'
@@ -1916,21 +1965,24 @@ public class GameController : MonoBehaviour
 			this.mainEyeColor = b3;
 			this.mainCarouselRotation = this.selectShapeController.GetcarouselSelectedRotation();
 			this.mainModelIndex = this.selectShapeController.GetCarouselSelectedModelIndex();
-			this.selectShapeController.OnClickSelectShapeButton(true);
+			if(!autoAcceptChange || autoAccept)
+            {
+                this.selectShapeController.OnClickSelectShapeButton(true);
+            }
 		}
 		catch
 		{
 		}
 	}
 
-	public void AcceptEyeColorChange()
+	public void AcceptEyeColorChange(bool autoAccept=false)
 	{
 		GameObject selectedShape = this.rotationController.GetSelectedShape();
 		try
 		{
 			string name = selectedShape.GetComponent<SpriteRenderer>().sprite.texture.name;
 			this.femaleModelImageObject.GetComponent<Image>().sprite=(selectedShape.GetComponent<SpriteRenderer>().sprite);
-			this.ResetWearing();
+			//this.ResetWearing();
 			string b = name.Split(new char[]
 			{
 				'_'
@@ -1952,7 +2004,10 @@ public class GameController : MonoBehaviour
 			this.mainEyeColor = b3;
 			this.mainCarouselRotation = this.selectShapeController.GetcarouselSelectedRotation();
 			this.mainModelIndex = this.selectShapeController.GetCarouselSelectedModelIndex();
-			this.selectShapeController.OnClickSelectBodyToneButton(true);
+			if(!autoAcceptChange || autoAccept)
+            {
+                this.selectShapeController.OnClickSelectBodyToneButton(true);
+            }
 		}
 		catch
 		{

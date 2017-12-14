@@ -24,7 +24,7 @@ namespace Lean.Touch
 		[Tooltip("Should the scaling be performanced relative to the finger center?")]
 		public bool Relative;
 
-        public float minScaleSize = .25f;
+        public float minScaleSize = .1f;
         public float maxScaleSize = 5f;
         public bool useRangeForScaling = false;
 		
