@@ -61,6 +61,9 @@ public  class ResourceFileManager : MonoBehaviour {
     public string testUrl;
     public string defaultUrl;
 
+
+    public bool DownloadAll = false;
+
     private void Awake()
     {
 
@@ -154,7 +157,10 @@ public  class ResourceFileManager : MonoBehaviour {
         form.AddField("device_id", device_id);
         form.AddField("device_type", device_type);
 
-
+        if(DownloadAll)
+        {
+            firstInstallUrl = testUrl;
+        }
 
         if (isNewInstall == 1)
         {
@@ -218,7 +224,10 @@ public  class ResourceFileManager : MonoBehaviour {
 
         else
         {
-
+            if(DownloadAll)
+            {
+                defaultUrl = firstInstallUrl;
+            }
 #if !UNITY_EDITOR
         using (UnityWebRequest www = UnityWebRequest.Post(defaultUrl, form))  
         //using (UnityWebRequest www = UnityWebRequest.Post(testUrl, form))

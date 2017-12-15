@@ -1297,9 +1297,17 @@ public class SelectDressController : MonoBehaviour {
     #endregion DRESSWIGCOLOR
 
 
-    public void InstantiateInfoPopup(String message)
+    public void InstantiateInfoPopup(String message,CloseStyle closeStyle=CloseStyle.None)
     {
         GameObject g = Instantiate<GameObject>(infoPopupPrefab, canvasObject.transform);
+        if(closeStyle!=CloseStyle.None)
+        {
+            PopUpClosingStyle pcs = g.GetComponent<PopUpClosingStyle>();
+            if(pcs!=null)
+            {
+                pcs.popupCloseStyle = closeStyle;
+            }
+        }
         Text t = g.transform.GetChild(0).GetChild(0).GetComponent<Text>();
         t.text = message;
 
@@ -1406,7 +1414,7 @@ public class SelectDressController : MonoBehaviour {
         {
             dressLoadingPanel.SetActive(false);
             dressLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Dresses Available");
+            InstantiateInfoPopup("No Dresses Available",CloseStyle.TapToClose);
         }
 
         if(partialDressArray !=null)
@@ -1604,7 +1612,7 @@ public class SelectDressController : MonoBehaviour {
         {
             wigLoadingPanel.SetActive(false);
             wigLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Wigs Available");
+            InstantiateInfoPopup("No Wigs Available",CloseStyle.TapToClose);
         }
 
         if(partialWigArray!=null)
@@ -1798,7 +1806,7 @@ public class SelectDressController : MonoBehaviour {
         {
             ornamentLoadingPanel.SetActive(false);
             ornamentLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Ornaments Available");
+            InstantiateInfoPopup("No Ornaments Available",CloseStyle.TapToClose);
         }
 
         if(partialOrnamentArray!=null)
@@ -1990,7 +1998,7 @@ public class SelectDressController : MonoBehaviour {
         {
             shoeLoadingPanel.SetActive(false);
             shoeLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Shoes Available");
+            InstantiateInfoPopup("No Shoes Available",CloseStyle.TapToClose);
         }
 
         if(partialShoeArray!=null)
@@ -2142,7 +2150,7 @@ public class SelectDressController : MonoBehaviour {
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
-                InstantiateInfoPopup("No Internet Connection");
+                InstantiateInfoPopup("No Internet Connection",CloseStyle.TapToClose);
             }
             else
             {

@@ -692,11 +692,11 @@ public void DragMaskOriginal()
     public void CropImage()
     {
         //Debug.Log("Inside rotated image");
-        gameController.ShowLoading();
+        gameController.ShowLoadingPanelOnly();
         print("Starting Cropping");
         CropImageByTamal();
         
-        gameController.HideLoading();
+        
         print("finished cropping");
         return;
     }
@@ -805,9 +805,9 @@ public void DragMaskOriginal()
             gameController.currentlyUsingFace = 2;
         }
 
-        
-        
 
+
+        gameController.HideLoadingPanelOnly();
     }
 
     Texture2D CropTexture2D(Texture2D mTexture, Rect rect)

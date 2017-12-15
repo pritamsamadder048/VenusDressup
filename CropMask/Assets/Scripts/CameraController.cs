@@ -117,10 +117,12 @@ public class CameraController : MonoBehaviour
     }
     public void OpenCamera(bool accessFrontCam = true)
     {
+        DestroyImmediate(processingImage.sprite);
+        gameController.CollectGurbage(true);
 
 
 #if UNITY_EDITOR
-        
+
         OnImageSaved(null, ImageOrientation.UP);
 
 #else
@@ -165,7 +167,6 @@ public class CameraController : MonoBehaviour
 
     public void OnImageSaved(string path, ImageOrientation orientation)
     {
-        gameController.CollectGurbage(true);
 
 #if UNITY_EDITOR
         gameController.ShowLoading();

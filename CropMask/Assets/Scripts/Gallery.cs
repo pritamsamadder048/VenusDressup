@@ -95,9 +95,10 @@ public class Gallery : MonoBehaviour {
 
 	public void OnOpenGallery()
 	{
-        
+        DestroyImmediate(processingImage.sprite);
+        gameController.CollectGurbage(true);
 #if UNITY_EDITOR
-            OnPhotoPick("editor");
+        OnPhotoPick("editor");
 #elif UNITY_ANDROID
 
             //AndroidJavaClass ajc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
@@ -120,7 +121,7 @@ public class Gallery : MonoBehaviour {
 
     public void OnPhotoPick(string filePath,ImageOrientation orientation=ImageOrientation.UP)
 	{
-        gameController.CollectGurbage(true);
+        //gameController.CollectGurbage(true);
         Debug.Log ("filePath : " + filePath);
         //gameController.InstantiateInfoPopup(filePath);
 

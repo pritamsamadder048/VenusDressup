@@ -348,6 +348,9 @@ public class GameController : MonoBehaviour
 
 	private void Awake()
 	{
+        Input.simulateMouseWithTouches = true;
+
+
 		this.modelHash = new Dictionary<string, string>();
 		this.toneHash = new Dictionary<string, string>();
 		this.eyeHash = new Dictionary<string, string>();
@@ -491,19 +494,25 @@ public class GameController : MonoBehaviour
 		SmartIAPListener.INSTANCE.Purchase("android.test.purchased", new Action<bool, string>(this.PurchaseCallBack));
 	}
 
-	public void InstantiateInfoPopup(string message)
-	{
-		GameObject g = Instantiate<GameObject>(this.infoPopupPrefab, this.canvasObject.transform);
-		Text component = g.transform.GetChild(0).GetChild(0).GetComponent<Text>();
-		component.text=message;
-		Button component2 = g.transform.GetChild(0).GetChild(1).GetComponent<Button>();
-		component2.onClick.AddListener(delegate
-		{
-			Destroy(g);
-		});
-	}
+    public void InstantiateInfoPopup(String message, CloseStyle closeStyle = CloseStyle.None)
+    {
+        GameObject g = Instantiate<GameObject>(infoPopupPrefab, canvasObject.transform);
+        if (closeStyle != CloseStyle.None)
+        {
+            PopUpClosingStyle pcs = g.GetComponent<PopUpClosingStyle>();
+            if (pcs != null)
+            {
+                pcs.popupCloseStyle = closeStyle;
+            }
+        }
+        Text t = g.transform.GetChild(0).GetChild(0).GetComponent<Text>();
+        t.text = message;
 
-	public void InstantiateInfoPopupForPurchase()
+        Button b = g.transform.GetChild(0).GetChild(1).GetComponent<Button>();
+        b.onClick.AddListener(() => { Destroy(g); });
+    }
+
+    public void InstantiateInfoPopupForPurchase()
 	{
 		if (!this.IsPaidUser)
 		{
