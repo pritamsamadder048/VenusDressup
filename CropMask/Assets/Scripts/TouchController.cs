@@ -386,7 +386,9 @@ public class TouchController : MonoBehaviour
             }
             if (maskImg.gameObject.activeSelf)
             {
+                
                 maskImg.gameObject.SetActive(false);
+                DestroyImmediate(maskImg.sprite);
             }
             else
             {
@@ -397,7 +399,7 @@ public class TouchController : MonoBehaviour
                     if (tmptex2d != null)
                     {
                         maskImg.sprite = Sprite.Create(tmptex2d, new Rect(0, 0, tmptex2d.width, tmptex2d.height), new Vector2(0.5f, 0.5f), 100f);
-                        maskImg.rectTransform.sizeDelta = new Vector3(200f, 200f, 1f);
+                        maskImg.rectTransform.sizeDelta = new Vector3(tmptex2d.width, tmptex2d.height, 1f);
                         maskImg.transform.eulerAngles = new Vector3(0f, 0f, 0f);
                         //maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta / 2f;
                         maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta;
@@ -432,7 +434,7 @@ public class TouchController : MonoBehaviour
                 if (tmptex2d!=null)
                 {
                     maskImg.sprite = Sprite.Create(tmptex2d, new Rect(0, 0, tmptex2d.width, tmptex2d.height), new Vector2(0.5f, 0.5f), 100f);
-                    maskImg.rectTransform.sizeDelta = new Vector3(200f, 200f, 1f);
+                    maskImg.rectTransform.sizeDelta = new Vector3(tmptex2d.width, tmptex2d.height, 1f);
                     maskImg.transform.eulerAngles = new Vector3(0f, 0f, 0f);
                     //maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta / 2f;
                     maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta;

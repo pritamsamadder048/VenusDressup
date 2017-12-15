@@ -43,6 +43,8 @@ public class SelectShapeController : MonoBehaviour {
 
     public float carouselSelectedRotation = 0f;
 
+    public RawImage faceCloseup;
+    public SpriteRenderer femaleSprite;
 
     public float GetcarouselSelectedRotation()
     {
@@ -227,6 +229,13 @@ public class SelectShapeController : MonoBehaviour {
             gameController = gameControllerObject.GetComponent<GameController>();
         }
 
+        if(newState)
+        {
+            femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
+        }
+
+        faceCloseup.gameObject.SetActive(newState);
+
         shapeButtonObjects[2].GetComponent<Toggle>().isOn = newState;
 
         previousButtonObject.SetActive(false);
@@ -352,6 +361,8 @@ public class SelectShapeController : MonoBehaviour {
             {
                 gameController.AcceptEyeColorChange();
             }
+
+            femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
         }
         catch
         {
