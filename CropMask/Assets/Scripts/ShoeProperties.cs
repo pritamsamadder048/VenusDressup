@@ -75,7 +75,7 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         propertyType = "shoe";
 
         GetComponent<Button>().onClick.RemoveAllListeners();
-        GetComponent<Button>().onClick.AddListener(UseThisShoe);
+        GetComponent<Button>().onClick.AddListener(InvokeUseThisShoe);
 
         mo = m;
         serializedJsonObject = mo.ToString(); // MiniJSON.jsonEncode(mo);
@@ -325,14 +325,32 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
 
     }
 
+    public void InvokeUseThisShoe()
+    {
+        if(gameController!=null)
+        {
+            if(_isInitialized)
+            {
+                gameController.ShowLoadingPanelOnlyTransparent();
+
+                Invoke("UseThisShoe", .2f);
+            }
+        }
+    }
+
     public void UseThisShoe()
     {
         if (_isInitialized)
         {
+            gameController.InstantiateNotInteractablePanel();
             gameController.selectDressController.PutOnShoeDynamically(this);
+            Invoke("DestroyUninteractivePanel", .5f);
+            gameController.HideLoadingPanelOnlyTransparent();
         }
         else
         {
+
+            gameController.HideLoadingPanelOnlyTransparent();
             return;
         }
     }
@@ -369,5 +387,11 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
     public void OnAfterDeserialize()
     {
         //throw new NotImplementedException();
+    }
+
+
+    public void DestroyUninteractivePanel()
+    {
+        gameController.DestroyNotInteractablePopupPanel();
     }
 }

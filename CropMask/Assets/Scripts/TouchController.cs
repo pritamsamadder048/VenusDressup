@@ -155,6 +155,10 @@ public class TouchController : MonoBehaviour
     public Camera currentCam;
     public Canvas mainCanvas;
 
+
+    public Rect newMaskRect;
+    public Texture2D combinedImage;
+
     void Start()
     {
         gameController = gameControllerObject.GetComponent<GameController>();
@@ -694,12 +698,15 @@ public void DragMaskOriginal()
     public void CropImage()
     {
         //Debug.Log("Inside rotated image");
+        Debug.Log("loading activated");
         gameController.ShowLoadingPanelOnly();
         print("Starting Cropping");
-        CropImageByTamal();
+        Invoke("CropImageByTamal",.5f);
         
         
-        print("finished cropping");
+        //print("finished cropping");
+        //gameController.HideLoadingPanelOnly();
+        //Debug.Log("loading deactivated");
         return;
     }
 
@@ -718,7 +725,7 @@ public void DragMaskOriginal()
         //corners = TransformToAspectPoints(corners);
         corners = TransformToAspectPointsForScreenSpaceCamera(corners);
 
-        Rect newMaskRect = GetRectFromCorners(corners);
+        newMaskRect = GetRectFromCorners(corners);
 
         Texture2D sourceTexture2D = CropTexture2D(mainSourceTexture2D, newMaskRect);
         sourceTexture2D.Apply();
@@ -763,7 +770,7 @@ public void DragMaskOriginal()
         }
 
         // final masked output
-        Texture2D combinedImage = GetMaskedImage(sourceTexture2D, maskResized);
+        combinedImage = GetMaskedImage(sourceTexture2D, maskResized);
 
         if (maskImg.transform.eulerAngles.z != 0)
         { 
@@ -771,24 +778,52 @@ public void DragMaskOriginal()
         }
         //Sprite cropcombinedSprite = Sprite.Create(combinedImage, new Rect(0, 0, combinedImage.width, combinedImage.height), new Vector2(.5f, .5f), 100);
 
+
+        #region PREVIOUSSTYLECROP
+        /*
         if(gameController.currentlySelectedFace==1)
         {
-            finalOutImage.texture = (Texture)combinedImage;
+            maskImg.sprite = Sprite.Create(combinedImage, new Rect(0, 0, combinedImage.width, combinedImage.height), new Vector2(0.5f, 0.5f), 100f);
+            DestroyImmediate(finalOutImage.texture);
+            finalOutImage.texture = new Texture2D(combinedImage.width, combinedImage.height) as Texture;
+            (finalOutImage.texture as Texture2D).SetPixels(combinedImage.GetPixels());  // = (Texture)combinedImage;
+            (finalOutImage.texture as Texture2D).Apply();
+            finalOutImage.transform.parent.gameObject.SetActive(true);
             finalOutImage.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
             finalOutImage.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage.rectTransform.sizeDelta / 2f;
             //gameController.currentlySelectedFace = 1;
-            maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage.texture), new Rect(0, 0, finalOutImage.texture.width, finalOutImage.texture.height), new Vector2(0.5f, 0.5f), 100f);
+            //maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage.texture), new Rect(0, 0, finalOutImage.texture.width, finalOutImage.texture.height), new Vector2(0.5f, 0.5f), 100f);
         }
-        else if(gameController.currentlySelectedFace==2)
+        else if(!gameController.isShowingMale)
         {
-            finalOutImage2.texture = (Texture)combinedImage;
+            gameController.currentlySelectedFace = 1;
+            maskImg.sprite = Sprite.Create(combinedImage, new Rect(0, 0, combinedImage.width, combinedImage.height), new Vector2(0.5f, 0.5f), 100f);
+            DestroyImmediate(finalOutImage.texture);
+            finalOutImage.texture = new Texture2D(combinedImage.width, combinedImage.height) as Texture;
+            (finalOutImage.texture as Texture2D).SetPixels(combinedImage.GetPixels());  // = (Texture)combinedImage;
+            (finalOutImage.texture as Texture2D).Apply();
+            finalOutImage.transform.parent.gameObject.SetActive(true);
+            finalOutImage.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
+            finalOutImage.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage.rectTransform.sizeDelta / 2f;
+            //gameController.currentlySelectedFace = 1;
+            //maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage.texture), new Rect(0, 0, finalOutImage.texture.width, finalOutImage.texture.height), new Vector2(0.5f, 0.5f), 100f);
+        }
+        else if(gameController.isShowingMale && gameController.currentlySelectedFace==2)
+        {
+            //finalOutImage2.texture = (Texture)combinedImage;
+            maskImg.sprite = Sprite.Create(combinedImage, new Rect(0, 0, combinedImage.width, combinedImage.height), new Vector2(0.5f, 0.5f), 100f);
+
+            DestroyImmediate(finalOutImage2.texture);
+            finalOutImage2.texture = new Texture2D(combinedImage.width, combinedImage.height) as Texture;
+            (finalOutImage2.texture as Texture2D).SetPixels(combinedImage.GetPixels());  // = (Texture)combinedImage;
+            (finalOutImage2.texture as Texture2D).Apply();
+            finalOutImage2.transform.parent.gameObject.SetActive(true);
             finalOutImage2.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
             finalOutImage2.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage2.rectTransform.sizeDelta / 2f;
             //gameController.currentlySelectedFace = 0;
-            maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage2.texture), new Rect(0, 0, finalOutImage2.texture.width, finalOutImage2.texture.height), new Vector2(0.5f, 0.5f), 100f);
+            
 
         }
-        gameController.ShowAcceptCropButton();
 
 
         if (gameController.IsUsingCustomFace() && gameController.currentlySelectedFace == 1 && !gameController.IsUsingCustomFace2())
@@ -808,8 +843,161 @@ public void DragMaskOriginal()
         }
 
 
+        */
 
+        #endregion PREVIOUSSTYLECROP
+
+
+        #region NEWSTYLECROP
+
+        maskImg.sprite = Sprite.Create(combinedImage, new Rect(0, 0, combinedImage.width, combinedImage.height), new Vector2(0.5f, 0.5f), 100f);
+
+
+        #endregion NEWSTYLECROP
+
+
+
+        //DestroyImmediate(combinedImage);
+        gameController.ShowAcceptCropButton();
+
+
+
+
+
+
+        print("finished cropping");
         gameController.HideLoadingPanelOnly();
+        Debug.Log("loading deactivated");
+        return;
+    }
+
+
+    public void ApplyMaskImageToFace()
+    {
+        if (gameController.currentlySelectedFace == 1)
+        {
+            DestroyImmediate(finalOutImage.texture);
+            finalOutImage.texture = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height) as Texture;
+            (finalOutImage.texture as Texture2D).SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            (finalOutImage.texture as Texture2D).Apply();
+            finalOutImage.transform.parent.gameObject.SetActive(true);
+            finalOutImage.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
+            finalOutImage.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage.rectTransform.sizeDelta / 2f;
+            //gameController.currentlySelectedFace = 1;
+            //maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage.texture), new Rect(0, 0, finalOutImage.texture.width, finalOutImage.texture.height), new Vector2(0.5f, 0.5f), 100f);
+        }
+        else if (!gameController.isShowingMale)
+        {
+            gameController.currentlySelectedFace = 1;
+            maskImg.sprite = Sprite.Create(maskImg.sprite.texture, new Rect(0, 0, maskImg.sprite.texture.width, maskImg.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
+            DestroyImmediate(finalOutImage.texture);
+            finalOutImage.texture = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height) as Texture;
+            (finalOutImage.texture as Texture2D).SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            (finalOutImage.texture as Texture2D).Apply();
+            finalOutImage.transform.parent.gameObject.SetActive(true);
+            finalOutImage.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
+            finalOutImage.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage.rectTransform.sizeDelta / 2f;
+            //gameController.currentlySelectedFace = 1;
+            //maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage.texture), new Rect(0, 0, finalOutImage.texture.width, finalOutImage.texture.height), new Vector2(0.5f, 0.5f), 100f);
+        }
+        else if (gameController.isShowingMale && gameController.currentlySelectedFace == 2)
+        {
+            //finalOutImage2.texture = (Texture)combinedImage;
+            //maskImg.sprite = Sprite.Create(maskImg.sprite.texture, new Rect(0, 0, maskImg.sprite.texture.width, maskImg.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
+
+            DestroyImmediate(finalOutImage2.texture);
+            finalOutImage2.texture = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height) as Texture;
+            (finalOutImage2.texture as Texture2D).SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            (finalOutImage2.texture as Texture2D).Apply();
+            finalOutImage2.transform.parent.gameObject.SetActive(true);
+            finalOutImage2.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
+            finalOutImage2.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage2.rectTransform.sizeDelta / 2f;
+            //gameController.currentlySelectedFace = 0;
+
+
+        }
+
+        if (gameController.IsUsingCustomFace() && gameController.currentlySelectedFace == 1 && !gameController.IsUsingCustomFace2())
+        {
+            gameController.currentlyUsingFace = 1;
+            return;
+        }
+        else if (gameController.IsUsingCustomFace2() && gameController.currentlySelectedFace == 2 && !gameController.IsUsingCustomFace())
+        {
+            gameController.currentlyUsingFace = 1;
+            return;
+        }
+        gameController.currentlyUsingFace += 1;
+        if (gameController.currentlyUsingFace > 2)
+        {
+            gameController.currentlyUsingFace = 2;
+        }
+
+
+    }
+
+
+    public void ApplyMaskImageTemp()
+    {
+        if (gameController.currentlySelectedFace == 1 && gameController.isShowingMale)
+        {
+            DestroyImmediate(gameController.temporalFaceImage );
+            gameController.temporalFaceImage = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height);
+            gameController.temporalFaceImage.SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            gameController.temporalFaceImage.Apply();
+            
+        }
+        else if (!gameController.isShowingMale)
+        {
+            gameController.currentlySelectedFace = 1;
+            DestroyImmediate(gameController.temporalFaceImage);
+            gameController.temporalFaceImage = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height);
+            gameController.temporalFaceImage.SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            gameController.temporalFaceImage.Apply();
+
+            //maskImg.sprite = Sprite.Create(maskImg.sprite.texture, new Rect(0, 0, maskImg.sprite.texture.width, maskImg.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
+            //DestroyImmediate(finalOutImage.texture);
+            //finalOutImage.texture = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height) as Texture;
+            //(finalOutImage.texture as Texture2D).SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            //(finalOutImage.texture as Texture2D).Apply();
+            //finalOutImage.transform.parent.gameObject.SetActive(true);
+            //finalOutImage.rectTransform.sizeDelta = new Vector2(newMaskRect.width, newMaskRect.height);
+            //finalOutImage.gameObject.GetComponent<BoxCollider2D>().size = finalOutImage.rectTransform.sizeDelta / 2f;
+            //gameController.currentlySelectedFace = 1;
+            //maskImg.sprite = Sprite.Create(((Texture2D)finalOutImage.texture), new Rect(0, 0, finalOutImage.texture.width, finalOutImage.texture.height), new Vector2(0.5f, 0.5f), 100f);
+        }
+        else if (gameController.isShowingMale && gameController.currentlySelectedFace == 2)
+        {
+            //finalOutImage2.texture = (Texture)combinedImage;
+            //maskImg.sprite = Sprite.Create(maskImg.sprite.texture, new Rect(0, 0, maskImg.sprite.texture.width, maskImg.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
+
+            DestroyImmediate(gameController.temporeaFaceImage2);
+            gameController.temporeaFaceImage2 = new Texture2D(maskImg.sprite.texture.width, maskImg.sprite.texture.height);
+            gameController.temporeaFaceImage2.SetPixels(maskImg.sprite.texture.GetPixels());  // = (Texture)combinedImage;
+            gameController.temporeaFaceImage2.Apply();
+            
+            //gameController.currentlySelectedFace = 0;
+
+
+        }
+
+        if (gameController.IsUsingCustomFace() && gameController.currentlySelectedFace == 1 && !gameController.IsUsingCustomFace2())
+        {
+            gameController.currentlyUsingFace = 1;
+            return;
+        }
+        else if (gameController.IsUsingCustomFace2() && gameController.currentlySelectedFace == 2 && !gameController.IsUsingCustomFace())
+        {
+            gameController.currentlyUsingFace = 1;
+            return;
+        }
+        gameController.currentlyUsingFace += 1;
+        if (gameController.currentlyUsingFace > 2)
+        {
+            gameController.currentlyUsingFace = 2;
+        }
+
+
     }
 
     Texture2D CropTexture2D(Texture2D mTexture, Rect rect)
@@ -844,6 +1032,9 @@ public void DragMaskOriginal()
 
         //Color[] c = mTexture.GetPixels(rx, ry, rw, rh);
 
+        Debug.Log(string.Format("mtex w:{0}  h:{1}", mTexture.width, mTexture.height));
+        Debug.Log("cropping texture from : " + rect);
+
         Texture2D m2Texture = new Texture2D(rw, rh);
         
         for(int y=ry;y<ry+rh;y++)
@@ -855,14 +1046,14 @@ public void DragMaskOriginal()
                 {
                     if(x<0||y<0)
                     {
-                        c2 = Color.red;
+                        c2 = Color.clear;
                         throw new Exception("negative index cant crop from here");
                         
                     }
                     //else if(x>Screen.width || y>Screen.height)
                     else if(x>mainImage.rectTransform.rect.width || y>mainImage.rectTransform.rect.height)
                     {
-                        c2 = Color.blue;
+                        c2 = Color.clear;
                         throw new Exception("index out of screen cant crop from here");
                         
                     }

@@ -65,7 +65,16 @@ public class SaveManager : MonoBehaviour {
             }
         }
 
+        HideLoadingPanelOnly();
+
+        //Invoke("HideLoadingPanelOnly", .2f);
+
         yield return null;
+    }
+
+    public void HideLoadingPanelOnly()
+    {
+        gameController.HideLoadingPanelOnly();
     }
 
     public IEnumerator LoadScreenshotFromDisk(Image img, string imgname)
@@ -137,6 +146,8 @@ public class SaveManager : MonoBehaviour {
             }
         }
 
+
+        Invoke("HideLoadingPanelOnly", .1f);
         yield return null;
     }
 

@@ -60,6 +60,7 @@ public class CroppedFaceProperties : MonoBehaviour {
         if(face!=null&&face2!=null)
         {
             isInitialized = true;
+            GetComponent<Image>().color = new Color(c.faceColor[0], c.faceColor[1], c.faceColor[2], c.faceColor[3]);
         }
         else
         {
@@ -69,6 +70,15 @@ public class CroppedFaceProperties : MonoBehaviour {
         if(gameController.faceHash==faceHash  || gameController.faceHash2==faceHash)
         {
             ShowRemoveButton(true);
+
+            if(gameController.faceHash == faceHash)
+            {
+                gameController.loadedFaceIndex = imageIndex;
+            }
+            else if(gameController.faceHash2==faceHash)
+            {
+                gameController.loadedFaceIndex2 = imageIndex;
+            }
         }
         
     }
@@ -78,6 +88,19 @@ public class CroppedFaceProperties : MonoBehaviour {
 		
 	}
 
+
+    public void Copy(ref CroppedFaceProperties cp)
+    {
+        cp = new CroppedFaceProperties();
+
+        cp.imageName = this.imageName;
+        cp.imageIndex = this.imageIndex;
+        cp.dataPath = this.dataPath;
+        cp.finalSavePath = this.finalSavePath;
+        cp.faceHash = this.faceHash;
+        cfd.Copy(ref cp.cfd);
+    }
+
     public void UseThisCroppedFace()
     {
         print("clicked");
@@ -86,64 +109,48 @@ public class CroppedFaceProperties : MonoBehaviour {
             if (File.Exists(finalSavePath))
             {
 
-                print("yes file does exist");
-                Texture2D t2d = new Texture2D(150, 150);
-                t2d.LoadImage(File.ReadAllBytes(finalSavePath));
-
-                
-                gameController.currentlyUsingFace += 1;
-
-                if(gameController.currentlyUsingFace>2)
+                if(gameController.isShowingMale)
                 {
-                    gameController.currentlyUsingFace = 2;
+                    print("yes file does exist");
+                    Texture2D t2d = new Texture2D(10, 10);
+                    t2d.LoadImage(File.ReadAllBytes(finalSavePath));
+
+                    this.Copy(ref gameController.tempCroppedFaceProperty);
                     
-                }
 
-                if (gameController.IsUsingCustomFace() && gameController.currentlySelectedFace == 1 && !gameController.IsUsingCustomFace2())
-                {
-                    gameController.currentlyUsingFace = 1;
+                    gameController.ToggleSavedFacesPanel(2);
+                    gameController.isInHome = false;
+                    Vector3 scale = new Vector3(cfd.scale[0], cfd.scale[1], cfd.scale[2]);
+                    Vector3 rotation = new Vector3(cfd.rotation[0], cfd.rotation[1], cfd.rotation[2]);
+                    Color col = new Color(cfd.faceColor[0], cfd.faceColor[1], cfd.faceColor[2], cfd.faceColor[3]);
+                    StartCoroutine(gameController.FinalizeImageEdit(t2d, scale, rotation, imageIndex, faceHash, col, false));
+                    ShowRemoveButton(true);
                 }
-                else if (gameController.IsUsingCustomFace2() && gameController.currentlySelectedFace == 2 && !gameController.IsUsingCustomFace())
+                else
                 {
-                    gameController.currentlyUsingFace = 1;
-                }
-                if (gameController.currentlySelectedFace==1)
-                {
-                    face.GetComponent<RawImage>().texture = t2d as Texture;
-                    face.transform.localScale = new Vector3(cfd.scale[0], cfd.scale[1], cfd.scale[2]);
-                    face.transform.localEulerAngles = new Vector3(cfd.rotation[0], cfd.rotation[1], cfd.rotation[2]);
-                    face.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(cfd.position[0], cfd.position[1], cfd.position[2]);
-                    face.GetComponent<RectTransform>().sizeDelta = new Vector2(cfd.sizeDelta[0], cfd.sizeDelta[1]);
-                    gameController.UsingCustomFace(true);
-                    gameController.ShowFaceImage(true);
+                    Texture2D t2d = new Texture2D(150, 150);
+                    t2d.LoadImage(File.ReadAllBytes(finalSavePath));
+
+                    
 
 
                     gameController.isLoadedFace = true;
                     gameController.loadedFaceIndex = imageIndex;
                     gameController.faceHash = faceHash;
 
-                }
-                else if(gameController.currentlySelectedFace==2)
-                {
-                    face2.GetComponent<RawImage>().texture = t2d as Texture;
-                    face2.transform.localScale = new Vector3(cfd.scale[0], cfd.scale[1], cfd.scale[2]);
-                    face2.transform.localEulerAngles = new Vector3(cfd.rotation[0], cfd.rotation[1], cfd.rotation[2]);
-                    face2.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(cfd.position[0], cfd.position[1], cfd.position[2]);
-                    face2.GetComponent<RectTransform>().sizeDelta = new Vector2(cfd.sizeDelta[0], cfd.sizeDelta[1]);
-                    gameController.UsingCustomFace2(true);
-                    gameController.ShowFaceImage2(true);
+                    //this.Copy(gameController.loadedCroppedFaceProperty);
+                    this.Copy(ref gameController.tempCroppedFaceProperty);
 
-                    gameController.isLoadedFace2 = true;
-                    gameController.loadedFaceIndex2 = imageIndex;
-                    gameController.faceHash2 = faceHash;
-                    
-
+                    gameController.ToggleSavedFacesPanel(2);
+                    gameController.isInHome = false;
+                    //gameController.currentlySelectedFace = 1;
+                    //gameController.currentlyUsingFace = 1;
+                    Vector3 scale = new Vector3(cfd.scale[0], cfd.scale[1], cfd.scale[2]);
+                    Vector3 rotation= new Vector3(cfd.rotation[0], cfd.rotation[1], cfd.rotation[2]);
+                    Color col = new Color(cfd.faceColor[0], cfd.faceColor[1], cfd.faceColor[2], cfd.faceColor[3]);
+                    StartCoroutine(gameController.FinalizeImageEdit(t2d,scale,rotation,imageIndex,faceHash,col,false));
+                    ShowRemoveButton(true);
                 }
-                
-                gameController.ToggleSavedFacesPanel(2);
-                gameController.isInHome = false;
-                StartCoroutine(gameController.FinalizeImageEdit());
-                ShowRemoveButton(true);
             }
             else
             {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections;
+using System;
 
 public class PopUpClosingStyle : MonoBehaviour
 {
@@ -12,7 +13,16 @@ public class PopUpClosingStyle : MonoBehaviour
     void Start()
     {
         attachedCollider = GetComponent<Collider2D>();
-        gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        try
+        {
+
+
+            gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        }
+        catch(Exception e)
+        {
+            Debug.Log(string.Format("exception occured : {0}", e));
+        }
     }
 
     // Update is called once per frame

@@ -142,39 +142,46 @@ public class SelectShapeController : MonoBehaviour {
         }
         shapeButtonObjects[0].GetComponent<Toggle>().isOn = newState;
 
-        if (!gameController.isFirstTime)
+        if(newState)
         {
-            if(gameController.shouldShowDressResetWarning && newState)
+            if (!gameController.isFirstTime)
             {
-                gameController.popupController.ShowPopup(3, null);
-                gameController.shouldShowDressResetWarning = false;
-                OnClickSelectBodyToneButton(true);
-                return;
+                if (gameController.shouldShowDressResetWarning && newState)
+                {
+                    gameController.popupController.ShowPopup(3, null);
+                    gameController.shouldShowDressResetWarning = false;
+                    OnClickSelectBodyToneButton(true);
+                    return;
 
+                }
             }
-        }
-        gameController.ToggleOptionSideMenu(2);
-        ToggleSideMenuSelectShape(0, 2);
-        ToggleSideMenuSelectShape(1, 2);
-        previousButtonObject.SetActive(true);
-        nextButtonObject.SetActive(true);
-        rotationControllerObject.SetActive(true);
+            gameController.ToggleOptionSideMenu(2);
+            ToggleSideMenuSelectShape(0, 2);
+            ToggleSideMenuSelectShape(1, 2);
+            previousButtonObject.SetActive(true);
+            nextButtonObject.SetActive(true);
+            rotationControllerObject.SetActive(true);
 
-        if(gameController.autoAcceptChange)
-        {
-            gameController.HideFemaleModelAndAppearings();
-        }
+            if (gameController.autoAcceptChange)
+            {
+                gameController.HideFemaleModelAndAppearings();
+            }
+            else
+            {
+                gameController.HideFemaleModelAndAppearings();
+            }
 
-        rotationController.ShowAllShapes(true);
-        for(int i=0;i< shapeButtonObjects.Length;i++)
-        {
-            shapeButtonObjects[i].transform.GetChild(0).gameObject.SetActive(false);
+            rotationController.ShowAllShapes(true);
+            for (int i = 0; i < shapeButtonObjects.Length; i++)
+            {
+                shapeButtonObjects[i].transform.GetChild(0).gameObject.SetActive(false);
+            }
+            shapeButtonObjects[0].transform.GetChild(0).gameObject.SetActive(true);
+            //PlayerPrefs.SetInt("selectedBodyShape", 1);
+            acceptDiscardPanelForBodyTone.SetActive(false);
+            acceptDiscardPanelForEyeColor.SetActive(false);
+            acceptDiscardPanelForBodyShape.SetActive(true);
         }
-        shapeButtonObjects[0].transform.GetChild(0).gameObject.SetActive(true);
-        PlayerPrefs.SetInt("selectedBodyShape", 1);
-        acceptDiscardPanelForBodyTone.SetActive(false);
-        acceptDiscardPanelForEyeColor.SetActive(false);
-        acceptDiscardPanelForBodyShape.SetActive(true);
     }
 
     public void OnClickSelectBodyToneButton(bool newState)
@@ -195,7 +202,29 @@ public class SelectShapeController : MonoBehaviour {
         ToggleSideMenuSelectShape(0, 0, shapeButtonObjects[1]);
 
 
-
+        if(newState)
+        {
+            if (gameController.isUsingCustomFace)
+            {
+                gameController.faceRawImage.transform.parent.gameObject.SetActive(true);
+                //gameController.faceRawImage2.transform.parent.gameObject.SetActive(true);
+            }
+            else
+            {
+                gameController.faceRawImage.transform.parent.gameObject.SetActive(false);
+                //gameController.faceRawImage2.transform.parent.gameObject.SetActive(true);
+            }
+            if(gameController.isUsingCustomFace2)
+            {
+                //gameController.faceRawImage.transform.parent.gameObject.SetActive(true);
+                gameController.faceRawImage2.transform.parent.gameObject.SetActive(true);
+            }
+            else
+            {
+                //gameController.faceRawImage.transform.parent.gameObject.SetActive(true);
+                gameController.faceRawImage2.transform.parent.gameObject.SetActive(false);
+            }
+        }
 
         if (gameController.autoAcceptChange)
         {
@@ -204,7 +233,12 @@ public class SelectShapeController : MonoBehaviour {
         }
         else
         {
-            rotationController.HideUnSelectedShapes(true);
+            //rotationController.ShowAllShapes(true);
+            //rotationController.HideUnSelectedShapes(true);
+
+            rotationController.ShowAllShapes(false);
+            gameController.ShowFemaleModelAndAppearings();
+
         }
 
         rotationControllerObject.SetActive(false);
@@ -214,7 +248,7 @@ public class SelectShapeController : MonoBehaviour {
         }
         shapeButtonObjects[1].transform.GetChild(0).gameObject.SetActive(true);
         
-        PlayerPrefs.SetInt("selectedBodyTone", 1);
+        //PlayerPrefs.SetInt("selectedBodyTone", 1);
         acceptDiscardPanelForBodyShape.SetActive(false);
         acceptDiscardPanelForEyeColor.SetActive(false);
         //acceptDiscardPanelForBodyTone.SetActive(true);
@@ -228,31 +262,50 @@ public class SelectShapeController : MonoBehaviour {
         {
             gameController = gameControllerObject.GetComponent<GameController>();
         }
-
-        if(newState)
+        print("New state is " + newState);
+        if (newState)
         {
+            gameController.faceRawImage.transform.parent.gameObject.SetActive(false);
+            gameController.faceRawImage2.transform.parent.gameObject.SetActive(false);
+
             femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
+            ToggleSideMenuSelectShape(0, 2);
+            ToggleSideMenuSelectShape(1, 1, shapeButtonObjects[2]);
+            gameController.ShowFemaleModelAndAppearings();
+            gameController.ZoomInFemaleModel();
+        }
+        else
+        {
+            ToggleSideMenuSelectShape(1, 2, shapeButtonObjects[2]);
+            gameController.ZoomOutFemaleModel();
         }
 
-        faceCloseup.gameObject.SetActive(newState);
+        //faceCloseup.gameObject.SetActive(newState);
 
         shapeButtonObjects[2].GetComponent<Toggle>().isOn = newState;
 
         previousButtonObject.SetActive(false);
         nextButtonObject.SetActive(false);
         gameController.ToggleOptionSideMenu(2);
-        ToggleSideMenuSelectShape(0, 2);
-        ToggleSideMenuSelectShape(1, 0, shapeButtonObjects[2]);
+        
 
 
         if (gameController.autoAcceptChange)
         {
             rotationController.ShowAllShapes(false);
-            gameController.ShowFemaleModelAndAppearings();
+            //gameController.ShowFemaleModelAndAppearings();
+            //gameController.HideFemaleModelAndAppearings();
+            //gameController.ZoomInFemaleModel();
         }
         else
         {
-            rotationController.HideUnSelectedShapes(true);
+            //rotationController.ShowAllShapes(false);
+            //rotationController.HideUnSelectedShapes(true);
+
+            rotationController.ShowAllShapes(false);
+            //gameController.ShowFemaleModelAndAppearings();
+            //gameController.HideFemaleModelAndAppearings();
+            //gameController.ZoomInFemaleModel();
         }
 
         rotationControllerObject.SetActive(false);
@@ -261,13 +314,12 @@ public class SelectShapeController : MonoBehaviour {
             shapeButtonObjects[i].transform.GetChild(0).gameObject.SetActive(false);
         }
         shapeButtonObjects[2].transform.GetChild(0).gameObject.SetActive(true);
-        PlayerPrefs.SetInt("selectedEyeColor", 1);
+        //PlayerPrefs.SetInt("selectedEyeColor", 1);
         acceptDiscardPanelForBodyShape.SetActive(false);
         acceptDiscardPanelForBodyTone.SetActive(false);
         //acceptDiscardPanelForEyeColor.SetActive(true);
         acceptDiscardPanelForEyeColor.SetActive(!gameController.autoAcceptChange);
     }
-
     public void ToggleSideMenuSelectShape(int sideMenuIndex=0,int showCode = 0,GameObject btnGameObject=null)
     {
         if(btnGameObject!=null)
@@ -333,7 +385,11 @@ public class SelectShapeController : MonoBehaviour {
             SetModel(rotationController.GetSelectedShape(), toneColor,GetCarouselSelectedEyeColor());
             if (gameController.autoAcceptChange)
             {
-                gameController.AcceptBodyToneChange();
+                gameController.AcceptBodyToneChange(true);
+            }
+            else
+            {
+                gameController.AcceptBodyToneChange(true);
             }
         }
         catch
@@ -359,7 +415,11 @@ public class SelectShapeController : MonoBehaviour {
             SetModel(rotationController.GetSelectedShape(), GetCarouselSelectedBodyTone(),eyeColor);
             if(gameController.autoAcceptChange)
             {
-                gameController.AcceptEyeColorChange();
+                gameController.AcceptEyeColorChange(true);
+            }
+            else
+            {
+                gameController.AcceptEyeColorChange(true);
             }
 
             femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;

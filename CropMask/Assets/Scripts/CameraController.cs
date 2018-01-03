@@ -2,11 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using CameraShot;
+//using CameraShot;
 using System.Linq;
 using System;
 using UnityEngine.Networking;
-
 public class CameraController : MonoBehaviour
 {
 
@@ -60,9 +59,19 @@ public class CameraController : MonoBehaviour
     private void Awake()
     {
         //CameraShotEventListener.onImageLoad += OnImageLoad;
-        CameraShotEventListener.onImageSaved += OnImageSaved;
-        CameraShotEventListener.onCancel += CancelCamera;
-        CameraShotEventListener.onError += OnError;
+        //CameraShotEventListener.onImageSaved += OnImageSaved;
+        //CameraShotEventListener.onCancel += CancelCamera;
+        //CameraShotEventListener.onError += OnError;
+    }
+
+    private void OnEnable()
+    {
+        
+    }
+
+    private void OnDisable()
+    {
+        //AndroidCamera.instance.OnImagePicked -= OnImagePicked;
     }
     // Use this for initialization
     void Start()
@@ -76,37 +85,7 @@ public class CameraController : MonoBehaviour
         touchController = touchControllerObject.GetComponent<TouchController>();
         panels[3].SetActive(false);
         imagePanel.SetActive(false);
-        //mainPanel.SetActive(true);
-        //		defaultBackground = background.texture;
-        WebCamDevice[] cams = WebCamTexture.devices;
-
-        if (cams.Length == 0)
-        {
-            camSupported = false;
-            print("cam not supported");
-            return;
-        }
-        else
-        {
-            camSupported = true;
-        }
-
-        for (int i = 0; i < cams.Length; i++)
-        {
-            print(cams[i].name);
-            if (cams[i].isFrontFacing)
-            {
-                frontCam = new WebCamTexture(cams[i].name, 1280, 720);
-            }
-            else if (!(cams[i].isFrontFacing))
-            {
-                backCam = new WebCamTexture(cams[i].name, 1280, 720);
-            }
-
-            //			if (frontCam != null && backCam != null) {
-            //				break;
-            //			}
-        }
+        
     }
 
     // Update is called once per frame
@@ -123,7 +102,7 @@ public class CameraController : MonoBehaviour
 
 #if UNITY_EDITOR
 
-        OnImageSaved(null, ImageOrientation.UP);
+        OnImageSaved(null);
 
 #else
         StartNativeCamera();
@@ -134,63 +113,217 @@ public class CameraController : MonoBehaviour
 
     }
 
-
-    public void StartCamera()
+    public void OpenAndroidNativeCamera()
     {
-        if (cam != null)
+        try
         {
-            cam.Play();
-            background.texture = cam;
-            cameraIsOpen = true;
-            panels[0].SetActive(false);
-            panels[1].SetActive(false);
-            panels[2].SetActive(false);
-            panels[3].SetActive(true);
-
+            AndroidJavaClass ajc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject ajo = new AndroidJavaObject("tico.transindia.com.cameralib.ImageProStatic");
+            ajo.CallStatic("OpenCamera", ajc.GetStatic<AndroidJavaObject>("currentActivity"), (int)processingImage.rectTransform.rect.width, (int)processingImage.rectTransform.rect.height,50);
+            //ajo.CallStatic("OpenCamera", ajc.GetStatic<AndroidJavaObject>("currentActivity"), 480,640);
+        }
+        catch(Exception e)
+        {
+            Debug.Log("Error occured opening Camers : " + e.Message);
+            gameController.InstantiateInfoPopup("Error Opening Camera");
+            gameController.HideLoadingPanelOnly();
         }
     }
 
+
+
+
+
     public void StartNativeCamera()
     {
-
+        Debug.Log("start native camera..");
 
 #if UNITY_ANDROID
-        AndroidCameraShot.GetTexture2DFromCamera(false);
+        gameController.CollectGurbage(true);
+        gameController.ShowLoadingPanelOnly();
+        OpenAndroidNativeCamera();
+
+        //AndroidCamera.Instance.OnImagePicked += OnImagePicked;
+        //AndroidCamera.Instance.GetImageFromCamera();
+        
 
 #elif UNITY_IPHONE
             Debug.Log("opening camera on iphone");
-            IOSCameraShot.GetTexture2DFromCamera(false);
+            //IOSCameraShot.LaunchCameraForImageCapture(false);
 #endif
 
     }
 
 
-    public void OnImageSaved(string path, ImageOrientation orientation)
+
+
+
+
+
+
+
+    public void OnPhotoPick(string photoPath)
+    {
+        
+        if (!photoPath.Contains("file://"))
+        {
+            photoPath = "file://" + photoPath;
+        }
+        Debug.Log("Camera-----" + photoPath);
+        StartCoroutine(DownloadImageAndUse(photoPath));
+    }
+
+
+    public void OnPhotoCancel(string message)
+    {
+        Debug.Log("You cancelled the camera");
+        gameController.HideLoadingPanelOnly();
+    }
+
+    private IEnumerator DownloadImageAndUse(string imageUrl)
     {
 
+        bool success = false;
+
+
+        using (UnityEngine.Networking.UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageUrl))
+        {
+            //print(www.url);
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log("Error Occured");
+                success = false;
+            }
+            else
+            {
+                Texture2D t2d = ((DownloadHandlerTexture)www.downloadHandler).texture as Texture2D;
+                t2d.Apply();
+                Debug.Log(string.Format("width and height of camera image is : {0}  {1}", t2d.width, t2d.height));
+                processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
+                success = true;
+            }
+            //www.Dispose();
+
+        }
+
+
+        gameController.HideLoadingPanelOnly();
+        if(success)
+        {
+            GoToImageCrop();
+        }
+        else
+        {
+            Debug.Log("error setting camera image");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //public void OnImagePicked(AndroidImagePickResult result)
+    //{
+
+    //    Debug.Log("image pick");
+    //    if (result.IsSucceeded)
+    //    {
+    //        //DestroyImmediate(result.Image);
+    //        //gameController.CollectGurbage(true);
+    //        gameController.ShowLoadingPanelOnly();
+    //        //AN_PoupsProxy.showMessage("Image Pick Rsult", "Succeeded, path: " + result.ImagePath);
+    //        //OnImageSaved(result.ImagePath);
+    //        UseImage(result.Image);
+
+    //        //DestroyImmediate(result.Image);
+
+    //    }
+    //    else
+    //    {
+    //        AN_PoupsProxy.showMessage("Image Pick Rsult", "Failed");
+    //    }
+
+    //    //gameController.CollectGurbage(true);
+    //    AndroidCamera.Instance.OnImagePicked -= OnImagePicked;
+    //}
+
+    public void OnImageSaved(string path)
+    {
+        
 #if UNITY_EDITOR
         gameController.ShowLoading();
         
         //			DownloadImage ("http://dentedpixel.com/wp-content/uploads/2014/12/Unity5-0.png");
-        StartCoroutine(DownloadImage("http://i.telegraph.co.uk/multimedia/archive/03249/archetypal-female-_3249633c.jpg"));
+        StartCoroutine(DownloadImage("http://htc-wallpaper.com/wp-content/uploads/2015/10/Old-watch.jpg?982602"));
         //DownloadImage("https://i.pinimg.com/originals/99/96/b4/9996b4944a37318dfc00c9a34ed78c6b.png");
         //			DownloadImage("file:///C:/Users/Arun/Desktop/Gimp.jpg");
 #elif UNITY_ANDROID
         //Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Large);
         //gameController.ShowLoadingPanelOnly();
         //Handheld.StartActivityIndicator();
-        path = "file://" + path;
+        if(!path.Contains("file://"))
+        {
+            path = "file://" + path;
+        }
             print("image path is ........ : " + path);
-            StartCoroutine(DownloadImage(path,orientation));
+            StartCoroutine(DownloadImage(path));
 
 #elif UNITY_IPHONE
 
         //Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.iOSActivityIndicatorStyle.WhiteLarge);
         //gameController.ShowLoadingPanelOnly();
         //Handheld.StartActivityIndicator();
+            if(!path.Contains("file://"))
+        {
             path = "file://" + path;
+        }
             Debug.Log("image path is ........ : " + path);
-            StartCoroutine(DownloadImage(path,orientation));
+            StartCoroutine(DownloadImage(path));
 
 #endif
 
@@ -202,7 +335,94 @@ public class CameraController : MonoBehaviour
         gameController.HideLoading();
     }
 
-    private IEnumerator DownloadImage(string imageUrl, ImageOrientation imageOrientation = ImageOrientation.UP)
+
+
+
+
+    public void UseImage(Texture2D tex)
+    {
+
+        bool success = false;
+
+
+#if !UNITY_EDITOR
+        //gameController.ShowLoadingPanelOnly();
+#endif
+         
+
+
+               
+
+                Texture2D t2d = new Texture2D(tex.width, tex.height);
+        print(string.Format("Tex width : {0} , height : {1}", tex.width, tex.height));
+                t2d.SetPixels(tex.GetPixels());
+                t2d.Apply();
+                DestroyImmediate(tex);
+
+
+                try
+                {
+
+
+                    processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
+                    
+
+            Texture2D ttx = MergeImage(t2d);
+
+                    ttx.Apply();
+
+
+            print("Got image");
+            processingImage.sprite = Sprite.Create(ttx, new Rect(0, 0, ttx.width, ttx.height), new Vector2(0.5f, 0.5f), 100f);
+
+                    Destroy(touchController.actualImage);
+                    
+
+                    DestroyImmediate(t2d, true);
+                    success = true;
+            print("All Success");
+                }
+                catch (Exception e)
+                {
+                    success = false;
+                    Debug.Log(string.Format("Error while downloading image : ", e));
+                    
+                }
+
+            
+
+
+
+        
+
+        if (success)
+        {
+            
+            Handheld.StopActivityIndicator();
+            gameController.HideLoading();
+            //gameController.HideLoadingPanelOnly();
+            print("going to imagecrop");
+
+            GoToImageCrop();
+        }
+        else
+        {
+           
+            Handheld.StopActivityIndicator();
+            //gameController.HideLoadingPanelOnly();
+            gameController.HideLoading();
+            print("Some Error occured");
+        }
+        gameController.HideLoadingPanelOnly();
+        //gameController.HideLoading(); 
+
+        gameController.CollectGurbage(true);
+
+    }
+
+
+
+    private IEnumerator DownloadImage(string imageUrl)
     {
 
         bool success = false;
@@ -236,40 +456,19 @@ public class CameraController : MonoBehaviour
             }
             else
             {
+
+
+
                 Texture2D t2d = ((DownloadHandlerTexture)www.downloadHandler).texture as Texture2D;
                 t2d.Apply();
 
-
-                Texture2D newTex = new Texture2D(t2d.width, t2d.height);
-                newTex.SetPixels(t2d.GetPixels());
-                newTex.Apply();
-                if (imageOrientation == ImageOrientation.UP)
-                {
-                }
-                else if (imageOrientation == ImageOrientation.LEFT)
-                {
-                    newTex = rotateTexture(t2d, true);
-                }
-                else if (imageOrientation == ImageOrientation.RIGHT)
-                {
-                    newTex = rotateTexture(t2d, false);
-                }
-                else
-                {
-                }
-                t2d = new Texture2D(newTex.width, newTex.height);
-                t2d.SetPixels(newTex.GetPixels());
-                t2d.Apply();
-                DestroyImmediate(newTex);
-
-
                 try
                 {
-
-
-                    processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
-                    int rX = (int)(t2d.width);
-                    int rY = (int)(t2d.height);
+                    
+                    //print("good");
+                    //print(string.Format("before Process image size : {0} ", processingImage.rectTransform.rect));
+                    //processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
+                    //print(string.Format("after Process image size : {0} {1} ", processingImage.rectTransform.rect, processingImage.sprite.rect));
 
                     Texture2D ttx = MergeImage(t2d);
 
@@ -284,7 +483,7 @@ public class CameraController : MonoBehaviour
                     touchController.actualImage = new Texture2D(t2d.width, t2d.height);
                     touchController.actualImage.SetPixels(t2d.GetPixels());
                     touchController.actualImage.Apply();
-                    
+
                     DestroyImmediate(t2d, true);
                     success = true;
                 }
@@ -296,6 +495,7 @@ public class CameraController : MonoBehaviour
                     //print("stopping loading for camera..");
                     //gameController.HideLoading();
                 }
+                //UseImage(((DownloadHandlerTexture)www.downloadHandler).texture as Texture2D);
 
             }
 
@@ -318,10 +518,10 @@ public class CameraController : MonoBehaviour
             gameController.HideLoadingPanelOnly();
             gameController.HideLoading();
         }
-       
+
         //gameController.HideLoading(); 
 
-
+        gameController.HideLoadingPanelOnly();
 
     }
     
@@ -445,6 +645,7 @@ public class CameraController : MonoBehaviour
 
         sceneEditorControllerObj.SetActive(false);
         //gameController.HideLoading();
+        gameController.HideLoadingPanelOnly();
 
     }
     public void CancelCamera()
@@ -567,6 +768,7 @@ public class CameraController : MonoBehaviour
             //			Overlay=ResizeTexture2D (Overlay, resizeWidth, resizeHeight);
             Overlay.SetPixels(resizedOverlay.GetPixels());
             Overlay.Apply();
+            Destroy(resizedOverlay);
         }
 
         if (Background == null)
@@ -608,6 +810,8 @@ public class CameraController : MonoBehaviour
         }
 
         newTexture.Apply();
+        Destroy(Background);
+
         return newTexture;
     }
 

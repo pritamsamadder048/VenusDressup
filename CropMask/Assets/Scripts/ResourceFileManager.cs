@@ -43,6 +43,7 @@ public  class ResourceFileManager : MonoBehaviour {
 
     public GameObject downloadInfoPanel;
     public GameObject checkForUpdatePanel;
+    public GameObject firstInstallPanel;
     public GameObject retryButton;
 
     public object lockObjectFileChecked=new object();
@@ -108,6 +109,11 @@ public  class ResourceFileManager : MonoBehaviour {
         dmo = new MiniJsonObject();
         if(standAloneDownloader)
         {
+            if(isNewInstall==1)
+            {
+                checkForUpdatePanel.SetActive(false);
+                firstInstallPanel.SetActive(true);
+            }
             StartCoroutine(CreateDirectories());
             StartCoroutine(DownloadAllFile0());
            
@@ -116,7 +122,11 @@ public  class ResourceFileManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            PlayerPrefs.SetInt("isNewInstall", 1);
+            isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
+        }
 	}
 
     
@@ -140,6 +150,7 @@ public  class ResourceFileManager : MonoBehaviour {
 #region ZERO
     public IEnumerator DownloadAllFile0()
     {
+        isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
         WWWForm form = new WWWForm();
         string device_id;
         string device_type;
@@ -151,7 +162,7 @@ public  class ResourceFileManager : MonoBehaviour {
         device_type="I";
         device_id = SystemInfo.deviceUniqueIdentifier;
 #elif UNITY_EDITOR
-        device_type="A"
+        device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
 #endif
         form.AddField("device_id", device_id);
@@ -180,7 +191,7 @@ public  class ResourceFileManager : MonoBehaviour {
                     Debug.Log("Form upload complete!");
 
                     string jsonString = www.downloadHandler.text;
-                    //print(jsonString);
+                    print(jsonString);
 
 
 
@@ -201,6 +212,7 @@ public  class ResourceFileManager : MonoBehaviour {
                         if (femalesArrayData.Count > 0)
                         {
                             checkForUpdatePanel.SetActive(false);
+                            firstInstallPanel.SetActive(false);
                             downloadInfoPanel.SetActive(true);
                             yield return new WaitForFixedUpdate();
                             StartCoroutine(DownloadFemalesData0(femalesArrayData));
@@ -208,11 +220,16 @@ public  class ResourceFileManager : MonoBehaviour {
                         if (malesArrayData.Count > 0)
                         {
                             checkForUpdatePanel.SetActive(false);
+                            firstInstallPanel.SetActive(false);
                             downloadInfoPanel.SetActive(true);
                             yield return new WaitForFixedUpdate();
                             StartCoroutine(DownloadMalesData0(malesArrayData));
                         }
 
+                    }
+                    else if(error_code==2)
+                    {
+                        LoadMainSceneStatic();
                     }
 
 
@@ -249,7 +266,7 @@ public  class ResourceFileManager : MonoBehaviour {
                     Debug.Log("Form upload complete!");
 
                     string jsonString = www.downloadHandler.text;
-                    //print(jsonString);
+                    print("Json String : "+jsonString);
 
 
 
@@ -268,7 +285,7 @@ public  class ResourceFileManager : MonoBehaviour {
                         print(string.Format("total male image : {0}   total Female Image : {1}", malesArrayData.Count, femalesArrayData.Count));
                         if(totalDownloadableFile==0)
                         {
-
+                            LoadMainSceneStatic();
                         }
                         if (femalesArrayData.Count > 0)
                         {
@@ -286,6 +303,16 @@ public  class ResourceFileManager : MonoBehaviour {
                         }
 
 
+                    }
+                    else if(error_code==2)
+                    {
+                        LoadMainSceneStatic();
+                    }
+                    else
+                    {
+                        InstantiateInfoPopup("Unable To Fetch Data From Server");
+                        retryButton.SetActive(true);
+                        Debug.Log(www.error);
                     }
 
 
@@ -1462,12 +1489,31 @@ public  class ResourceFileManager : MonoBehaviour {
             
         }
 //#endif
-        yield return new WaitForFixedUpdate();
+        yield return new WaitForEndOfFrame();
         PlayerPrefs.SetInt("isNewInstall", 0);
         SceneManager.LoadScene(1);
     }
 
 
+
+    public void LoadMainSceneStatic()
+    {
+        print("Loading main scene static");
+        PlayerPrefs.SetInt("isNewInstall", 0);
+        SceneManager.LoadScene(1);
+    }
+
+    public IEnumerator LoadMainSceneAsync()
+    {
+        PlayerPrefs.SetInt("isNewInstall", 0);
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(1,LoadSceneMode.Single);
+
+        while(!asyncLoad.isDone)
+        {
+            print(string.Format("Loading Percent : {0}", asyncLoad.progress));
+            yield return null;
+        }
+    }
 
 
 

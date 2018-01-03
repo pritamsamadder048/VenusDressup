@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class PopUpController : MonoBehaviour {
 
 
+    public GameController gameController;
+
     [SerializeField]
     protected GameObject[] popupPanels;
 
@@ -38,6 +40,16 @@ public class PopUpController : MonoBehaviour {
         p.SetActive(true);
     }
 
+    public void ResetAllSavedFaceStatic()
+    {
+        foreach (GameObject g in popupPanels)
+        {
+            g.SetActive(false);
+
+        }
+        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        StartCoroutine(gameController.saveManager.ResetAllCroppedFaces());
+    }
 
     public void HidePopup()
     {
@@ -46,7 +58,13 @@ public class PopUpController : MonoBehaviour {
             g.SetActive(false);
 
         }
+        
     }
 
+
+    public void DestroyPopup(GameObject g)
+    {
+        DestroyImmediate(g);
+    }
    
 }

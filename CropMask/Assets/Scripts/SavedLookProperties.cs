@@ -30,8 +30,8 @@ public class SavedLookProperties : MonoBehaviour {
         {
             
         }
-        GetComponent<Button>().onClick.AddListener(LoadSavedLook);
-        transform.GetChild(0).GetComponent<Button>().onClick.AddListener(DeleteThisSavedLook);
+        GetComponent<Button>().onClick.AddListener(CallLoadSavedLook);
+        transform.GetChild(0).GetComponent<Button>().onClick.AddListener(CallDeleteThisSavedLook);
     }
 
     // Use this for initialization
@@ -69,6 +69,18 @@ public class SavedLookProperties : MonoBehaviour {
 
     }
 
+    public void CallLoadSavedLook()
+    {
+        if(isInitialized)
+        {
+            if(gameController!=null)
+            {
+                gameController.ShowLoadingPanelOnly();
+                Invoke("LoadSavedLook", .3f);
+            }
+        }
+    }
+
     public void LoadSavedLook()
     {
         print("using saved look");
@@ -94,13 +106,44 @@ public class SavedLookProperties : MonoBehaviour {
                 print("game controller is ready");
                 if(sd.dressProperty==null)
                 {
-                    print("dressproperty is null reinitializing dress property");
-                    sd.dressProperty = new DressProperties();
-                    sd.dressProperty.InitializeDressProperty(sd.dressData.serializedJsonObject);
-                    print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl,(sd.dressProperty==null)));
+                    try
+                    {
+                        if (sd.dressProperty.imgName == "" || sd.dressProperty.imgName == null)
+                        {
+                            print("dressproperty is null reinitializing dress property");
+                            sd.dressProperty = new DressProperties();
+                            sd.dressProperty.InitializeDressProperty(sd.dressData.serializedJsonObject);
+                            sd.dressProperty.SetDressColor(sd.dressData.pColor);
+                            //print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl, (sd.dressProperty == null)));
+                        }
+                    }
+                    catch
+                    {
+                        print("dressproperty is null reinitializing dress property");
+                        sd.dressProperty = new DressProperties();
+                        sd.dressProperty.InitializeDressProperty(sd.dressData.serializedJsonObject);
+                        sd.dressProperty.SetDressColor(sd.dressData.pColor);
+                        //print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl, (sd.dressProperty == null)));
+                    }
                 }
-                sd.femaleWigProperty = new FemaleWigProperties();
-                sd.femaleWigProperty.InitializeWigProperty(sd.femaleWigData.serializedJsonObject);
+                if(sd.femaleWigProperty==null)
+                {
+                    try
+                    {
+                        if (sd.femaleWigProperty.imgName == "" || sd.femaleWigProperty.imgName == null)
+                        {
+                            sd.femaleWigProperty = new FemaleWigProperties();
+                            sd.femaleWigProperty.InitializeWigProperty(sd.femaleWigData.serializedJsonObject);
+                            sd.femaleWigProperty.SetFemaleWigColor(sd.femaleWigData.pColor);
+                        }
+                    }
+                    catch
+                    {
+                        sd.femaleWigProperty = new FemaleWigProperties();
+                        sd.femaleWigProperty.InitializeWigProperty(sd.femaleWigData.serializedJsonObject);
+                        sd.femaleWigProperty.SetFemaleWigColor(sd.femaleWigData.pColor);
+                    }
+                }
 
                 sd.ornamentProperty = new OrnamentProperties();
                 sd.ornamentProperty.InitializeOrnamentProperty(sd.ornamentData.serializedJsonObject);
@@ -108,17 +151,25 @@ public class SavedLookProperties : MonoBehaviour {
                 sd.shoeProperty = new ShoeProperties();
                 sd.shoeProperty.InitializeShoeProperty(sd.shoeData.serializedJsonObject);
                     
-                if(sd.dressProperty.imgName!=null || sd.dressProperty.imgName!="")
+                if(sd.dressProperty.imgName!=null && sd.dressProperty.imgName!="")
                 {
                     print("found dressproperty");
                     gameController.selectDressController.PutOnLongDressDynamically(sd.dressProperty, true);
                     Color c = new Color(sd.dressData.pColor[0], sd.dressData.pColor[1], sd.dressData.pColor[2], sd.dressData.pColor[3]);
-                    if(c!=Color.white)
-                    {
-                        gameController.ChangeToGrayScale(gameController.dress);
-                        gameController.dress.color = c;
+                    //if(c!=Color.white)
+                    //{
+                    //    gameController.ChangeToGrayScale(gameController.dress);
+                    //    gameController.dress.color = c;
 
-                    }
+                    //}
+
+                    
+                        
+                    //    gameController.dress.color = c;
+                    //gameController.currentDressColor = c;
+                    //gameController.selectDressController.dressColor = c.r;
+                    //gameController.selectDressController.dressBrightness = c.b;
+                    
                     print("Dress weared");
                 }
                 else
@@ -126,15 +177,26 @@ public class SavedLookProperties : MonoBehaviour {
                     gameController.ToggleDress();
                 }
 
-                if(sd.femaleWigProperty.imgName!=null || sd.femaleWigProperty.imgName!="")
+                if(sd.femaleWigProperty.imgName!=null && sd.femaleWigProperty.imgName!="")
                 {
                     gameController.selectDressController.PutOnWigDynamically(sd.femaleWigProperty, true);
                     Color c = new Color(sd.femaleWigData.pColor[0], sd.femaleWigData.pColor[1], sd.femaleWigData.pColor[2], sd.femaleWigData.pColor[3]);
-                    if(c!=Color.white)
-                    {
-                        gameController.ChangeToGrayScale(gameController.wig);
-                        gameController.wig.color = c;
-                    }
+                    //if(c!=Color.white)
+                    //{
+                    //    gameController.ChangeToGrayScale(gameController.wig);
+                    //    gameController.wig.color = c;
+                    //}
+
+                    
+                        
+                    //gameController.wig.color = c;
+
+                    //gameController.currentWigColor = c;
+                    //gameController.selectDressController.wigColor = c.r;
+                    //gameController.selectDressController.wigBrightness = c.b;
+
+                    
+
                     print("wig weared");
                 }
                 else
@@ -143,7 +205,7 @@ public class SavedLookProperties : MonoBehaviour {
                 }
 
 
-                if(sd.ornamentProperty.imgName!=null || sd.ornamentProperty.imgName!="")
+                if(sd.ornamentProperty.imgName!=null && sd.ornamentProperty.imgName!="")
                 {
                     gameController.selectDressController.PutOnOrnamentDynamically(sd.ornamentProperty);
                 }
@@ -153,7 +215,7 @@ public class SavedLookProperties : MonoBehaviour {
                 }
 
 
-                if (sd.shoeProperty.imgName != null || sd.shoeProperty.imgName != "")
+                if (sd.shoeProperty.imgName != null && sd.shoeProperty.imgName != "")
                 {
                     gameController.selectDressController.PutOnShoeDynamically(sd.shoeProperty);
                 }
@@ -165,6 +227,17 @@ public class SavedLookProperties : MonoBehaviour {
             }
             gameController.GoToHome();
         }
+
+        gameController.HideLoadingPanelOnly();
+        
+    }
+
+
+
+    public void CallDeleteThisSavedLook()
+    {
+        gameController.ShowLoadingPanelOnly();
+        Invoke("DeleteThisSavedLook", .3f);
     }
 
 

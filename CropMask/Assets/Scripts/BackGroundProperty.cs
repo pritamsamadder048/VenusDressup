@@ -14,7 +14,7 @@ public class BackGroundProperty : MonoBehaviour
 
     private void Awake()
     {
-        GetComponent<Button>().onClick.AddListener(UseThisBackgroundStatic);
+        GetComponent<Button>().onClick.AddListener(InvokeUseThisBackgroundStatic);
         gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
     }
     void Start()
@@ -26,6 +26,12 @@ public class BackGroundProperty : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void InvokeUseThisBackgroundStatic()
+    {
+        gameController.ShowLoadingPanelOnly();
+        Invoke("UseThisBackgroundStatic", .3f);
     }
 
     public void UseThisBackgroundStatic()
@@ -53,5 +59,12 @@ public class BackGroundProperty : MonoBehaviour
         {
             gameController.InstantiateInfoPopup(e.Message);
         }
+
+        Invoke("HideLoadingPanelOnly", .1f);
+    }
+
+    public void HideLoadingPanelOnly()
+    {
+        gameController.HideLoadingPanelOnly();
     }
 }

@@ -83,12 +83,16 @@ public class SelectDressController : MonoBehaviour {
     public GameObject infoPopupPrefab;
 
     public GameObject dressColorSlider;
+    public GameObject dressBrightnessSlider;
     public GameObject wigColorSlider;
+    public GameObject wigBrightnessSlider;
 
     public GameObject selectDressOptionPanel;
 
     public UIImageColorPicker dressColorPicker;
+    public UIImageColorPicker dressBrigtnessPicker;
     public UIImageColorPicker wigColorPicker;
+    public UIImageColorPicker wigBrightnessPicker;
 
     public GameObject selectWearingRoot;
 
@@ -101,6 +105,22 @@ public class SelectDressController : MonoBehaviour {
     public int wigCoroutineInQueue = 0;
     public int ornamentCoroutineInQueue = 0;
     public int shoeCoroutineInQueue = 0;
+
+
+    public GameObject[] wigEditSidePanels;
+    public GameObject[] dressEditSidePanels;
+
+
+    public float dressColor = 0.5f;
+    public float dressBrightness = .5f;
+    public float wigColor = 0.5f;
+    public float wigBrightness = .5f;
+
+    public Toggle[] wigEditUndoButtons;
+    public Toggle[] dressEditUndoButton;
+
+
+    
 
     public bool IsWearingDress()
     {
@@ -139,15 +159,18 @@ public class SelectDressController : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
-        
+    private void Awake()
+    {
         gameController = gameControllerObject.GetComponent<GameController>();
-        if(gameController!=null)
+        if (gameController != null)
         {
             paidUserStatus = gameController.IsPaidUser;
         }
+
         dressColorPicker = dressColorSlider.GetComponent<UIImageColorPicker>();
+        dressBrigtnessPicker = dressBrightnessSlider.GetComponent<UIImageColorPicker>();
         wigColorPicker = wigColorSlider.GetComponent<UIImageColorPicker>();
+        wigBrightnessPicker = wigBrightnessSlider.GetComponent<UIImageColorPicker>();
         //wigColorPicker = wigColorSlider.GetComponent<UIImageColorPicker>();
 
 
@@ -157,11 +180,21 @@ public class SelectDressController : MonoBehaviour {
         //StartCoroutine(GetWearingsForSelectedModel(gameController.mainBodyShape,gameController.mainBodyTone,gameController.mainEyeColor));
         //StartCoroutine(GetWearingsForSelectedModel("hourglass", "dark", "green"));
     }
+    void Start () {
+        
+        
+        
+    }
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+        
+    }
+
+    private void OnDisable()
+    {
+        
+    }
 
     public IEnumerator ReloadDresses()
     {
@@ -173,6 +206,8 @@ public class SelectDressController : MonoBehaviour {
 
     private void OnEnable()
     {
+        OnclickCloseEditDressButton();
+        OnclickCloseEditWigButton();
         CheckForChanges();
         
     }
@@ -253,6 +288,8 @@ public class SelectDressController : MonoBehaviour {
     }
 
 
+
+
     public void OnClickSelectLongDressButton(bool newState)   //select long dress handler
     {
         
@@ -271,12 +308,19 @@ public class SelectDressController : MonoBehaviour {
         if(newState)
         {
             ToggleSideMenuSelectDress(0, 1, dressButtonObjects[0]);
-            if (dress.transform.parent.gameObject.activeSelf && dress.gameObject.activeSelf && dress.color.a > 0)
+            //if (dress.transform.parent.gameObject.activeSelf && dress.gameObject.activeSelf && dress.color.a > 0)
+            //{
+            //    editButtons[0].SetActive(true);
+            //}
+            print("new state is true");
+            if (isWearingDress)
             {
+                print("Dress is weared");
                 editButtons[0].SetActive(true);
             }
             else
             {
+                print("no dress");
                 editButtons[0].SetActive(false);
             }
         }
@@ -483,12 +527,23 @@ public class SelectDressController : MonoBehaviour {
         }
     }
 
+    public void RemoveDress()
+    {
+        print("Remove Dress");
+        dress.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+        isWearingDress = false;
+        currentDressName = "";
+        gameController.currentDressProperty = null;
+        
+        editButtons[0].SetActive(false);
+        return;
+    }
     public void PutOnLongDressDynamically(DressProperties dp,bool resetDress=false)  //for dynamically loading dress
     {
         gameController = gameControllerObject.GetComponent<GameController>();
         string dressName = dp.imgName;
 
-
+        print("Dp Color = " + dp.dressColor[0] + " " + dp.dressColor[1]);
         if(!resetDress)
         {
 
@@ -533,13 +588,13 @@ public class SelectDressController : MonoBehaviour {
             else if (isWearingDress && dressName != currentDressName)
             {
                 print("else if (isWearingDress && dressName != currentDressName)");
-                dress.gameObject.GetComponent<Image>().DOFade(0f, .5f);
-                isWearingDress = false;
-                editButtons[0].SetActive(true);
+                //dress.gameObject.GetComponent<Image>().DOFade(0f, 1f);
+                //isWearingDress = false;
+                //editButtons[0].SetActive(true);
             }
             else
             {
-                editButtons[0].SetActive(true);
+                //editButtons[0].SetActive(true);
             }
             if (!dress.gameObject.activeSelf)
             {
@@ -550,15 +605,15 @@ public class SelectDressController : MonoBehaviour {
                 dress.transform.parent.gameObject.SetActive(true);
             }
             print("loading dress");
-            dress.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            //dress.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             //yield return new WaitForSeconds(.1f);
 
         }
 
         else
         {
-            print("Reset Wig");
-            dress.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            print("Reset Dress");
+            //dress.gameObject.GetComponent<Image>().DOFade(0f, .5f);
             if (!dress.gameObject.activeSelf)
             {
                 dress.gameObject.SetActive(true);
@@ -570,37 +625,123 @@ public class SelectDressController : MonoBehaviour {
         }
 
         Texture2D tempTex = new Texture2D(10,10);
-        if(File.Exists(dp.finalSavePath))
+        
+
+        if (File.Exists(dp.finalSavePath))
         {
+            
             tempTex.LoadImage(File.ReadAllBytes(dp.finalSavePath));
             tempTex.Apply();
-           
-            dress.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
-            dress.color = Color.white;
-            gameController.currentDressColor = Color.white;
-            isWearingDress = true;
-            editButtons[0].SetActive(true);
-            currentDressName = dressName;
+
+            if(isWearingDress)
+            {
+                DestroyImmediate(gameController.tmpDress.sprite, true);
+                gameController.tmpDress.sprite = dress.sprite;
+                gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
+            }
+            else
+            {
+                DestroyImmediate(gameController.tmpDress.sprite, true);
+                gameController.tmpDress.sprite = dress.sprite;
+                //gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
+            }
+            gameController.tmpDress.gameObject.SetActive(true);
+            dress.gameObject.SetActive(false);
+
+// change the dress at background
+            {
+                dress.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+                dress.color = new Color(dp.dressColor[0], dp.dressColor[1], dp.dressColor[2], 0f); //new Color(0.5f, .5f, .5f, 0f);
+                dress.gameObject.SetActive(true);
+                gameController.currentDressColor = new Color(dp.dressColor[0], dp.dressColor[1], dp.dressColor[2], 1); //new Color(0.5f, .5f, .5f, 0f);
+                print("Dress Color now is : " + gameController.currentDressColor.ToString());
+                isWearingDress = true;
+                editButtons[0].SetActive(true);
+                currentDressName = dressName;
+            }
+
+            float fadeDuration = .8f;
+            if (!isWearingDress)
+            {
+                fadeDuration = 0f;
+            }
+
+            print("fade duration : " + fadeDuration);
+            gameController.tmpDress.DOFade(0f, fadeDuration).SetEase(Ease.OutSine).onComplete+= delegate
+            {
+                gameController.tmpDress.gameObject.SetActive(false);
+                DestroyImmediate(gameController.tmpDress.sprite,true);
+                
+            };
+            dress.gameObject.GetComponent<Image>().DOFade(1f,.8f).SetEase(Ease.InSine).onComplete += delegate
+            {
+                print("last fade");
+
+                gameController.currentDressTexture = new Texture2D(1, 1);
+                gameController.currentDressTexture.LoadImage(File.ReadAllBytes(dp.finalSavePath));
+                gameController.currentDressTexture.Apply();
+                gameController.currentDressProperty = new DressProperties();
+                gameController.currentDressProperty = dp;
+                //gameController.currentDressColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+                print("Dress Color : " + dress.gameObject.GetComponent<Image>().color.ToString());
+                gameController.HideLoadingPanelOnly();
+                gameController.HideLoadingPanelOnlyTransparent();
+            };
+
+            //dress.gameObject.GetComponent<Image>().DOFade(0f, fadeDuration).onComplete += delegate 
+            //{
+            //    //dress.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+            //    //dress.color = new Color(dp.dressColor[0], dp.dressColor[1], dp.dressColor[2], 0f); //new Color(0.5f, .5f, .5f, 0f);
+            //    //gameController.currentDressColor = new Color(dp.dressColor[0], dp.dressColor[1], dp.dressColor[2], 1); //new Color(0.5f, .5f, .5f, 0f);
+            //    //print("Dress Color now is : " + gameController.currentDressColor.ToString());
+            //    //isWearingDress = true;
+            //    //editButtons[0].SetActive(true);
+            //    //currentDressName = dressName;
+
+            //    //dress.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+            //    //print("image assigned");
+
+
+            //    //dress.gameObject.GetComponent<Image>().DOFade(1f, .5f).onComplete += delegate
+            //    //  {
+            //    //      print("last fade");
+
+            //    //      gameController.currentDressTexture = new Texture2D(1, 1);
+            //    //      gameController.currentDressTexture.LoadImage(File.ReadAllBytes(dp.finalSavePath));
+            //    //      gameController.currentDressTexture.Apply();
+            //    //      gameController.currentDressProperty = new DressProperties();
+            //    //      gameController.currentDressProperty = dp;
+            //    //    //gameController.currentDressColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+            //    //    print("Dress Color : " + dress.gameObject.GetComponent<Image>().color.ToString());
+            //    //      gameController.HideLoadingPanelOnly();
+            //    //      gameController.HideLoadingPanelOnlyTransparent();
+            //    //  };
+                
+            //};
+
+
             
-            dress.gameObject.GetComponent<Image>().DOFade(0f, 0f);
-            print("image assigned");
+             //Color.white;
+            
+            
+
+            
 
 
 
-            dress.gameObject.GetComponent<Image>().DOFade(1f, 1f);
-            print("last fade");
-
-            gameController.currentDressTexture = new Texture2D(1, 1);
-            gameController.currentDressTexture.LoadImage(File.ReadAllBytes(dp.finalSavePath));
-            gameController.currentDressTexture.Apply();
-            gameController.currentDressProperty = new DressProperties();
-            gameController.currentDressProperty = dp;
-            gameController.currentDressColor = Color.white;
+            
+        }
+        else
+        {
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoadingPanelOnlyTransparent();
+            gameController.InstantiateInfoPopup("Could not Load Dress");
+            DestroyImmediate(gameController.tmpDress.sprite);
+            gameController.tmpDress.gameObject.SetActive(false);
         }
 
 
 
-        
     }
 
     public void PutOnShortDress(string gender, string modelName, string dressName)
@@ -716,6 +857,16 @@ public class SelectDressController : MonoBehaviour {
 
 
 
+    public void RemoveWig()
+    {
+        wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+        isWearingWig = false;
+        currentWigName = "";
+        gameController.currentFemaleWigProperty = null;
+        editButtons[1].SetActive(false);
+        return;
+    }
+
     public void PutOnWigDynamically(FemaleWigProperties fwp,bool resetWig=false)
     {
         gameController = gameControllerObject.GetComponent<GameController>();
@@ -764,13 +915,13 @@ public class SelectDressController : MonoBehaviour {
             else if (isWearingWig && wigName != currentWigName)
             {
                 print(string.Format("else if (isWearingWig && {0} != {1})",wigName,currentWigName));
-                wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
-                isWearingWig = false;
-                editButtons[1].SetActive(true);
+                //wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+                //isWearingWig = false;
+                //editButtons[1].SetActive(true);
             }
             else
             {
-                editButtons[1].SetActive(true);
+                //editButtons[1].SetActive(true);
             }
 
             if (!wig.gameObject.activeSelf)
@@ -782,7 +933,7 @@ public class SelectDressController : MonoBehaviour {
                 wig.transform.parent.gameObject.SetActive(true);
             }
             print("loading wig");
-            wig.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            //wig.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             //yield return new WaitForSeconds(.1f);
 
 
@@ -790,7 +941,7 @@ public class SelectDressController : MonoBehaviour {
         else
         {
             print("resetting wig");
-            wig.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            //wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
             if (!wig.gameObject.activeSelf)
             {
                 wig.gameObject.SetActive(true);
@@ -803,42 +954,137 @@ public class SelectDressController : MonoBehaviour {
 
 
 
+        //if (File.Exists(fwp.finalSavePath))
+        //{
+        //    Texture2D tempTex = new Texture2D(10,10);
+        //    tempTex.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
+        //    tempTex.Apply();
+        //    wig.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+        //    wig.color = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+        //    gameController.currentWigColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+        //    isWearingWig = true;
+        //    editButtons[1].SetActive(true);
+        //    currentWigName = wigName;
+        //    wig.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+        //    print("image assigned");
+
+
+
+        //    wig.gameObject.GetComponent<Image>().DOFade(1f, 1f);
+        //    print("last fade");
+
+        //    gameController.currentWigTexture = new Texture2D(1, 1);
+        //    gameController.currentWigTexture.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
+        //    gameController.currentWigTexture.Apply();
+        //    gameController.currentFemaleWigProperty = new FemaleWigProperties();
+        //    gameController.currentFemaleWigProperty = fwp;
+        //    gameController.currentWigColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+        //}
+
         if (File.Exists(fwp.finalSavePath))
         {
-            Texture2D tempTex = new Texture2D(10,10);
+
+            if (isWearingWig)
+            {
+                DestroyImmediate(gameController.tmpWig.sprite, true);
+                gameController.tmpWig.sprite = wig.sprite;
+                gameController.tmpWig.color = new Color(wig.color.r, wig.color.g, wig.color.b, 1f);
+            }
+            else
+            {
+                DestroyImmediate(gameController.tmpWig.sprite, true);
+                gameController.tmpWig.sprite = wig.sprite;
+                //gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
+            }
+            gameController.tmpWig.gameObject.SetActive(true);
+            wig.gameObject.SetActive(false);
+
+
+            float fadeDuration = 1f;
+            if (!isWearingWig)
+            {
+                fadeDuration = 0f;
+            }
+            Texture2D tempTex = new Texture2D(10, 10);
             tempTex.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
             tempTex.Apply();
-            wig.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
-            wig.color = Color.white;
-            gameController.currentWigColor = Color.white;
-            isWearingWig = true;
-            editButtons[1].SetActive(true);
-            currentWigName = wigName;
-            wig.gameObject.GetComponent<Image>().DOFade(0f, 0f);
-            print("image assigned");
+
+            {
+                wig.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+                wig.color = new Color(fwp.wigColor[0], fwp.wigColor[1], fwp.wigColor[2], 0f); //new Color(0.5f, .5f, .5f, 0f); //Color.white;
+                wig.gameObject.SetActive(true);
+                gameController.currentWigColor = new Color(fwp.wigColor[0], fwp.wigColor[1], fwp.wigColor[2], 1f); //Color.white;
+                
+                isWearingWig = true;
+                editButtons[1].SetActive(true);
+                currentWigName = wigName;
+            }
+
+
+            gameController.tmpWig.DOFade(0f, fadeDuration).SetEase(Ease.OutSine).onComplete += delegate
+            {
+                gameController.tmpWig.gameObject.SetActive(false);
+                DestroyImmediate(gameController.tmpWig.sprite, true);
+                
+            };
+
+            wig.DOFade(1f, .8f).SetEase(Ease.InSine).onComplete += delegate
+            {
+                print("last fade");
+
+                gameController.currentWigTexture = new Texture2D(1, 1);
+                gameController.currentWigTexture.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
+                gameController.currentWigTexture.Apply();
+                gameController.currentFemaleWigProperty = new FemaleWigProperties();
+                gameController.currentFemaleWigProperty = fwp;
+                //gameController.currentWigColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+            };
+
+            //wig.gameObject.GetComponent<Image>().DOFade(0f, fadeDuration).onComplete += delegate
+            //      {
+            //          //wig.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+            //          //wig.color = new Color(fwp.wigColor[0], fwp.wigColor[1], fwp.wigColor[2],0f); //new Color(0.5f, .5f, .5f, 0f); //Color.white;
+            //          //gameController.currentWigColor = new Color(fwp.wigColor[0], fwp.wigColor[1], fwp.wigColor[2], 1f); //Color.white;
+            //          //isWearingWig = true;
+            //          //editButtons[1].SetActive(true);
+            //          //currentWigName = wigName;
+            //          //wig.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+            //          //print("image assigned");
 
 
 
-            wig.gameObject.GetComponent<Image>().DOFade(1f, 1f);
-            print("last fade");
+            //          //wig.gameObject.GetComponent<Image>().DOFade(1f, .5f).onComplete+=delegate
+            //          //{
+            //          //    print("last fade");
 
-            gameController.currentWigTexture = new Texture2D(1, 1);
-            gameController.currentWigTexture.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
-            gameController.currentWigTexture.Apply();
-            gameController.currentFemaleWigProperty = new FemaleWigProperties();
-            gameController.currentFemaleWigProperty = fwp;
-            gameController.currentWigColor = Color.white;
+            //          //    gameController.currentWigTexture = new Texture2D(1, 1);
+            //          //    gameController.currentWigTexture.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
+            //          //    gameController.currentWigTexture.Apply();
+            //          //    gameController.currentFemaleWigProperty = new FemaleWigProperties();
+            //          //    gameController.currentFemaleWigProperty = fwp;
+            //          //    //gameController.currentWigColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+            //          //};
+
+            //      };
+        }
+        else
+        {
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoadingPanelOnlyTransparent();
+            gameController.InstantiateInfoPopup("Could not Load Wig");
+            DestroyImmediate(gameController.tmpWig.sprite);
+            gameController.tmpWig.gameObject.SetActive(false);
         }
 
 
 
-        
+
     }
 
 
 
 
-
+    
     public void PutOnOrnament(string gender, string modelName, string ornamentName)
     {
         if (gender.ToLower() == "female")
@@ -911,6 +1157,15 @@ public class SelectDressController : MonoBehaviour {
         }
     }
 
+    public void RemoveOrnament()
+    {
+        ornament.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+        isWearingOrnament = false;
+        currentOrnamentName = "";
+        gameController.currentOrnamentProperty = null;
+
+        return;
+    }
 
     public void PutOnOrnamentDynamically(OrnamentProperties op)
     {
@@ -948,8 +1203,8 @@ public class SelectDressController : MonoBehaviour {
             }
             else if (isWearingOrnament && ornamentName != currentOrnamentName)
             {
-                ornament.gameObject.GetComponent<Image>().DOFade(0f, .5f);
-                isWearingOrnament = false;
+                //ornament.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+                //isWearingOrnament = false;
             }
             if (!ornament.gameObject.activeSelf)
             {
@@ -960,7 +1215,7 @@ public class SelectDressController : MonoBehaviour {
                 ornament.transform.parent.gameObject.SetActive(true);
             }
             print("loading ornament");
-            ornament.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            //ornament.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             //yield return new WaitForSeconds(.1f);
 
 
@@ -970,21 +1225,87 @@ public class SelectDressController : MonoBehaviour {
             Texture2D tempTex = new Texture2D(10, 10);
             tempTex.LoadImage(File.ReadAllBytes(op.finalSavePath));
             tempTex.Apply();
-            ornament.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
-            isWearingOrnament = true;
-            currentOrnamentName = ornamentName;
-            ornament.gameObject.GetComponent<Image>().DOFade(0f, 0f);
-            print("image assigned");
 
 
 
-            ornament.gameObject.GetComponent<Image>().DOFade(1f, 1f);
-            print("last fade");
+            if (isWearingOrnament)
+            {
+                DestroyImmediate(gameController.tmpOrnament.sprite, true);
+                gameController.tmpOrnament.sprite = ornament.sprite;
+                gameController.tmpOrnament.color = new Color(ornament.color.r, ornament.color.g, ornament.color.b, 1f);
+            }
+            else
+            {
+                DestroyImmediate(gameController.tmpOrnament.sprite, true);
+                gameController.tmpOrnament.sprite = ornament.sprite;
+                //gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
+            }
+            gameController.tmpOrnament.gameObject.SetActive(true);
+            ornament.gameObject.SetActive(false);
+
+            float fadeDuration = .5f;
+            if (!isWearingOrnament)
+            {
+                fadeDuration = 0f;
+            }
+
+
+            {
+                ornament.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+                ornament.gameObject.SetActive(true);
+                isWearingOrnament = true;
+                currentOrnamentName = ornamentName;
+                //ornament.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+                print("image assigned");
+            }
+
+            gameController.tmpOrnament.DOFade(0f, fadeDuration).SetEase(Ease.OutSine).onComplete += delegate
+            {
+                gameController.tmpOrnament.gameObject.SetActive(false);
+                DestroyImmediate(gameController.tmpOrnament.sprite, true);
+
+            };
+
+
+            ornament.gameObject.GetComponent<Image>().DOFade(1f, .8f).SetDelay(.2f).SetEase(Ease.InSine).onComplete += delegate
+            {
+                print("last fade");
 
 
 
-            gameController.currentOrnamentProperty = new OrnamentProperties();
-            gameController.currentOrnamentProperty = op;
+                gameController.currentOrnamentProperty = new OrnamentProperties();
+                gameController.currentOrnamentProperty = op;
+            };
+
+            //ornament.gameObject.GetComponent<Image>().DOFade(0f, fadeDuration).onComplete += delegate
+            // {
+            //    // ornament.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+            //    // isWearingOrnament = true;
+            //    // currentOrnamentName = ornamentName;
+            //    ////ornament.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+            //    //print("image assigned");
+
+
+
+            //     ornament.gameObject.GetComponent<Image>().DOFade(1f, .5f).onComplete += delegate
+            //       {
+            //           print("last fade");
+
+
+
+            //           gameController.currentOrnamentProperty = new OrnamentProperties();
+            //           gameController.currentOrnamentProperty = op;
+            //       };
+
+            // };
+        }
+        else
+        {
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoadingPanelOnlyTransparent();
+            gameController.InstantiateInfoPopup("Could not Load Ornament");
+            DestroyImmediate(gameController.tmpOrnament.sprite);
+            gameController.tmpOrnament.gameObject.SetActive(false);
         }
 
 
@@ -1060,6 +1381,14 @@ public class SelectDressController : MonoBehaviour {
         }
     }
 
+    public void RemoveShoe()
+    {
+        shoe.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+        isWearingShoe = false;
+        currentShoeName = "";
+        gameController.currentShoeProperty = null;
+        return;
+    }
 
     public void PutOnShoeDynamically(ShoeProperties sp)
     {
@@ -1096,8 +1425,8 @@ public class SelectDressController : MonoBehaviour {
             }
             else if (isWearingShoe && shoeName != currentShoeName)
             {
-                shoe.gameObject.GetComponent<Image>().DOFade(0f, .5f);
-                isWearingShoe = false;
+                //shoe.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+                //isWearingShoe = false;
             }
             if (!shoe.gameObject.activeSelf)
             {
@@ -1108,7 +1437,7 @@ public class SelectDressController : MonoBehaviour {
                 shoe.transform.parent.gameObject.SetActive(true);
             }
             print("loading shoe");
-            shoe.gameObject.GetComponent<Image>().DOFade(0f, .8f);
+            //shoe.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             //yield return new WaitForSeconds(.1f);
 
 
@@ -1118,20 +1447,64 @@ public class SelectDressController : MonoBehaviour {
             Texture2D tempTex = new Texture2D(10, 10);
             tempTex.LoadImage(File.ReadAllBytes(sp.finalSavePath));
             tempTex.Apply();
-            shoe.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
-            isWearingShoe = true;
-            currentShoeName = shoeName;
-            shoe.gameObject.GetComponent<Image>().DOFade(0f, 0f);
-            print("image assigned");
+            if (isWearingShoe)
+            {
+                DestroyImmediate(gameController.tmpShoe.sprite, true);
+                gameController.tmpShoe.sprite = shoe.sprite;
+                gameController.tmpShoe.color = new Color(shoe.color.r, shoe.color.g, shoe.color.b, 1f);
+            }
+            else
+            {
+                DestroyImmediate(gameController.tmpShoe.sprite, true);
+                gameController.tmpShoe.sprite = shoe.sprite;
+                //gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
+            }
+            gameController.tmpShoe.gameObject.SetActive(true);
+            shoe.gameObject.SetActive(false);
+
+            float fadeDuration = .5f;
+            if (!isWearingShoe)
+            {
+                fadeDuration = 0f;
+            }
+
+
+            {
+                shoe.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+                shoe.gameObject.SetActive(true);
+                isWearingShoe = true;
+                currentShoeName = shoeName;
+                //ornament.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+                print("image assigned");
+            }
+
+            gameController.tmpShoe.DOFade(0f, fadeDuration).SetEase(Ease.OutSine).onComplete += delegate
+            {
+                gameController.tmpShoe.gameObject.SetActive(false);
+                DestroyImmediate(gameController.tmpShoe.sprite, true);
+
+            };
+
+
+            shoe.gameObject.GetComponent<Image>().DOFade(1f, .8f).SetDelay(.2f).SetEase(Ease.InSine).onComplete += delegate
+            {
+                print("last fade");
 
 
 
-            shoe.gameObject.GetComponent<Image>().DOFade(1f, 1f);
-            print("last fade");
+                gameController.currentShoeProperty = new ShoeProperties();
+                gameController.currentShoeProperty = sp;
+            };
 
+        }
 
-            gameController.currentShoeProperty = new ShoeProperties();
-            gameController.currentShoeProperty = sp;
+       else
+        {
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoadingPanelOnlyTransparent();
+            gameController.InstantiateInfoPopup("Could not Load Shoe");
+            DestroyImmediate(gameController.tmpShoe.sprite);
+            gameController.tmpShoe.gameObject.SetActive(false);
         }
 
 
@@ -1146,17 +1519,36 @@ public class SelectDressController : MonoBehaviour {
         return currentWearings;
     }
 
+    public void ActiveWigEditSliders()
+    {
+        wigColorSlider.SetActive(true);
+        wigColorPicker.ActivateColorSlider();
+        wigBrightnessSlider.SetActive(true);
+        wigBrightnessPicker.ActivateColorSlider();
+    }
 
+    public void DeactiveWigEditSliders()
+    {
+
+        ToggleEditSidePanels(wigEditSidePanels[0], 2);
+        ToggleEditSidePanels(wigEditSidePanels[1], 2);
+
+        wigColorPicker.DeactivateColorSlider();
+        wigColorSlider.SetActive(false);
+        wigBrightnessPicker.DeactivateColorSlider();
+        wigBrightnessSlider.SetActive(false);
+    }
 
     public void OnClickEditWigButton(bool newState)
     {
         if(newState)
         {
-            wigColorSlider.SetActive(true);
-            wigColorPicker.ActivateColorSlider();
+            ActiveWigEditSliders();
             gameController.sceneEditorController.enabled = false;
             editButtons[1].GetComponent<Toggle>().isOn = false;
             StartCoroutine(ToggleEditPanel(wigEditPanel));
+            wigEditUndoButtons[1].gameObject.SetActive(false);
+            wigEditUndoButtons[0].gameObject.SetActive(true);
             ToggleSideMenuSelectDress(5, 1);
         }
 
@@ -1164,18 +1556,39 @@ public class SelectDressController : MonoBehaviour {
 
     }
 
+
+    public void ActiveDressEditSliders()
+    {
+        dressColorSlider.SetActive(true);
+        dressColorPicker.ActivateColorSlider();
+        dressBrightnessSlider.SetActive(true);
+        dressBrigtnessPicker.ActivateColorSlider();
+    }
+
+    public void DeactiveDressEditSliders()
+    {
+        ToggleEditSidePanels(dressEditSidePanels[0], 2);
+        ToggleEditSidePanels(dressEditSidePanels[1], 2);
+
+        dressColorPicker.DeactivateColorSlider();
+        dressColorSlider.SetActive(false);
+        dressBrigtnessPicker.DeactivateColorSlider();
+        dressBrightnessSlider.SetActive(false);
+    }
+
     public void OnClickEditDressButton(bool newState)
     {
         if (newState)
         {
-            dressColorSlider.SetActive(true);
-            dressColorPicker.ActivateColorSlider();
+            ActiveDressEditSliders();
             gameController.sceneEditorController.enabled = false;
             editButtons[0].GetComponent<Toggle>().isOn = false;
             StartCoroutine(ToggleEditPanel(dressEditPanel));
             ToggleSideMenuSelectDress(4, 1);
-            
-            
+            dressEditUndoButton[1].gameObject.SetActive(false);
+            dressEditUndoButton[0].gameObject.SetActive(true);
+
+
         }
 
 
@@ -1212,9 +1625,8 @@ public class SelectDressController : MonoBehaviour {
         Color[] dcs = dress.sprite.texture.GetPixels();
         gameController.currentDressTexture.SetPixels(dcs);
         gameController.currentDressTexture.Apply();
-        dressColorPicker.DeactivateColorSlider();
-        dressColorSlider.SetActive(false);
 
+        DeactiveDressEditSliders();
         gameController.sceneEditorController.enabled = true;
     }
 
@@ -1224,33 +1636,74 @@ public class SelectDressController : MonoBehaviour {
         ToggleSideMenuSelectDress(4, 2);
 
         DiscardEditDress();
-        dressColorPicker.DeactivateColorSlider();
-        dressColorSlider.SetActive(false);
+        DeactiveDressEditSliders();
         
+        gameController.sceneEditorController.enabled = true;
+        //ToggleSideMenuSelectDress(5, 2);
+    }
+    public void OnclickCloseEditDressButton()
+    {
+        StartCoroutine(ToggleEditPanel(dressEditPanel, false));
+        ToggleSideMenuSelectDress(4, 2);
+
+        //DiscardEditDress();
+        //DeactiveDressEditSliders();
+
         gameController.sceneEditorController.enabled = true;
         //ToggleSideMenuSelectDress(5, 2);
     }
 
     public void DiscardEditDress()
     {
-        dress.color = gameController.currentDressColor;
-        dress.sprite = Sprite.Create(gameController.currentDressTexture, new Rect(0, 0, gameController.currentDressTexture.width, gameController.currentDressTexture.height), new Vector2(0.5f, 0.5f), 100f);
+        DiscardEditDressColor();
+        DiscardEditDressBrightness();
+    }
+
+    public void DiscardEditDressColor()
+    {
+        Color c = gameController.currentDressColor;
+        
+        c.b = dress.color.b;
+        print("current dress color : " + c.ToString());
+        dress.color = c;
+        //dress.sprite = Sprite.Create(gameController.currentDressTexture, new Rect(0, 0, gameController.currentDressTexture.width, gameController.currentDressTexture.height), new Vector2(0.5f, 0.5f), 100f);
         dressColorPicker.DeactivateColorSlider();
-        dressColorPicker.mainSlider.value = 0f;
+        dressColorPicker.mainSlider.value = 0.5f;
         dressColorPicker.ActivateColorSlider();
+        //dressBrigtnessPicker.DeactivateColorSlider();
+        //dressBrigtnessPicker.mainSlider.value = 0.5f;
+        //dressBrigtnessPicker.ActivateColorSlider();
+    }
+    public void DiscardEditDressBrightness()
+    {
+        Color c = gameController.currentDressColor;
+        c.r = dress.color.r;
+        print("current dress brightness : " + c.ToString());
+        dress.color = c;
+        //dress.sprite = Sprite.Create(gameController.currentDressTexture, new Rect(0, 0, gameController.currentDressTexture.width, gameController.currentDressTexture.height), new Vector2(0.5f, 0.5f), 100f);
+        //dressColorPicker.DeactivateColorSlider();
+        //dressColorPicker.mainSlider.value = 0.5f;
+        //dressColorPicker.ActivateColorSlider();
+        dressBrigtnessPicker.DeactivateColorSlider();
+        dressBrigtnessPicker.mainSlider.value = 0.5f;
+        dressBrigtnessPicker.ActivateColorSlider();
     }
     public void ResetDefaultDress()
     {
         PutOnLongDressDynamically(gameController.currentDressProperty,true);
         //PutOnLongDressDynamically(gameController.currentDressProperty,true);
         dressColorPicker.DeactivateColorSlider();
-        dressColorPicker.mainSlider.value = 0f;
+        dressColorPicker.mainSlider.value = 0.5f;
         dressColorPicker.ActivateColorSlider();
-
+        dressBrigtnessPicker.DeactivateColorSlider();
+        dressBrigtnessPicker.mainSlider.value = 0.5f;
+        dressBrigtnessPicker.ActivateColorSlider();
 
     }
 
+    
 
+   
 
     public void OnclickAcceptWigColorChangeButton(GameObject editPanel)
     {
@@ -1260,9 +1713,8 @@ public class SelectDressController : MonoBehaviour {
         Color[] wcs = wig.sprite.texture.GetPixels();
         gameController.currentWigTexture.SetPixels(wcs);
         gameController.currentWigTexture.Apply();
-        wigColorPicker.DeactivateColorSlider();
-        wigColorSlider.SetActive(false);
 
+        DeactiveWigEditSliders();
         gameController.sceneEditorController.enabled = true;
     }
 
@@ -1271,27 +1723,76 @@ public class SelectDressController : MonoBehaviour {
         StartCoroutine(ToggleEditPanel(editPanel, false));
         ToggleSideMenuSelectDress(5, 2);
         DiscardEditWig();
-        wigColorPicker.DeactivateColorSlider();
-        wigColorSlider.SetActive(false);
+        DeactiveWigEditSliders();
+
+        gameController.sceneEditorController.enabled = true;
+    }
+
+    public void OnclickCloseEditWigButton()
+    {
+        StartCoroutine(ToggleEditPanel(wigEditPanel, false));
+        ToggleSideMenuSelectDress(5, 2);
+        //DiscardEditWig();
+        DeactiveWigEditSliders();
 
         gameController.sceneEditorController.enabled = true;
     }
 
     public void DiscardEditWig()
     {
-        wig.color = gameController.currentWigColor;
-        wig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
+        DiscardEditWigColor();
+        DiscardEditWigBrightness();
+    }
+
+    public void DiscardEditWigColor()
+    {
+        Color c= gameController.currentWigColor;
+        c.b = wig.color.b;
+        wig.color = c;
+        //wig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
         wigColorPicker.DeactivateColorSlider();
-        wigColorPicker.mainSlider.value = 0f;
+        wigColorPicker.mainSlider.value = 0.5f;
         wigColorPicker.ActivateColorSlider();
+        //wigBrightnessPicker.DeactivateColorSlider();
+        //wigBrightnessPicker.mainSlider.value = 0.5f;
+        //wigBrightnessPicker.ActivateColorSlider();
+    }
+    public void DiscardEditWigBrightness()
+    {
+        Color c = gameController.currentWigColor;
+        c.r = wig.color.r;
+        wig.color = c;
+        //wig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
+        //wigColorPicker.DeactivateColorSlider();
+        //wigColorPicker.mainSlider.value = 0.5f;
+        //wigColorPicker.ActivateColorSlider();
+        wigBrightnessPicker.DeactivateColorSlider();
+        wigBrightnessPicker.mainSlider.value = 0.5f;
+        wigBrightnessPicker.ActivateColorSlider();
     }
 
     public void ResetDefaultWig()
     {
         PutOnWigDynamically(gameController.currentFemaleWigProperty,true);
         wigColorPicker.DeactivateColorSlider();
-        wigColorPicker.mainSlider.value = 0f;
+        wigColorPicker.mainSlider.value = 0.5f;
         wigColorPicker.ActivateColorSlider();
+        wigBrightnessPicker.DeactivateColorSlider();
+        wigBrightnessPicker.mainSlider.value = 0.5f;
+        wigBrightnessPicker.ActivateColorSlider();
+    }
+
+    
+
+    public void ResetDefaultWigBrightness()
+    {
+        PutOnWigDynamically(gameController.currentFemaleWigProperty, true);
+        wigBrightnessPicker.DeactivateColorSlider();
+        wigBrightnessPicker.mainSlider.value = 0.5f;
+        wigBrightnessPicker.ActivateColorSlider();
+        wigBrightnessPicker.DeactivateColorSlider();
+        wigBrightnessPicker.mainSlider.value = 0.5f;
+        wigBrightnessPicker.ActivateColorSlider();
     }
 
     #endregion DRESSWIGCOLOR
@@ -1324,20 +1825,16 @@ public class SelectDressController : MonoBehaviour {
 #region RESETDRESSES
     public IEnumerator ResetDresses(MiniJsonArray fa,MiniJsonArray partialDressArray=null)
     {
-        print("started.. main");
+        //print("started.. main");
         if(fa.Count>1)
         {
             for (int i = 0; i < fa.Count; i++)
             {
                 dressCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return dressCoroutineInQueue < maxCoroutineQueueLength;
-                });
-
+                
                 GameObject d = Instantiate(dressButtonPrefab, Vector3.zero, Quaternion.identity, femaleDressContainer.transform);
-                print("loaded main: " + i);
+                //print("loaded main: " + i);
                 if (i == 0)
                 {
                     d.transform.GetChild(3).gameObject.SetActive(true);
@@ -1365,7 +1862,14 @@ public class SelectDressController : MonoBehaviour {
                     dressLoadingPanel.SetActive(false);
                     dressLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
                 }
-                
+
+
+                //yield return new WaitForSeconds(.01f);
+                if(dressCoroutineInQueue>maxCoroutineQueueLength)
+                {
+                    dressCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if(!gameController.IsPaidUser)
                 {
@@ -1382,10 +1886,7 @@ public class SelectDressController : MonoBehaviour {
             {
                 dressCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return dressCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                
 
                 GameObject d = Instantiate(dressButtonPrefab, Vector3.zero, Quaternion.identity, femaleDressContainer.transform);
 
@@ -1400,6 +1901,14 @@ public class SelectDressController : MonoBehaviour {
 
 
                 d.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+
+                //yield return new WaitForSeconds(.01f);
+                if (dressCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    dressCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
@@ -1414,60 +1923,50 @@ public class SelectDressController : MonoBehaviour {
         {
             dressLoadingPanel.SetActive(false);
             dressLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Dresses Available",CloseStyle.TapToClose);
+            
         }
 
-        if(partialDressArray !=null)
+        dressCoroutineInQueue = 0;
+
+        if (partialDressArray !=null)
         {
             if(partialDressArray.Count>0)
             {
                 StartCoroutine(ResetPartiallyMatchingDresses(partialDressArray));
             }
         }
+
+        
+
         yield return null;
     }
 
 
+  
+
+
     public IEnumerator ResetPartiallyMatchingDresses(MiniJsonArray fa)
     {
-        print("started partial");
+        //print("started partial");
         if (fa.Count > 1)
         {
             for (int i = 0; i < fa.Count; i++)
             {
                 dressCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return dressCoroutineInQueue < maxCoroutineQueueLength;
-                });
-
-
+                
                 GameObject d = Instantiate(dressButtonPrefab, Vector3.zero, Quaternion.identity, femaleDressContainer.transform);
-                print("loaded partial: " + i);
-                //{
-
-                //if (i == 0)
-                //{
-                //    d.transform.GetChild(3).gameObject.SetActive(true);
-                //    d.transform.GetChild(6).gameObject.SetActive(true);
-                //    d.transform.GetChild(7).gameObject.SetActive(true);
-                //}
-                //else if (i == (fa.Count - 1))
-                //{
-                //    d.transform.GetChild(2).gameObject.SetActive(true);
-                //    d.transform.GetChild(5).gameObject.SetActive(true);
-                //    d.transform.GetChild(8).gameObject.SetActive(true);
-                //}
-                //else
-                //{
-                //    d.transform.GetChild(3).gameObject.SetActive(true);
-                //    d.transform.GetChild(6).gameObject.SetActive(true);
-                //    //d.transform.GetChild(7).gameObject.SetActive(true);
-                //}
-                //}
+                
 
                 d.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+
+                //yield return new WaitForSeconds(.01f);
+                if (dressCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    dressCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
@@ -1475,33 +1974,34 @@ public class SelectDressController : MonoBehaviour {
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
-            //dressLoadingPanel.SetActive(false);
-            //dressLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
+            
         }
         else if (fa.Count == 1)
         {
-            dressCoroutineInQueue += 1;
-
-            yield return new WaitUntil(() =>
-            {
-                return dressCoroutineInQueue < maxCoroutineQueueLength;
-            });
-
+            
             for (int i = 0; i < fa.Count; i++)
             {
+
+                dressCoroutineInQueue += 1;
+
+                
+
                 GameObject d = Instantiate(dressButtonPrefab, Vector3.zero, Quaternion.identity, femaleDressContainer.transform);
 
-                //if (i == 0)
-                //{
-                //    d.transform.GetChild(1).gameObject.SetActive(true);
-                //    d.transform.GetChild(4).gameObject.SetActive(true);
-                //    d.transform.GetChild(7).gameObject.SetActive(true);
-                //    d.transform.GetChild(8).gameObject.SetActive(true);
-                //}
+               
 
 
 
                 d.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+
+
+                //yield return new WaitForSeconds(.01f);
+                if (dressCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    dressCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
@@ -1509,8 +2009,7 @@ public class SelectDressController : MonoBehaviour {
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
-            //dressLoadingPanel.SetActive(false);
-            //dressLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
+            
         }
         else
         {
@@ -1518,21 +2017,27 @@ public class SelectDressController : MonoBehaviour {
             dressLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
             //InstantiateInfoPopup("No Dresses Available");
         }
+
+        dressCoroutineInQueue = 0;
         yield return null;
     }
 
 
+    
+
 
     public IEnumerator LoadIconOnDressButton(GameObject d, MiniJsonObject m)
     {
+        //print("Started work : " + Time.deltaTime);
         DressProperties dp = d.GetComponent<DressProperties>();
         dp.InitializeDressProperty(m);
+        //print("Completed work : "+Time.deltaTime);
 
-        dressCoroutineInQueue -= 1;
-        if(dressCoroutineInQueue<0)
-        {
-            dressCoroutineInQueue = 0;
-        }
+        //dressCoroutineInQueue -= 1;
+        //if (dressCoroutineInQueue < 0)
+        //{
+        //    dressCoroutineInQueue = 0;
+        //}
         yield return null;
     }
     #endregion RESETDRESSES
@@ -1546,10 +2051,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 wigCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return wigCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return wigCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject w = Instantiate(wigButtonPrefab, Vector3.zero, Quaternion.identity, femaleWigContainer.transform);
                 {
@@ -1573,6 +2078,15 @@ public class SelectDressController : MonoBehaviour {
                     }
                 }
                 w.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+
+                if (wigCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    wigCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
+
                 StartCoroutine(LoadIconOnWigButton(w, fa.Get(i)));
                 
             }
@@ -1585,10 +2099,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 wigCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return wigCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return wigCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject w = Instantiate(wigButtonPrefab, Vector3.zero, Quaternion.identity, femaleWigContainer.transform);
                 {
@@ -1602,6 +2116,13 @@ public class SelectDressController : MonoBehaviour {
                    
                 }
                 w.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (wigCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    wigCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnWigButton(w, fa.Get(i)));
 
             }
@@ -1612,10 +2133,13 @@ public class SelectDressController : MonoBehaviour {
         {
             wigLoadingPanel.SetActive(false);
             wigLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Wigs Available",CloseStyle.TapToClose);
+            
         }
 
-        if(partialWigArray!=null)
+        wigCoroutineInQueue = 0;
+
+
+        if (partialWigArray!=null)
         {
             if(partialWigArray.Count>0)
             {
@@ -1637,10 +2161,10 @@ public class SelectDressController : MonoBehaviour {
 
                 wigCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return wigCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return wigCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject w = Instantiate(wigButtonPrefab, Vector3.zero, Quaternion.identity, femaleWigContainer.transform);
                 //{
@@ -1664,6 +2188,13 @@ public class SelectDressController : MonoBehaviour {
                 //    }
                 //}
                 w.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (wigCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    wigCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnWigButton(w, fa.Get(i)));
 
             }
@@ -1676,10 +2207,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 wigCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return wigCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return wigCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject w = Instantiate(wigButtonPrefab, Vector3.zero, Quaternion.identity, femaleWigContainer.transform);
                 //{
@@ -1693,6 +2224,13 @@ public class SelectDressController : MonoBehaviour {
 
                 //}
                 w.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (wigCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    wigCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnWigButton(w, fa.Get(i)));
 
             }
@@ -1705,19 +2243,27 @@ public class SelectDressController : MonoBehaviour {
             wigLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
             //InstantiateInfoPopup("No Wigs Available");
         }
+
+
+        wigCoroutineInQueue = 0;
+
         yield return null;
     }
 
     public IEnumerator LoadIconOnWigButton(GameObject w, MiniJsonObject m)
     {
+        //yield return new WaitUntil(() => {
+        //    return wigCoroutineInQueue < maxCoroutineQueueLength;
+        //});
+
         FemaleWigProperties fwp = w.GetComponent<FemaleWigProperties>();
         fwp.InitializeWigProperty(m);
 
-        wigCoroutineInQueue -= 1;
-        if (wigCoroutineInQueue < 0)
-        {
-            wigCoroutineInQueue = 0;
-        }
+        //wigCoroutineInQueue -= 1;
+        //if (wigCoroutineInQueue < 0)
+        //{
+        //    wigCoroutineInQueue = 0;
+        //}
 
         yield return null;
     }
@@ -1733,10 +2279,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 ornamentCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject o = Instantiate(ornamentButtonPrefab, Vector3.zero, Quaternion.identity, femaleOrnamentContainer.transform);
 
@@ -1763,6 +2309,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 o.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (ornamentCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    ornamentCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnOrnamentButton(o, fa.Get(i)));
                 
             }
@@ -1775,10 +2328,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 ornamentCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
 
                 GameObject o = Instantiate(ornamentButtonPrefab, Vector3.zero, Quaternion.identity, femaleOrnamentContainer.transform);
@@ -1796,6 +2349,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 o.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (ornamentCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    ornamentCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnOrnamentButton(o, fa.Get(i)));
 
             }
@@ -1806,8 +2366,10 @@ public class SelectDressController : MonoBehaviour {
         {
             ornamentLoadingPanel.SetActive(false);
             ornamentLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Ornaments Available",CloseStyle.TapToClose);
+            
         }
+
+        ornamentCoroutineInQueue = 0;
 
         if(partialOrnamentArray!=null)
         {
@@ -1828,10 +2390,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 ornamentCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
 
                 GameObject o = Instantiate(ornamentButtonPrefab, Vector3.zero, Quaternion.identity, femaleOrnamentContainer.transform);
@@ -1859,6 +2421,14 @@ public class SelectDressController : MonoBehaviour {
 
 
                 o.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (ornamentCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    ornamentCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
+
                 StartCoroutine(LoadIconOnOrnamentButton(o, fa.Get(i)));
 
             }
@@ -1871,10 +2441,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 ornamentCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return ornamentCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
 
                 GameObject o = Instantiate(ornamentButtonPrefab, Vector3.zero, Quaternion.identity, femaleOrnamentContainer.transform);
@@ -1892,6 +2462,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 o.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (ornamentCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    ornamentCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnOrnamentButton(o, fa.Get(i)));
 
             }
@@ -1904,6 +2481,9 @@ public class SelectDressController : MonoBehaviour {
             ornamentLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
             //InstantiateInfoPopup("No Ornaments Available");
         }
+
+        ornamentCoroutineInQueue = 0;
+
         yield return null;
     }
 
@@ -1912,11 +2492,12 @@ public class SelectDressController : MonoBehaviour {
         OrnamentProperties op = o.GetComponent<OrnamentProperties>();
         op.InitializeOrnamentProperty(m);
 
-        ornamentCoroutineInQueue -= 1;
-        if(ornamentCoroutineInQueue<0)
-        {
-            ornamentCoroutineInQueue = 0;
-        }
+        //ornamentCoroutineInQueue -= 1;
+        //if(ornamentCoroutineInQueue<0)
+        //{
+        //    ornamentCoroutineInQueue = 0;
+        //}
+
         yield return null;
     }
     #endregion RESETORNAMENTS
@@ -1930,10 +2511,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 shoeCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return shoeCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return shoeCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject s = Instantiate(shoeButtonPrefab, Vector3.zero, Quaternion.identity, femaleShoeContainer.transform);
 
@@ -1958,6 +2539,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 s.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (shoeCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    shoeCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnShoeButton(s, fa.Get(i)));
                 
             }
@@ -1970,10 +2558,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 shoeCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return shoeCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return shoeCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject s = Instantiate(shoeButtonPrefab, Vector3.zero, Quaternion.identity, femaleShoeContainer.transform);
 
@@ -1988,6 +2576,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 s.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (shoeCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    shoeCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnShoeButton(s, fa.Get(i)));
 
             }
@@ -1998,8 +2593,10 @@ public class SelectDressController : MonoBehaviour {
         {
             shoeLoadingPanel.SetActive(false);
             shoeLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
-            InstantiateInfoPopup("No Shoes Available",CloseStyle.TapToClose);
+            
         }
+
+        shoeCoroutineInQueue = 0;
 
         if(partialShoeArray!=null)
         {
@@ -2020,10 +2617,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 shoeCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return shoeCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return shoeCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject s = Instantiate(shoeButtonPrefab, Vector3.zero, Quaternion.identity, femaleShoeContainer.transform);
 
@@ -2048,6 +2645,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 s.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (shoeCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    shoeCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnShoeButton(s, fa.Get(i)));
 
             }
@@ -2060,10 +2664,10 @@ public class SelectDressController : MonoBehaviour {
             {
                 shoeCoroutineInQueue += 1;
 
-                yield return new WaitUntil(() =>
-                {
-                    return shoeCoroutineInQueue < maxCoroutineQueueLength;
-                });
+                //yield return new WaitUntil(() =>
+                //{
+                //    return shoeCoroutineInQueue < maxCoroutineQueueLength;
+                //});
 
                 GameObject s = Instantiate(shoeButtonPrefab, Vector3.zero, Quaternion.identity, femaleShoeContainer.transform);
 
@@ -2078,6 +2682,13 @@ public class SelectDressController : MonoBehaviour {
 
 
                 s.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+
+                if (shoeCoroutineInQueue > maxCoroutineQueueLength)
+                {
+                    shoeCoroutineInQueue = 0;
+                    yield return new WaitForSeconds(.1f);
+                }
+
                 StartCoroutine(LoadIconOnShoeButton(s, fa.Get(i)));
 
             }
@@ -2090,6 +2701,8 @@ public class SelectDressController : MonoBehaviour {
             shoeLoadingPanel.transform.GetChild(0).GetComponent<AnimateLoading>().StopRotating();
             //InstantiateInfoPopup("No Shoes Available");
         }
+
+        shoeCoroutineInQueue = 0;
         yield return null;
     }
 
@@ -2098,11 +2711,12 @@ public class SelectDressController : MonoBehaviour {
         ShoeProperties sp = s.GetComponent<ShoeProperties>();
         sp.InitializeShoeProperty(m);
 
-        shoeCoroutineInQueue -= 1;
-        if(shoeCoroutineInQueue<0)
-        {
-            shoeCoroutineInQueue = 0;
-        }
+        //shoeCoroutineInQueue -= 1;
+        //if(shoeCoroutineInQueue<0)
+        //{
+        //    shoeCoroutineInQueue = 0;
+        //}
+
         yield return null;
     }
     #endregion RESETSHOES
@@ -2174,14 +2788,92 @@ public class SelectDressController : MonoBehaviour {
                     MiniJsonArray toneMatch = rObject.GetJsonArray("skin_color");
                     MiniJsonArray bodyMatch = rObject.GetJsonArray("body_type");
 
-                    
+                    string notAvailableMessage = "No {0} Available";
+                    string thesearenotavailable = "";
 
-                    #region GETDRESSLIST
-                    // get the list of dress
+
+                    #region PREFETCHARRAY
+                    #region PREFETCHARRAYDRESS
                     MiniJsonObject dressObject = rData.Get(0);
                     MiniJsonArray dressArray = dressObject.GetJsonArray("females");
                     gameController.currentDressList = dressArray;
                     dressDataLoadingComplete = true;
+                    #endregion PREFETCHARRAYDRESS
+
+                    #region PREFETCHARRAYWIG
+
+                    MiniJsonObject femaleWigObject = rData.Get(1);
+                    MiniJsonArray femaleWigArray = femaleWigObject.GetJsonArray("females");
+                    gameController.currentFemaleWigList = femaleWigArray;
+                    femaleWigDataLoadingComplete = true;
+                    #endregion PREFETCHARRAYWIG
+
+                    #region PREFETCHARRAYORNAMENT
+
+                    MiniJsonObject ornamentObject = rData.Get(2);
+                    MiniJsonArray ornamentArray = ornamentObject.GetJsonArray("females");
+                    gameController.currentOrnamentList = ornamentArray;
+                    ornamentDataLoadingComplete = true;
+
+                    #endregion PREFETCHARRAYORNAMENT
+
+                    #region PREFETCHARRAYSHOE
+
+                    MiniJsonObject shoeObject = rData.Get(3);
+                    MiniJsonArray shoeArray = shoeObject.GetJsonArray("females");
+                    gameController.currentShoeList = shoeArray;
+                    shoeDataLoadingComplete = true;
+
+                    #endregion PREFETCHARRAYSHOE
+
+
+                    if(dressArray.Count<=0)
+                    {
+                        thesearenotavailable += "Dress";
+                    }
+                    if(femaleWigArray.Count<=0)
+                    {
+                        if(thesearenotavailable!="")
+                        {
+                            thesearenotavailable += ",";
+                        }
+                        thesearenotavailable += "Wig";
+                    }
+                    if(ornamentArray.Count<=0)
+                    {
+                        if (thesearenotavailable != "")
+                        {
+                            thesearenotavailable += ",";
+                        }
+                        thesearenotavailable += "Ornament";
+                    }
+                    if (shoeArray.Count <= 0)
+                    {
+                        if (thesearenotavailable != "")
+                        {
+                            thesearenotavailable += ",";
+                        }
+                        thesearenotavailable += "Shoe";
+                    }
+
+                    if(thesearenotavailable!="" || thesearenotavailable.Length>=3)
+                    {
+                        string formattedMessage = string.Format(notAvailableMessage, thesearenotavailable);
+                        InstantiateInfoPopup(formattedMessage, CloseStyle.TapToClose);
+                    }
+                    
+                    //InstantiateInfoPopup("No Wigs Available", CloseStyle.TapToClose);
+                    //InstantiateInfoPopup("No Ornaments Available", CloseStyle.TapToClose);
+                    //InstantiateInfoPopup("No Shoes Available", CloseStyle.TapToClose);
+
+                    #endregion PREFETCHARRAY
+
+
+
+
+                    #region GETDRESSLIST
+                    // get the list of dress
+
 
                     MiniJsonObject toneMatchDressObject = toneMatch.Get(0);
                     MiniJsonObject bodyMatchDressObject = bodyMatch.Get(0);
@@ -2201,10 +2893,7 @@ public class SelectDressController : MonoBehaviour {
 
                     #region GETFEMALEWIGLIST
                     // get the list of wigs
-                    MiniJsonObject femaleWigObject = rData.Get(1);
-                    MiniJsonArray femaleWigArray = femaleWigObject.GetJsonArray("females");
-                    gameController.currentFemaleWigList = femaleWigArray;
-                    femaleWigDataLoadingComplete = true;
+                    
 
 
                     MiniJsonObject toneMatchWigObject = toneMatch.Get(1);
@@ -2225,10 +2914,7 @@ public class SelectDressController : MonoBehaviour {
 
                     #region GETORNAMENTLIST
                     // get the list of ornament
-                    MiniJsonObject ornamentObject = rData.Get(2);
-                    MiniJsonArray ornamentArray = ornamentObject.GetJsonArray("females");
-                    gameController.currentOrnamentList = ornamentArray;
-                    ornamentDataLoadingComplete = true;
+                    
 
                     MiniJsonObject toneMatchOrnamentObject = toneMatch.Get(2);
                     MiniJsonObject bodyMatchOrnamentObject = bodyMatch.Get(2);
@@ -2250,11 +2936,7 @@ public class SelectDressController : MonoBehaviour {
 
                     #region GETSHOELIST
                     // get the list of shoe
-                    MiniJsonObject shoeObject = rData.Get(3);
-                    MiniJsonArray shoeArray = shoeObject.GetJsonArray("females");
-                    gameController.currentShoeList = shoeArray;
-                    shoeDataLoadingComplete = true;
-
+                    
 
                     MiniJsonObject toneMatchShoeObject = toneMatch.Get(3);
                     MiniJsonObject bodyMatchShoeObject = bodyMatch.Get(3);
@@ -2491,5 +3173,114 @@ public class SelectDressController : MonoBehaviour {
     }
 
     #endregion DYNAMICWEARINGS
+
+
+
+
+
+    #region EDITPANELTOGGLING
+
+
+    public void ToggleEditSidePanels(GameObject panel,int toggleState=0)
+    {
+        switch(toggleState)
+        {
+            case 0:
+            default:
+                {
+                    if(panel.GetComponent<RectTransform>().anchoredPosition.x<-5)
+                    {
+                        panel.GetComponent<RectTransform>().DOAnchorPosX(0f,.2f);
+                    }
+                    else
+                    {
+                        panel.GetComponent<RectTransform>().DOAnchorPosX(-800f, .2f);
+                    }
+                    break;
+                }
+            case 1:
+                {
+                    panel.GetComponent<RectTransform>().DOAnchorPosX(0f, .2f);
+                    break;
+                }
+            case 2:
+                {
+                    panel.GetComponent<RectTransform>().DOAnchorPosX(-800f, .2f);
+                    break;
+                }
+        }
+    }
+
+
+    public void ToggleDressColorPanel(bool newState)
+    {
+        if(newState)
+        {
+            ToggleEditSidePanels(dressEditSidePanels[1], 2);
+            ToggleEditSidePanels(dressEditSidePanels[0], 1);
+
+            dressEditUndoButton[1].gameObject.SetActive(false);
+            dressEditUndoButton[0].gameObject.SetActive(true);
+        }
+        else
+        {
+            ToggleEditSidePanels(dressEditSidePanels[0], 2);
+        }
+    }
+    public void ToggleDressBrightnessPanel(bool newState)
+    {
+        
+            if (newState)
+            {
+                ToggleEditSidePanels(dressEditSidePanels[0], 2);
+                ToggleEditSidePanels(dressEditSidePanels[1], 1);
+
+                dressEditUndoButton[0].gameObject.SetActive(false);
+                dressEditUndoButton[1].gameObject.SetActive(true);
+            }
+            else
+            {
+                ToggleEditSidePanels(dressEditSidePanels[1], 2);
+            }
+        
+    }
+
+
+
+    public void ToggleWigColorPanel(bool newState)
+    {
+        if (newState)
+        {
+            ToggleEditSidePanels(wigEditSidePanels[1], 2);
+            ToggleEditSidePanels(wigEditSidePanels[0], 1);
+
+            wigEditUndoButtons[1].gameObject.SetActive(false);
+            wigEditUndoButtons[0].gameObject.SetActive(true);
+        }
+        else
+        {
+            ToggleEditSidePanels(wigEditSidePanels[0], 2);
+        }
+    }
+    public void ToggleWigBrightnessPanel(bool newState)
+    {
+        
+            if (newState)
+            {
+                ToggleEditSidePanels(wigEditSidePanels[0], 2);
+                ToggleEditSidePanels(wigEditSidePanels[1], 1);
+
+                wigEditUndoButtons[0].gameObject.SetActive(false);
+                wigEditUndoButtons[1].gameObject.SetActive(true);
+            }
+            else
+            {
+                ToggleEditSidePanels(wigEditSidePanels[1], 2);
+            }
+        
+    }
+
+
+    #endregion EDITPANELTOGGLING
 
 }

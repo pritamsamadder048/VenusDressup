@@ -25,7 +25,7 @@ public class DressData
     public string lockStatus = "";
     public string serializedJsonObject = "";
     public bool _isInitialized = false;
-    public float[] pColor=new float[] { 1, 1, 1, 1 };
+    public float[] pColor=new float[] { .5f, .5f, .5f, 1 };
 
     public void EncodeData(DressProperties p, Color pcolor)
     {
@@ -71,7 +71,7 @@ public class FemaleWigData
     public string lockStatus = "";
     public string serializedJsonObject = "";
     public bool _isInitialized = false;
-    public float[] pColor = new float[] { 1, 1, 1, 1 };
+    public float[] pColor = new float[] { .5f, .5f, .5f, 1f };
 
     public void EncodeData(FemaleWigProperties p, Color pcolor)
     {
@@ -303,14 +303,14 @@ public class SaveData
             {
 
                 dressData.EncodeData(dressProperty, gameController.currentDressColor);
-
+                Debug.Log(string.Format("Dress color is {0} {1} {2} {3}", dressData.pColor[0], dressData.pColor[1], dressData.pColor[2], dressData.pColor[3]));
                 dressName = dressProperty.imgName;
             }
 
         }
         catch (Exception e)
         {
-            Debug.Log(string.Format("Dress rechec Error : {0}",e.Message));
+            Debug.Log(string.Format("Dress recheck Error : {0}",e.Message));
             
         }
 
@@ -379,8 +379,10 @@ public class SaveData
     {
         dressProperty = new DressProperties();
         dressProperty.InitializeDressProperty(dressData.serializedJsonObject);
+        dressProperty.SetDressColor(dressData.pColor);
         femaleWigProperty = new FemaleWigProperties();
         femaleWigProperty.InitializeWigProperty(femaleWigData.serializedJsonObject);
+        femaleWigProperty.SetFemaleWigColor(femaleWigData.pColor);
         ornamentProperty = new OrnamentProperties();
         ornamentProperty.InitializeOrnamentProperty(ornamentData.serializedJsonObject);
         shoeProperty = new ShoeProperties();
@@ -691,7 +693,9 @@ public class SaveData
                             for(int i=0;i<saveDatas.Count;i++)
                             {
                                 saveDatas[i].InitializeProperties();
-                                
+                                Debug.Log(string.Format("savedata[{0}].dressproperty.dresscolor is : {1} {2} {3} {4} ",i, saveDatas[i].dressProperty.dressColor[0], saveDatas[i].dressProperty.dressColor[1], saveDatas[i].dressProperty.dressColor[2], saveDatas[i].dressProperty.dressColor[3]));
+                                Debug.Log(string.Format("savedata[{0}].dressdata.pcolor is : {1} {2} {3} {4} ",i, saveDatas[i].dressData.pColor[0], saveDatas[i].dressData.pColor[1], saveDatas[i].dressData.pColor[2], saveDatas[i].dressData.pColor[3]));
+
                             }
                         }
                     }
@@ -737,9 +741,52 @@ public class CroppedFaceData
     public float[] sizeDelta;
     public float[] position;
     public float[] rotation;
+    public float[] faceColor;
     public int saveFaceHash;
 
-    public void Initialize( Vector3 scl,Vector2 size_delta,Vector3 pos,Vector3 rot)
+
+
+    public void Copy(ref CroppedFaceData cd)
+    {
+        cd = new CroppedFaceData();
+
+        cd.imageName = this.imageName;
+        cd.saveFaceHash = this.saveFaceHash;
+        cd.scale = new float[scale.Length];
+        cd.sizeDelta = new float[sizeDelta.Length];
+        cd.position = new float[position.Length];
+        cd.rotation = new float[rotation.Length];
+        cd.faceColor = new float[faceColor.Length];
+
+
+
+        for(int i=0;i<scale.Length;i++)
+        {
+            cd.scale[i] = this.scale[i];
+        }
+
+        for (int i = 0; i < sizeDelta.Length; i++)
+        {
+            cd.sizeDelta[i] = this.sizeDelta[i];
+        }
+
+        for (int i = 0; i < position.Length; i++)
+        {
+            cd.position[i] = this.position[i];
+        }
+
+        for (int i = 0; i < rotation.Length; i++)
+        {
+            cd.rotation[i] = this.rotation[i];
+        }
+
+        for (int i = 0; i < faceColor.Length; i++)
+        {
+            cd.faceColor[i] = this.faceColor[i];
+        }
+    }
+
+    public void Initialize( Vector3 scl,Vector2 size_delta,Vector3 pos,Vector3 rot,Color col)
     {
         
         //croppedFaceImage = faceTexture.EncodeToPNG();
@@ -748,6 +795,7 @@ public class CroppedFaceData
         position = new float[] { pos.x, pos.y, pos.z };
         rotation = new float[] { rot.x, rot.y, rot.z };
         scale = new float[] { scl.x, scl.y, scl.z };
+        faceColor = new float[] { col.r, col.g, col.b, col.a };
 
         saveFaceHash = GetHashCode()*UnityEngine.Random.Range(2,10);
     }
@@ -761,6 +809,7 @@ public class CroppedFaceData
         scale = new float[] { img.transform.localScale.x, img.transform.localScale.y, img.transform.localScale.z };
         position = new float[] { img.GetComponent<RectTransform>().anchoredPosition3D.x, img.GetComponent<RectTransform>().anchoredPosition3D.y, img.GetComponent<RectTransform>().anchoredPosition3D.z };
         rotation = new float[] { img.transform.localEulerAngles.x, img.transform.localEulerAngles.y, img.transform.localEulerAngles.z };
+        faceColor = new float[] { img.color.r, img.color.g, img.color.b, img.color.a };
         saveFaceHash = GetHashCode() * UnityEngine.Random.Range(2, 10);
 
 

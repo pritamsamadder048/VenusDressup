@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using System.Linq;
-using ImageAndVideoPicker;
+//using ImageAndVideoPicker;
 using System;
 using UnityEngine.Networking;
 
@@ -35,8 +35,8 @@ public class Gallery : MonoBehaviour {
     private GameObject[] panels;
 
 
-    [SerializeField]
-    private GameObject sceneEditorControllerObj;
+    
+    public GameObject sceneEditorControllerObj;
 
     //	public RawImage background;
     public Image processingImage;
@@ -49,9 +49,9 @@ public class Gallery : MonoBehaviour {
     {
 
             
-        PickerEventListener.onImageSelect += OnImageSelect;
-        PickerEventListener.onCancel += OnCancel;
-        PickerEventListener.onError += OnError;
+        //PickerEventListener.onImageSelect += OnImageSelect;
+        //PickerEventListener.onCancel += OnCancel;
+        //PickerEventListener.onError += OnError;
     }
 
     // Use this for initialization
@@ -72,10 +72,140 @@ public class Gallery : MonoBehaviour {
 
 	}
 
+    private void OnEnable()
+    {
+        
+    }
+
+    private void OnDisable()
+    {
+        
+    }
 
 
 
-    private void GoToImageCrop()
+
+
+
+
+
+
+
+    //public void OnImagePicked(AndroidImagePickResult result)
+    //{
+
+    //    Debug.Log("image pick");
+
+    //    if (result.IsSucceeded)
+    //    {
+    //        gameController.ShowLoadingPanelOnly();
+
+
+    //        //gameController.CollectGurbage(true);
+    //        //AN_PoupsProxy.showMessage("Image Pick Rsult", "Succeeded, path: " + result.ImagePath);
+    //        //OnPhotoPick(result.ImagePath);
+    //        UseImage(result.Image);
+    //        //DestroyImmediate(result.Image);
+    //    }
+    //    else
+    //    {
+    //        AN_PoupsProxy.showMessage("Image Pick Rsult", "Failed");
+    //    }
+
+    //    //gameController.CollectGurbage(true);
+    //    AndroidCamera.Instance.OnImagePicked -= OnImagePicked;
+    //}
+
+
+    public void UseImage(Texture2D tex)
+    {
+
+        bool success = false;
+
+
+#if !UNITY_EDITOR
+        //gameController.ShowLoadingPanelOnly();
+#endif
+
+
+
+
+
+        Texture2D t2d = new Texture2D(tex.width, tex.height);
+        print(string.Format("Tex width : {0} , height : {1}", tex.width, tex.height));
+        t2d.SetPixels(tex.GetPixels());
+        t2d.Apply();
+        DestroyImmediate(tex);
+
+
+        try
+        {
+
+
+            processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
+
+
+            Texture2D ttx = MergeImage(t2d);
+
+            ttx.Apply();
+
+
+            print("Got image");
+            processingImage.sprite = Sprite.Create(ttx, new Rect(0, 0, ttx.width, ttx.height), new Vector2(0.5f, 0.5f), 100f);
+
+            Destroy(touchController.actualImage);
+            //touchController.actualImage = new Texture2D(t2d.width, t2d.height);
+            //touchController.actualImage.SetPixels(t2d.GetPixels());
+            //touchController.actualImage.Apply();
+
+            DestroyImmediate(t2d, true);
+            success = true;
+            print("All Success");
+        }
+        catch (Exception e)
+        {
+            success = false;
+            Debug.Log(string.Format("Error while downloading image : ", e));
+            //yield return new WaitForEndOfFrame();
+            //print("stopping loading for camera..");
+            //gameController.HideLoading();
+        }
+
+
+
+
+
+
+
+        if (success)
+        {
+
+            Handheld.StopActivityIndicator();
+            gameController.HideLoading();
+            //gameController.HideLoadingPanelOnly();
+            print("going to imagecrop");
+            GoToImageCrop();
+        }
+        else
+        {
+
+            Handheld.StopActivityIndicator();
+            //gameController.HideLoadingPanelOnly();
+            gameController.HideLoading();
+            print("Some Error occured");
+        }
+        gameController.CollectGurbage(true);
+        gameController.HideLoadingPanelOnly();
+        //gameController.HideLoading(); 
+
+
+
+    }
+
+
+
+
+    public void GoToImageCrop()
     {
         //Go To Image Panel;
         for (int i = 2; i < panels.Length; i++)
@@ -88,39 +218,176 @@ public class Gallery : MonoBehaviour {
         //gameController.HideLoading();
         www = null;
         sceneEditorControllerObj.SetActive(false);
+        gameController.HideLoadingPanelOnly();
     }
 
 
 
 
-	public void OnOpenGallery()
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public void OpenAndroidNativeGallery()
+    {
+       try
+        {
+            AndroidJavaClass ajc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject ajo = new AndroidJavaObject("tico.transindia.com.cameralib.ImageProStatic");
+            ajo.CallStatic("OpenGallery", ajc.GetStatic<AndroidJavaObject>("currentActivity"), (int)processingImage.rectTransform.rect.width, (int)processingImage.rectTransform.rect.height,50);
+        }
+        catch(Exception e)
+        {
+            Debug.Log("Error occured opening Gallery : " + e.Message);
+            gameController.InstantiateInfoPopup("Error Opening Gallery");
+            gameController.HideLoadingPanelOnly();
+        }
+    }
+
+
+
+    public void OnPhotoPick(string photoPath)
+    {
+        //Debug.Log("Gallery-----" + photoPath);
+        if (!photoPath.Contains("file://"))
+        {
+            photoPath = "file://" + photoPath;
+        }
+        Debug.Log("Gallery-----" + photoPath);
+        StartCoroutine(DownloadImageAndUse(photoPath));
+    }
+
+
+    public void OnPhotoCancel(string message)
+    {
+        Debug.Log("You cancelled the Gallery");
+        gameController.HideLoadingPanelOnly();
+        gameController.ToggleHomeSideMenu(1);
+    }
+
+    private IEnumerator DownloadImageAndUse(string imageUrl)
+    {
+
+        bool success = false;
+
+
+        using (UnityEngine.Networking.UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageUrl))
+        {
+            //print(www.url);
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log("Error Occured");
+                success = false;
+
+            }
+            else
+            {
+                Texture2D t2d = ((DownloadHandlerTexture)www.downloadHandler).texture as Texture2D;
+                t2d.Apply();
+                Debug.Log(string.Format("width and height of camera image is : {0}  {1}", t2d.width, t2d.height));
+                processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
+                success = true;
+            }
+            //www.Dispose();
+
+        }
+
+        
+        gameController.HideLoadingPanelOnly();
+        if(success)
+        {
+            GoToImageCrop();
+        }
+        else
+        {
+            Debug.Log("error setting gallery image");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public void OnOpenGallery()
 	{
+        
+        
         DestroyImmediate(processingImage.sprite);
-        gameController.CollectGurbage(true);
+        //gameController.CollectGurbage(true);
+        
 #if UNITY_EDITOR
-        OnPhotoPick("editor");
+        OnPhotoPick2("editor");
 #elif UNITY_ANDROID
 
-            //AndroidJavaClass ajc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            //AndroidJavaObject ajo = new AndroidJavaObject("com.radikallabs.androidgallery.UnityBinder");
-            //ajo.CallStatic("OpenGallery", ajc.GetStatic<AndroidJavaObject>("currentActivity"));
+            
+        gameController.CollectGurbage(true);
+        //AndroidCamera.instance.OnImagePicked += OnImagePicked;
+        gameController.ShowLoadingPanelOnly();
+        OpenAndroidNativeGallery();
 
 
-            AndroidPicker.BrowseImage();
 #elif UNITY_IPHONE
-            IOSPicker.BrowseImage(false);
+            //IOSPicker.BrowseImage(false);
 #endif
-        
+
         sceneEditorControllerObj.SetActive(false);
-	}
-    public void OnImageSelect(string imgPath, ImageOrientation orientation)
-    {
-        imgPath = "file://" + imgPath;
-        OnPhotoPick(imgPath,orientation);
     }
 
-    public void OnPhotoPick(string filePath,ImageOrientation orientation=ImageOrientation.UP)
+
+
+    public void OnImageSelect(string imgPath)
+    {
+        
+        OnPhotoPick2(imgPath);
+    }
+
+    public void OnPhotoPick2(string filePath)
 	{
+
+        if(!filePath.Contains("file://"))
+        {
+            filePath = "file://" + filePath;
+        }
         //gameController.CollectGurbage(true);
         Debug.Log ("filePath : " + filePath);
         //gameController.InstantiateInfoPopup(filePath);
@@ -128,18 +395,51 @@ public class Gallery : MonoBehaviour {
 #if UNITY_EDITOR
         gameController.ShowLoading();
         //StartCoroutine(DownloadImage("http://i.telegraph.co.uk/multimedia/archive/03249/archetypal-female-_3249633c.jpg",orientation));
-        StartCoroutine(DownloadImage("https://i.pinimg.com/originals/a0/1c/0e/a01c0e0c42c83752ea1533121174db34.jpg", orientation));
+        //StartCoroutine(DownloadImage("https://i.pinimg.com/originals/a0/1c/0e/a01c0e0c42c83752ea1533121174db34.jpg"));
+        //StartCoroutine(DownloadImage("https://wallpaperscraft.com/image/barbara_palvin_brunette_make-up_face_85254_1080x1920.jpg"));
+        StartCoroutine(DownloadImage("https://www.specktra.net/images/a/a1/a1e176fc_20150530_145845.jpeg"));
 #elif UNITY_ANDROID
-        StartCoroutine(DownloadImage(filePath,orientation));
+        StartCoroutine(DownloadImage(filePath));
         imageFilePAth = filePath;
 #elif UNITY_IPHONE
-        StartCoroutine(DownloadImage(filePath,orientation));
+        StartCoroutine(DownloadImage(filePath));
         imageFilePAth = filePath;
 #endif
 
     }
 
-    private IEnumerator DownloadImage(string imageUrl,ImageOrientation imageOrientation=ImageOrientation.UP)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private IEnumerator DownloadImage(string imageUrl)
     {
 
         bool success = false;
@@ -185,36 +485,15 @@ public class Gallery : MonoBehaviour {
                     //				photoTaken.SetPixels (www.texture.GetPixels ());
                     //				photoTaken.Apply ();
                     //				processingImage.gameObject.GetComponent<RectTransform> ().sizeDelta = new Vector2 (www.texture.width, www.texture.height);
-                    processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
-                    int rX = (int)(t2d.width);
-                    int rY = (int)(t2d.height);
+                    //processingImage.sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
+                    //int rX = (int)(t2d.width);
+                    //int rY = (int)(t2d.height);
 
                     Texture2D ttx = MergeImage(t2d);
 
                     ttx.Apply();
 
-                    Texture2D newTex = new Texture2D(t2d.width, t2d.height);
-                    newTex.SetPixels(t2d.GetPixels());
-                    newTex.Apply();
-                    if (imageOrientation == ImageOrientation.UP)
-                    {
-                    }
-                    else if (imageOrientation == ImageOrientation.LEFT)
-                    {
-                        newTex = rotateTexture(t2d, true);
-                    }
-                    else if (imageOrientation == ImageOrientation.RIGHT)
-                    {
-                        newTex = rotateTexture(t2d, false);
-                    }
-                    else
-                    {
-
-                    }
-                    t2d = new Texture2D(newTex.width, newTex.height);
-                    t2d.SetPixels(newTex.GetPixels());
-                    t2d.Apply();
-                    DestroyImmediate(newTex);
+                    
                     
                     print(string.Format("current size : {0} , {1}", ttx.width, ttx.height));
                     Debug.Log("Image is downloaded");
@@ -264,11 +543,13 @@ public class Gallery : MonoBehaviour {
         print(string.Format("Error Occured Selecting Image : {0}", message));
         gameController.InstantiateInfoPopup(message);
         gameController.ToggleHomeSideMenu(1);
+        gameController.panels[0].SetActive(true);
     }
     public void OnCancel()
     {
         gameController.InstantiateInfoPopup("you cancelled gallery");
-        //gameController.ToggleHomeSideMenu(1);
+        gameController.ToggleHomeSideMenu(1);
+        gameController.panels[0].SetActive(true);
     }
 
 //    void SetImage()

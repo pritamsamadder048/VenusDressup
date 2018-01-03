@@ -32,8 +32,15 @@ public class CroppedFaceController : MonoBehaviour {
 
     RawImage rwimg;
 
+    public GameController gameController;
     public GameObject buttomleft, buttomright, topright, topleft;
     private Vector2 lastTouchPosition=Vector2.zero;
+
+    public bool notOverSlider = true;
+    private void Awake()
+    {
+        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+    }
     void Start () {
         //buttomLine = new LineRenderer();
         //topLine = new LineRenderer();
@@ -52,6 +59,14 @@ public class CroppedFaceController : MonoBehaviour {
         DrawLine();
     }
 
+    private void OnDisable()
+    {
+        notOverSlider = true;
+    }
+    private void OnEnable()
+    {
+        notOverSlider = true;
+    }
 
     protected virtual void LateUpdate()
     {
@@ -85,6 +100,7 @@ public class CroppedFaceController : MonoBehaviour {
         
     }
 
+    
 
     public void DragMask()
     {
@@ -92,9 +108,18 @@ public class CroppedFaceController : MonoBehaviour {
         Vector2 newPos;
         if (gameObject.activeSelf)
         {
+            //Vector3 mousePos = gameController.MAINCAMERA.WorldToScreenPoint(Input.mousePosition);
+            //if (Physics2D.OverlapCircle(mousePos, 2f) == gameController.faceCollider2d)
+            //{
+            //    print("Colided");
+            //}
+            //else
+            //{
+            //    print(string.Format("Mouse position : {0}", mousePos.ToString()));
+            //}
             //			print ("mask enabled");
             //			print ("mouse press count : " + Input.GetKey (KeyCode.Mouse0));
-            if(Application.isMobilePlatform)
+            if (Application.isMobilePlatform)
             {
                 if (Input.touchCount == 1 )
                 {
@@ -135,7 +160,7 @@ public class CroppedFaceController : MonoBehaviour {
 
             return;
         }
-        if (gameObject.activeSelf && isTouching)
+        if (gameObject.activeSelf && isTouching && notOverSlider)
         {
 
 

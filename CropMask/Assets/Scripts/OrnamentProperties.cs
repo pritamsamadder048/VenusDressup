@@ -76,7 +76,7 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
         propertyType = "ornament";
 
         GetComponent<Button>().onClick.RemoveAllListeners();
-        GetComponent<Button>().onClick.AddListener(UseThisDress);
+        GetComponent<Button>().onClick.AddListener(InvokeUseThisOrnament);
 
         mo = m;
         serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(m);
@@ -333,14 +333,32 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
     }
 
 
-    public void UseThisDress()
+    public void InvokeUseThisOrnament()
+    {
+        if(gameController!=null)
+        {
+            if(_isInitialized)
+            {
+                gameController.ShowLoadingPanelOnlyTransparent();
+                Invoke("UseThisOrnament", .2f);
+            }
+        }
+    }
+
+    public void UseThisOrnament()
     {
         if (_isInitialized)
         {
+            gameController.InstantiateNotInteractablePanel();
             gameController.selectDressController.PutOnOrnamentDynamically(this);
+            Invoke("DestroyUninteractivePanel", .5f);
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoadingPanelOnlyTransparent();
         }
         else
         {
+            gameController.HideLoadingPanelOnly();
+            gameController.HideLoadingPanelOnlyTransparent();
             return;
         }
     }
@@ -377,5 +395,11 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
     void ISerializationCallbackReceiver.OnAfterDeserialize()
     {
         //throw new NotImplementedException();
+    }
+
+
+    public void DestroyUninteractivePanel()
+    {
+        gameController.DestroyNotInteractablePopupPanel();
     }
 }
