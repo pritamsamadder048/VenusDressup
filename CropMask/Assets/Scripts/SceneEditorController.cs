@@ -411,6 +411,8 @@ public class SceneEditorController : MonoBehaviour {
         gameController.OnPressDressForHerButton(gameController.homeMenuButtonObjects[0]);
         //}
         gameController.selectDressController.OnClickSelectOrnamentButton(true);
+        gameController.selectDressController.editButtons[0].SetActive(false);
+        gameController.selectDressController.editButtons[1].SetActive(false);
         //gameController.selectDressController.OnClickEditDressButton(true);
     }
     public void RemoveOrnamentFromScene()
@@ -436,6 +438,8 @@ public class SceneEditorController : MonoBehaviour {
         gameController.OnPressDressForHerButton(gameController.homeMenuButtonObjects[0]);
         //}
         gameController.selectDressController.OnClickSelectShoeButton(true);
+        gameController.selectDressController.editButtons[0].SetActive(false);
+        gameController.selectDressController.editButtons[1].SetActive(false);
         //gameController.selectDressController.OnClickEditDressButton(true);
     }
     public void RemoveShoeFromScene()
