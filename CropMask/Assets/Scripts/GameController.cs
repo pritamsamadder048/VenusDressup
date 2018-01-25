@@ -2,6 +2,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -47,8 +48,8 @@ public class GameController : MonoBehaviour
 	[SerializeField]
 	private GameObject femaleModelObject;
 
-	[SerializeField]
-	private GameObject femaleModelImageObject;
+
+	public GameObject femaleModelImageObject;
 
 	public bool isInHome = true;
 
@@ -138,7 +139,7 @@ public class GameController : MonoBehaviour
 	[SerializeField]
 	private GameObject faceEditControllerObj;
 
-	private FaceEditController faceEditController;
+	public FaceEditController faceEditController;
 
 	[SerializeField]
 	private GameObject[] maskButtons;
@@ -215,8 +216,7 @@ public class GameController : MonoBehaviour
 
     public string currentBackgroundName = "bg0";
 
-    [HideInInspector]
-	public string mainMaleBodyName = "male_1";
+	public string mainMaleBodyName = "M1";
 
 	public bool isScreenSpaceCamera = false;
 
@@ -276,13 +276,23 @@ public class GameController : MonoBehaviour
 
 	public MiniJsonArray currentShoeList;
 
-	public Texture2D currentDressTexture;
+    public MiniJsonArray currentMaleWigList;
+    public MiniJsonArray currentMaleTieList;
+
+    public Texture2D currentDressTexture;
 
 	public Texture2D currentWigTexture;
 
-	public Color currentDressColor = Color.white;
+
+    public Texture2D currentMaleWigTexture;
+    public Texture2D currentMaleTieTexture;
+
+    public Color currentDressColor = Color.white;
 
 	public Color currentWigColor = Color.white;
+
+    public Color currentMaleWigColor = Color.white;
+    public Color currentMaleTieColor = Color.white;
 
 	public int currentlyUsingFace = 0;
 
@@ -320,6 +330,9 @@ public class GameController : MonoBehaviour
     public OrnamentProperties currentOrnamentProperty;
     public ShoeProperties currentShoeProperty;
 
+    public MaleWigProperties currentMaleWigProperty;
+    public MaleTieProperties currentMaleTieProperty;
+
     public GameObject NotInteractablePanelPrefab;
     public GameObject NotInteractablePanelObject;
 
@@ -348,6 +361,8 @@ public class GameController : MonoBehaviour
     public Image tmpWig;
     public Image tmpOrnament;
     public Image tmpShoe;
+    public Image tmpMaleWig;
+    public Image tmpMaleTie;
 
 
 
@@ -362,7 +377,31 @@ public class GameController : MonoBehaviour
     public FaceColorController faceBrightnessController;
     public FaceColorController faceSaturationController;
 
+    public GameObject hideMaleButton;
+
+    public BackGroundProperty currentBackgroundProperty;
+
+    public int previousFaceIndex;
+    public Texture2D previousImagetexture;
+    public Vector3 previousScale, previousPosition, previousRotation;
+    public Vector2 previousSizeDelta;
+    public Color previousColor;
+    public bool previouslyUsingFace1 = false;
+    public bool previouslyUsingFace2 = false;
+    public int previousFaceHash=-999;
+    public int previousLoadedFaceIndex = -1;
+    public bool previouslyLoaded = false;
+
+
+
+
+    //public MaleWigProperties maleWigProperty;
+    //public MaleTieProperties maleTieProperty;
+
     public Camera MAINCAMERA;
+
+
+
     public bool IsPaidUser
 	{
 		get
@@ -420,7 +459,26 @@ public class GameController : MonoBehaviour
 		this.saveDict = new Dictionary<string, bool>();
 		this.saveDict["face1"] = false;
 		this.saveDict["face2"] = false;
-	}
+
+
+
+
+        this.isShowingSideMenu = true;
+        this.galleryController = this.galleryControllerObject.GetComponent<Gallery>();
+        this.cameraController = this.cameraControllerObject.GetComponent<CameraController>();
+        this.touchController = this.touchControllerObject.GetComponent<TouchController>();
+        this.selectDressController = this.selectDressControllerObject.GetComponent<SelectDressController>();
+        this.sceneEditorController = this.sceneEditorControllerObj.GetComponent<SceneEditorController>();
+        this.rotationController = this.rotationControllerObject.GetComponent<RotationController>();
+        this.faceEditController = this.faceEditControllerObj.GetComponent<FaceEditController>();
+        this.popupController = this.popupControllerObject.GetComponent<PopUpController>();
+        this.selectShapeController = this.selectShapeControllerObject.GetComponent<SelectShapeController>();
+
+        currentBackgroundProperty = new BackGroundProperty();
+        currentBackgroundProperty.InitBackgroundProperty("bg0");
+
+        print(string.Format("Background is : {0}  path is {1}", currentBackgroundProperty.backGroundName, currentBackgroundProperty.backGroundPath));
+    }
 
 	private void Start()
 	{
@@ -441,23 +499,25 @@ public class GameController : MonoBehaviour
 			}
 		}
 		this.animateHint = this.hint.GetComponent<AnimateHint>();
-		if (!Application.isMobilePlatform)
-		{
-			PlayerPrefs.SetInt("selectedBodyShape", 0);
-			PlayerPrefs.SetInt("selectedEyeColor", 0);
-			PlayerPrefs.SetInt("selectedBodyTone", 0);
-		}
-		Screen.sleepTimeout=SleepTimeout.SystemSetting;
-		this.isShowingSideMenu = true;
-		this.galleryController = this.galleryControllerObject.GetComponent<Gallery>();
-		this.cameraController = this.cameraControllerObject.GetComponent<CameraController>();
-		this.touchController = this.touchControllerObject.GetComponent<TouchController>();
-		this.selectDressController = this.selectDressControllerObject.GetComponent<SelectDressController>();
-		this.sceneEditorController = this.sceneEditorControllerObj.GetComponent<SceneEditorController>();
-		this.rotationController = this.rotationControllerObject.GetComponent<RotationController>();
-		this.faceEditController = this.faceEditControllerObj.GetComponent<FaceEditController>();
-		this.popupController = this.popupControllerObject.GetComponent<PopUpController>();
-		this.selectShapeController = this.selectShapeControllerObject.GetComponent<SelectShapeController>();
+
+        if (!Application.isMobilePlatform)
+        {
+            PlayerPrefs.SetInt("selectedBodyShape", 0);
+            PlayerPrefs.SetInt("selectedEyeColor", 0);
+            PlayerPrefs.SetInt("selectedBodyTone", 0);
+        }
+        Screen.sleepTimeout=SleepTimeout.SystemSetting;
+
+		//this.isShowingSideMenu = true;
+		//this.galleryController = this.galleryControllerObject.GetComponent<Gallery>();
+		//this.cameraController = this.cameraControllerObject.GetComponent<CameraController>();
+		//this.touchController = this.touchControllerObject.GetComponent<TouchController>();
+		//this.selectDressController = this.selectDressControllerObject.GetComponent<SelectDressController>();
+		//this.sceneEditorController = this.sceneEditorControllerObj.GetComponent<SceneEditorController>();
+		//this.rotationController = this.rotationControllerObject.GetComponent<RotationController>();
+		//this.faceEditController = this.faceEditControllerObj.GetComponent<FaceEditController>();
+		//this.popupController = this.popupControllerObject.GetComponent<PopUpController>();
+		//this.selectShapeController = this.selectShapeControllerObject.GetComponent<SelectShapeController>();
 		this.HideAcceptCropButton();
 		this.currentShapeIndex = 0;
 
@@ -511,6 +571,7 @@ public class GameController : MonoBehaviour
 			this.InstantiateInfoPopup("All Features Unlocked");
 			this.PaidUserDetected("");
 			this.selectDressController.CheckForChanges();
+            this.maleController.CheckForChanges();
 		}
 		else
 		{
@@ -518,6 +579,7 @@ public class GameController : MonoBehaviour
 			this.InstantiateInfoPopup("Demo All Features Unlocked");
             this.PaidUserDetected("");
             this.selectDressController.CheckForChanges();
+            this.maleController.CheckForChanges();
         }
 	}
 
@@ -560,6 +622,9 @@ public class GameController : MonoBehaviour
 
         Button b = g.transform.GetChild(0).GetChild(1).GetComponent<Button>();
         b.onClick.AddListener(() => { Destroy(g); });
+        Button o= g.transform.GetChild(0).GetChild(2).GetComponent<Button>();
+        o.onClick.AddListener(() => { Destroy(g); });
+        //print("info popup instantiate");
     }
 
     public void InstantiateInfoPopupForPurchase()
@@ -626,6 +691,7 @@ public class GameController : MonoBehaviour
 			this.currentlyUsingFace = 0;
 		}
         saveDict["face1"] = false;
+        previouslyUsingFace1 = false;
 	}
 
 	public void RemoveFace2()
@@ -641,6 +707,7 @@ public class GameController : MonoBehaviour
 			this.currentlyUsingFace = 0;
 		}
         saveDict["face2"] = false;
+        previouslyUsingFace2 = false;
     }
 
 	public void ShowFaceImage(bool show = false)
@@ -687,7 +754,17 @@ public class GameController : MonoBehaviour
 
 	}
 
-    
+    public void ActiveSceneEditorController()
+    {
+        sceneEditorController.gameObject.SetActive(true);
+        sceneEditorController.enabled = true;
+    }
+
+    public void DeActiveSceneEditorController()
+    {
+        sceneEditorController.gameObject.SetActive(false);
+        sceneEditorController.enabled = false;
+    }
 
     public void SaveProcessedImage()
 	{
@@ -883,12 +960,14 @@ public class GameController : MonoBehaviour
         }
         femaleModelObject.transform.localScale = Vector3.one * 2.5f;
         femaleModelObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-200f, -1230f);
+        print("female Model is zoomed in");
         femaleModelIsZoomed = true;
     }
     public void ZoomOutFemaleModel()
     {
         femaleModelObject.transform.localScale = Vector3.one;
         femaleModelObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(125.87f, 610f);
+        print("female Model is zoomed out");
         femaleModelIsZoomed = false;
     }
 
@@ -912,6 +991,7 @@ public class GameController : MonoBehaviour
         maleParent.transform.localScale = Vector3.one * 2.5f;
         maleParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(-200f, -1230f);
         maleParent.transform.SetSiblingIndex(4);
+        print("male Model is zoomed in");
         maleModelIsZoomed = true;
     }
     public void ZoomOutMaleModel()
@@ -919,6 +999,7 @@ public class GameController : MonoBehaviour
         maleParent.transform.localScale = Vector3.one;
         maleParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(-80f, 645f);
         maleParent.transform.SetSiblingIndex(2);
+        print("male Model is zoomed out");
         maleModelIsZoomed = false;
     }
 
@@ -1035,6 +1116,11 @@ public class GameController : MonoBehaviour
 
         faceRawImage.transform.parent.GetComponent<UILineRenderer>().enabled = false;
         faceRawImage2.transform.parent.GetComponent<UILineRenderer>().enabled = false;
+
+        sceneEditorController.enabled = true;
+        sceneEditorControllerObj.SetActive(true);
+
+        
     }
 
 	public void ToggleHomeSideMenu(int showCode = 0)
@@ -1867,14 +1953,7 @@ public class GameController : MonoBehaviour
 		}
 		else
 		{
-			if (this.currentActiveButton != null)
-			{
-				Toggle component = this.currentActiveButton.GetComponent<Toggle>();
-				if (component != null)
-				{
-					component.isOn=(true);
-				}
-			}
+			
 			if (this.currentActivePanel != null)
 			{
 				ShortcutExtensions46.DOAnchorPosX(this.currentActivePanel.GetComponent<RectTransform>(), 0f, 0.3f, false);
@@ -1890,7 +1969,15 @@ public class GameController : MonoBehaviour
 		if (reallyActiveCurrentActive)
 		{
 			this.panels[0].SetActive(true);
-		}
+            if (this.currentActiveButton != null)
+            {
+                Toggle component = this.currentActiveButton.GetComponent<Toggle>();
+                if (component != null)
+                {
+                    component.isOn = (true);
+                }
+            }
+        }
 	}
 
 	public void ActivePreviousActive(bool toggleDownPanelToo = false, bool reallyActiveCurrentActive = false)
@@ -2054,6 +2141,7 @@ public class GameController : MonoBehaviour
 		{
 
             SaveData sd = new SaveData();
+            sceneEditorController.gameObject.SetActive(false);
 
             sd.Initialize(mainModelIndex,mainCarouselRotation,mainBodyShape, mainBodyTone, mainEyeColor,this);
             if (wig.gameObject.activeSelf && wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f && selectDressController.isWearingWig)
@@ -2099,9 +2187,11 @@ public class GameController : MonoBehaviour
             //print("After dress property set dress color is : " + sd.dressProperty.dressColor[0] + " " + sd.dressProperty.dressColor[1] + " " + sd.dressProperty.dressColor[2] + " " + sd.dressProperty.dressColor[3]);
 
            int savestatus= SaveData.SaveWearings("wearingsdata.dat", sd, this);
+            print("save status : " + savestatus);
             if(savestatus==0)
             {
                 InstantiateInfoPopup("Maximum Save Data Reached");
+                sceneEditorController.gameObject.SetActive(true);
             }
         }
 		else
@@ -2112,20 +2202,142 @@ public class GameController : MonoBehaviour
 
 	public void CallBackFromSaveWearings(string fullPath)
 	{
+        sceneEditorController.gameObject.SetActive(false);
 		base.StartCoroutine(this.TakeScreenshotAndSaveTo(fullPath));
 	}
 
 	
 	public IEnumerator TakeScreenshotAndSaveTo(string fullPath)
 	{
+        
         DeactiveCurrentActive(true, true);
-        yield return new WaitForSecondsRealtime(1f);
+        print(string.Format("Full Path : {0} ", fullPath));
+        
+
+        yield return new WaitForSecondsRealtime(.5f);
         ScreenCapture.CaptureScreenshot(fullPath);
-        yield return new WaitForSecondsRealtime(1f);
-        ActiveCurrentActive(true, true);
+        //yield return new WaitForSecondsRealtime(1f);
+        //yield return new WaitForEndOfFrame();
+        Texture2D ttx2d = new Texture2D(320, 480);
+        if(Application.isMobilePlatform)
+        {
+            fullPath = Path.Combine(Application.persistentDataPath, fullPath);
+        }
+
+        print("full path now is : " + fullPath);
+        int maxWait = 30;
+        int currentWaitTime = 0;
+        while(!File.Exists(fullPath))
+        {
+            yield return new WaitForSecondsRealtime(.3f);
+            currentWaitTime += 1;
+            if(currentWaitTime>maxWait)
+            {
+                break;
+            }
+        }
+
+        if(!File.Exists(fullPath))
+        {
+            InstantiateInfoPopup("Could not Save Data");
+            
+        }
+        else
+        {
+            yield return new WaitForSecondsRealtime(1f);
+            ttx2d.LoadImage(File.ReadAllBytes(fullPath));
+            ttx2d.Apply();
+            ttx2d = cameraController.ResizeTexture2D(ttx2d, 320, 480);
+            ttx2d.Apply();
+            File.WriteAllBytes(fullPath, ttx2d.EncodeToJPG(50));
+            //ttx2d = RTImage(MAINCAMERA, 320, 480);
+            //ttx2d.Apply();
+            //File.WriteAllBytes(fullPath, ttx2d.EncodeToJPG(50));
+
+            //RenderTexture rt = MAINCAMERA.activeTexture;
+            //rt.Create();
+
+            //ScreenCapture.CaptureScreenshot()
+        }
+
+        yield return new WaitForSecondsRealtime(.5f);
+        //Destroy(ttx2d, 2f);
+        //ActiveCurrentActive(true, true);
+        GoToHome();
     }
 
-	public void ToggleGameObject(GameObject togglableGameObject)
+
+    public static Texture2D ResizeTexture2D(Texture2D texture, int newWidth, int newHeight)
+    {
+        float warpFactor = 1.0F;
+        //		Texture2D destTex = new Texture2D(Screen.width, Screen.height);
+        Texture2D destTex = new Texture2D(newWidth, newHeight);
+        print("resize texture size : " + destTex.width + "   " + destTex.height);
+        //		print ("Screen size : " + Screen.width + "   " + Screen.height);
+        Color[] destPix = new Color[destTex.width * destTex.height];
+        try
+        {
+            int y = 0;
+            while (y < destTex.height)
+            {
+                int x = 0;
+                while (x < destTex.width)
+                {
+                    float xFrac = x * 1.0F / (destTex.width - 1);
+                    float yFrac = y * 1.0F / (destTex.height - 1);
+                    float warpXFrac = Mathf.Pow(xFrac, warpFactor);
+                    float warpYFrac = Mathf.Pow(yFrac, warpFactor);
+                    destPix[y * destTex.width + x] = texture.GetPixelBilinear(warpXFrac, warpYFrac);
+                    x++;
+                }
+                y++;
+            }
+            destTex.SetPixels(destPix);
+            destTex.Apply();
+
+        }
+        catch
+        {
+            destTex = null;
+        }
+
+        //destImage.sprite = Sprite.Create(destTex, new Rect(0, 0, destTex.width, destTex.height), new Vector2(.5f, .5f), 100);
+
+        return destTex;
+    }
+
+
+
+    /*
+    Texture2D RTImage(Camera cam)
+    {
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture.active = cam.targetTexture;
+        cam.Render();
+        Texture2D image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
+        image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
+        image.Apply();
+        RenderTexture.active = currentRT;
+        return image;
+    }
+
+    Texture2D RTImage(Camera cam ,int newWidth,int newHeight)
+    {
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture.active = cam.targetTexture;
+        cam.Render();
+        Texture2D image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
+        image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
+        image.Apply();
+        image = cameraController.ResizeTexture2D(image,newWidth,newHeight);
+        image.Apply();
+        RenderTexture.active = currentRT;
+        return image;
+    }
+
+    */
+
+    public void ToggleGameObject(GameObject togglableGameObject)
 	{
 		togglableGameObject.SetActive(!togglableGameObject.activeSelf);
 	}
@@ -2226,7 +2438,7 @@ public class GameController : MonoBehaviour
 
 
 
-	public void AcceptBodyShapeChange()
+	public void AcceptBodyShapeChange(bool autoAccept = false)
 	{
 		GameObject selectedShape = this.rotationController.GetSelectedShape();
 		try
@@ -2255,9 +2467,24 @@ public class GameController : MonoBehaviour
 			this.mainCarouselRotation = this.selectShapeController.GetcarouselSelectedRotation();
 			this.mainModelIndex = this.selectShapeController.GetCarouselSelectedModelIndex();
             ResetWearing();
-            this.selectShapeController.OnClickSelectEyeButton(true);
-			
-		}
+            
+
+            if (!autoAccept)
+            {
+                this.selectShapeController.OnClickSelectEyeButton(true);
+                return;
+            }
+            else
+            {
+                return;
+            }
+            if (!autoAcceptChange)
+            {
+                this.selectShapeController.OnClickSelectEyeButton(true);
+                return;
+            }
+
+        }
 		catch (UnityException arg)
 		{
 			MonoBehaviour.print("Error..in body shape accept  " + arg);
@@ -2298,7 +2525,7 @@ public class GameController : MonoBehaviour
                 this.selectShapeController.OnClickSelectShapeButton(true);
                 return;
             }
-            else if(autoAccept)
+            else 
             {
                 return;
             }
@@ -2453,6 +2680,7 @@ public class GameController : MonoBehaviour
 	public void ShowMale()
 	{
 		this.maleImage.gameObject.SetActive(true);
+        //isShowingMale = true;
 		this.maleParent.SetActive(true);
 	}
 
@@ -2460,11 +2688,34 @@ public class GameController : MonoBehaviour
 	{
 		this.maleImage.gameObject.SetActive(false);
 		this.maleParent.SetActive(false);
+
 	}
+
+    public void RemoveMale()
+    {
+        HideMale();
+        hideMaleButton.SetActive(false);
+        if (faceRawImage.transform.parent.parent == maleImage.transform)
+        {
+            RemoveFace1();
+
+        }
+        else if(faceRawImage2.transform.parent.parent == maleImage.transform)
+        {
+            RemoveFace2();
+
+        }
+
+        maleController.RemoveMaleWig();
+        maleController.RemoveMaleTie();
+
+        isShowingMale = false;
+    }
 
 	public void ToggleMaleWig(bool changeEditButtonState = false)
 	{
-		this.maleWig.transform.parent.gameObject.SetActive(false);
+        //this.maleWig.transform.parent.gameObject.SetActive(false);
+        maleController.RemoveMaleWig();
 		if (changeEditButtonState)
 		{
 			if ((double)this.maleWig.color.a > 0.5)
@@ -2484,8 +2735,9 @@ public class GameController : MonoBehaviour
 
 	public void ToggleMaleTie(bool changeEditButtonState = false)
 	{
-		this.maleTie.transform.parent.gameObject.SetActive(false);
-		if (changeEditButtonState)
+        //this.maleTie.transform.parent.gameObject.SetActive(false);
+        maleController.RemoveMaleTie();
+        if (changeEditButtonState)
 		{
 			if ((double)this.maleTie.color.a > 0.5)
 			{
@@ -2512,13 +2764,25 @@ public class GameController : MonoBehaviour
 		this.mainMaleBodyName = val;
 	}
 
-	public void AcceptMaleBody()
+	public void AcceptMaleBody(bool goToNextPage=true)
 	{
 		string carouselSelectedMaleModel = this.maleController.GetCarouselSelectedMaleModel();
 		this.maleImage.sprite=(this.maleController.GetCarouselSelectedaleModelObject().GetComponent<SpriteRenderer>().sprite);
+
+        if(mainMaleBodyName!= this.maleImage.sprite.texture.name)
+        {
+            maleController.RemoveMaleWig();
+            maleController.RemoveMaleTie();
+        }
 		this.SetMainMaleBodyName(this.maleImage.sprite.texture.name);
 		this.isShowingMale = true;
-		this.maleController.OnClickSelectWigsForMale(true);
+        maleController.SelectedMale = mainMaleBodyName;
+        maleController.SetCurrentMaleIndexAndRotation();
+        hideMaleButton.SetActive(true);
+		if(goToNextPage)
+        {
+            this.maleController.OnClickSelectWigsForMale(true);
+        }
 	}
 
 
@@ -2537,6 +2801,40 @@ public class GameController : MonoBehaviour
         texture2D.SetPixels(pixels);
         texture2D.Apply();
         targetImage.sprite = Sprite.Create(texture2D, new Rect(0f, 0f, (float)texture2D.width, (float)texture2D.height), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    public void ChangeToGrayScale(RawImage targetImage)
+    {
+        Color[] pixels = ((Texture2D)(targetImage.texture)).GetPixels();
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (pixels[i].a > 0.5f)
+            {
+                pixels[i] = new Color(pixels[i].grayscale, pixels[i].grayscale, pixels[i].grayscale, pixels[i].a);
+            }
+        }
+        //Texture2D texture2D = new Texture2D(targetImage.texture.width, targetImage.texture.height);
+        //texture2D.SetPixels(pixels);
+        //texture2D.Apply();
+        ((Texture2D)(targetImage.texture)).SetPixels(pixels);
+        ((Texture2D)(targetImage.texture)).Apply();
+    }
+
+    public void ChangeToGrayScale(Texture2D targetImage)
+    {
+        Color[] pixels = targetImage.GetPixels();
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (pixels[i].a > 0.5f)
+            {
+                pixels[i] = new Color(pixels[i].grayscale, pixels[i].grayscale, pixels[i].grayscale, pixels[i].a);
+            }
+        }
+        //Texture2D texture2D = new Texture2D(targetImage.texture.width, targetImage.texture.height);
+        //texture2D.SetPixels(pixels);
+        //texture2D.Apply();
+        targetImage.SetPixels(pixels);
+        targetImage.Apply();
     }
 
 
@@ -2558,7 +2856,14 @@ public class GameController : MonoBehaviour
             maleFemaleSelectionToggle[1].onValueChanged.RemoveAllListeners();
             maleFemaleSelectionToggle[1].onValueChanged.AddListener(this.OnMaleSelectionToggleChange);
 
-            g.transform.GetChild(0).GetChild(2).GetComponent<Button>().onClick.AddListener(()=>
+
+            g.transform.GetChild(0).GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+            {
+                faceEditController.DiscardFaceEdit();
+                DestroyImmediate(g);
+            });
+
+            g.transform.GetChild(0).GetChild(3).GetComponent<Button>().onClick.AddListener(()=>
             {
 
 
@@ -2566,9 +2871,9 @@ public class GameController : MonoBehaviour
                 if(!maleModelIsZoomed && ! femaleModelIsZoomed)
                 {
                     //InstantiateInfoPopup("Please Select A Model To Use The Face On");
-                    faceEditController.DiscardFaceEdit();
-                    DestroyImmediate(g);
-                    //return;
+                    //faceEditController.DiscardFaceEdit();
+                    //DestroyImmediate(g);
+                    return;
                 }
                 if(temporarilyHiddenFace==1)
                 {
@@ -2648,7 +2953,7 @@ public class GameController : MonoBehaviour
                     if (currentlySelectedFace == 1)
                     {
                         faceRawImage.color = new Color(0.5f, 0.5f, 0.5f);
-
+                        faceRawImage.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
                         currentFaceColor = 0.5f;
                         currentFaceBrightness = 0.5f;
                         currentFaceSaturation = 0.5f;
@@ -2656,7 +2961,7 @@ public class GameController : MonoBehaviour
                     else if (currentlySelectedFace == 2)
                     {
                         faceRawImage2.color = new Color(0.5f, 0.5f, 0.5f);
-
+                        faceRawImage2.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
                         currentFaceColor2 = 0.5f;
                         currentFaceBrightness2 = 0.5f;
                         currentFaceSaturation2 = 0.5f;
@@ -2684,7 +2989,7 @@ public class GameController : MonoBehaviour
                 if (currentlySelectedFace == 1)
                 {
                     faceRawImage.color = new Color(0.5f, 0.5f, 0.5f);
-
+                    faceRawImage.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
                     currentFaceColor = 0.5f;
                     currentFaceBrightness = 0.5f;
                     currentFaceSaturation = 0.5f;
@@ -2692,7 +2997,7 @@ public class GameController : MonoBehaviour
                 else if (currentlySelectedFace == 2)
                 {
                     faceRawImage2.color = new Color(0.5f, 0.5f, 0.5f);
-
+                    faceRawImage2.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
                     currentFaceColor2 = 0.5f;
                     currentFaceBrightness2 = 0.5f;
                     currentFaceSaturation2 = 0.5f;
@@ -2741,7 +3046,14 @@ public class GameController : MonoBehaviour
             maleFemaleSelectionToggle[1].onValueChanged.RemoveAllListeners();
             maleFemaleSelectionToggle[1].onValueChanged.AddListener(this.OnMaleSelectionToggleChange);
 
+
             g.transform.GetChild(0).GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+            {
+                faceEditController.DiscardFaceEdit();
+                DestroyImmediate(g);
+            });
+
+            g.transform.GetChild(0).GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
 
 
@@ -2749,9 +3061,9 @@ public class GameController : MonoBehaviour
                 if (!maleModelIsZoomed && !femaleModelIsZoomed)
                 {
                     //InstantiateInfoPopup("Please Select A Model To Use The Face On");
-                    faceEditController.DiscardFaceEdit();
-                    DestroyImmediate(g);
-                    //return;
+                    //faceEditController.DiscardFaceEdit();
+                    //DestroyImmediate(g);
+                    return;
                 }
                 if (temporarilyHiddenFace == 1)
                 {
@@ -2825,7 +3137,7 @@ public class GameController : MonoBehaviour
                 temporarilyHiddenFace = -1;
 
                 
-                DestroyImmediate(g);
+                
 
                 if (currentlySelectedFace == 1)
                 {
@@ -2851,7 +3163,7 @@ public class GameController : MonoBehaviour
                     faceRawImage2.transform.localScale = scale;
                     faceRawImage2.color = col;
 
-                    tempCroppedFaceProperty.Copy(ref loadedCroppedFaceProperty);
+                    tempCroppedFaceProperty.Copy(ref loadedCroppedFaceProperty2);
 
                     currentFaceBrightness2 = col.b;
                     currentFaceColor2 = col.r;
@@ -2872,6 +3184,8 @@ public class GameController : MonoBehaviour
                 {
                     saveDict["face2"] = false;
                 }
+
+                DestroyImmediate(g);
 
             });
         }
@@ -2916,6 +3230,8 @@ public class GameController : MonoBehaviour
                 isLoadedFace2 = true;
                 this.faceHash2 = faceHash;
                 this.loadedFaceIndex2 = imageIndex;
+
+               
             }
             //OnFemaleSelectionToggleChange(true);
             ZoomInFemaleModel();
@@ -2945,6 +3261,60 @@ public class GameController : MonoBehaviour
     }
 
 
+    public void SetPreviousFaceDetail(int currentSelectedIndex)
+    {
+        if(currentSelectedIndex==1 && previouslyUsingFace1)
+        {
+            previousFaceIndex = 1;
+            if(isLoadedFace)
+            {
+                previousFaceHash = faceHash;
+                previousLoadedFaceIndex = loadedFaceIndex;
+                previouslyLoaded = isLoadedFace;
+            }
+            else
+            {
+                previousFaceHash = -999;
+                previousLoadedFaceIndex = -1;
+                previouslyLoaded = false;
+            }
+            previousColor = faceRawImage.color;
+            DestroyImmediate(previousImagetexture, true);
+            previousImagetexture = new Texture2D(faceRawImage.texture.width, faceRawImage.texture.height);
+            previousImagetexture.SetPixels(((Texture2D)(faceRawImage.texture)).GetPixels());
+            previousImagetexture.Apply();
+            previousPosition = faceRawImage.rectTransform.anchoredPosition3D;
+            previousScale = faceRawImage.transform.localScale;
+            previousRotation = faceRawImage.transform.localEulerAngles;
+            previousSizeDelta = faceRawImage.rectTransform.sizeDelta;
+        }
+        else if (currentSelectedIndex == 2 && previouslyUsingFace2)
+        {
+            if (isLoadedFace2)
+            {
+                previousFaceHash = faceHash2;
+                previousLoadedFaceIndex = loadedFaceIndex2;
+                previouslyLoaded = isLoadedFace2;
+            }
+            else
+            {
+                previousFaceHash = -999;
+                previousLoadedFaceIndex = -1;
+                previouslyLoaded = false;
+            }
+
+            previousFaceIndex = 2;
+            previousColor = faceRawImage2.color;
+            DestroyImmediate(previousImagetexture, true);
+            previousImagetexture = new Texture2D(faceRawImage2.texture.width, faceRawImage2.texture.height);
+            previousImagetexture.SetPixels(((Texture2D)(faceRawImage2.texture)).GetPixels());
+            previousImagetexture.Apply();
+            previousPosition = faceRawImage2.rectTransform.anchoredPosition3D;
+            previousScale = faceRawImage2.transform.localScale;
+            previousRotation = faceRawImage2.transform.localEulerAngles;
+            previousSizeDelta = faceRawImage2.rectTransform.sizeDelta;
+        }
+    }
 
     public void OnFemaleSelectionToggleChange(bool newState)
     {
@@ -2985,6 +3355,7 @@ public class GameController : MonoBehaviour
                     if(faceRawImage.transform.parent.parent==femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent==femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3004,6 +3375,7 @@ public class GameController : MonoBehaviour
                     else if(faceRawImage2.transform.parent.parent== femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent== femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3019,9 +3391,10 @@ public class GameController : MonoBehaviour
                         ShowFaceImage2(true);
                         return;
                     }
-                    else if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3038,9 +3411,10 @@ public class GameController : MonoBehaviour
                         return;
                     }
 
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3061,6 +3435,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("using face 1 on female");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3110,6 +3485,7 @@ public class GameController : MonoBehaviour
                     if (faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3129,6 +3505,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3144,9 +3521,10 @@ public class GameController : MonoBehaviour
                         ShowFaceImage2(true);
                         return;
                     }
-                    else if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3163,9 +3541,10 @@ public class GameController : MonoBehaviour
                         return;
                     }
 
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3186,6 +3565,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("using face 2 on female");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3229,9 +3609,10 @@ public class GameController : MonoBehaviour
             {
                 if (useImageFromTempImage)
                 {
-                    if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3248,9 +3629,10 @@ public class GameController : MonoBehaviour
                         ShowFaceImage(true);
                         return;
                     }
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3269,6 +3651,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3288,6 +3671,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3307,6 +3691,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("currently selected face 1 male zoom else");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporalFaceImage.width, temporalFaceImage.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporalFaceImage.GetPixels());  // = (Texture)combinedImage;
@@ -3344,9 +3729,10 @@ public class GameController : MonoBehaviour
             {
                 if (useImageFromTempImage)
                 {
-                    if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3364,9 +3750,10 @@ public class GameController : MonoBehaviour
 
                         return;
                     }
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3385,6 +3772,7 @@ public class GameController : MonoBehaviour
                     else if(faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3403,6 +3791,7 @@ public class GameController : MonoBehaviour
                     else if(faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3422,6 +3811,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("currently selected face 2 male zoom else");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(temporeaFaceImage2.width, temporeaFaceImage2.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(temporeaFaceImage2.GetPixels());  // = (Texture)combinedImage;
@@ -3484,6 +3874,7 @@ public class GameController : MonoBehaviour
                     if (faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent==femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3503,6 +3894,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent== femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3518,9 +3910,10 @@ public class GameController : MonoBehaviour
                         ShowFaceImage2(true);
                         return;
                     }
-                    else if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3537,9 +3930,10 @@ public class GameController : MonoBehaviour
                         return;
                     }
 
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3560,6 +3954,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("using face 1 on female");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3609,6 +4004,7 @@ public class GameController : MonoBehaviour
                     if (faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3628,6 +4024,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3643,9 +4040,10 @@ public class GameController : MonoBehaviour
                         ShowFaceImage2(true);
                         return;
                     }
-                    else if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3662,9 +4060,10 @@ public class GameController : MonoBehaviour
                         return;
                     }
 
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3685,6 +4084,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("using face 2 on female");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3728,9 +4128,10 @@ public class GameController : MonoBehaviour
             {
                 if (!useImageFromTempImage)
                 {
-                    if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3747,9 +4148,10 @@ public class GameController : MonoBehaviour
                         ShowFaceImage(true);
                         return;
                     }
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3768,6 +4170,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3787,6 +4190,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3806,6 +4210,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("currently selected face 1 male zoom else");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3843,9 +4248,10 @@ public class GameController : MonoBehaviour
             {
                 if (!useImageFromTempImage)
                 {
-                    if (faceRawImage.transform.parent.parent == maleParent.transform)
+                    if (faceRawImage.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3863,9 +4269,10 @@ public class GameController : MonoBehaviour
 
                         return;
                     }
-                    else if (faceRawImage2.transform.parent.parent == maleParent.transform)
+                    else if (faceRawImage2.transform.parent.parent == maleImage.transform)
                     {
-                        print("faceRawImage2.transform.parent.parent == maleParent.transform");
+                        print("faceRawImage2.transform.parent.parent == maleImage.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3884,6 +4291,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3902,6 +4310,7 @@ public class GameController : MonoBehaviour
                     else if (faceRawImage2.transform.parent.parent == femaleModelImageObject.transform)
                     {
                         print("faceRawImage2.transform.parent.parent == femaleModelImageObject.transform");
+                        SetPreviousFaceDetail(1);
                         DestroyImmediate(faceRawImage.texture);
                         faceRawImage.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;
@@ -3921,6 +4330,7 @@ public class GameController : MonoBehaviour
                     else
                     {
                         print("currently selected face 2 male zoom else");
+                        SetPreviousFaceDetail(2);
                         DestroyImmediate(faceRawImage2.texture);
                         faceRawImage2.texture = new Texture2D(faceTexture.width, faceTexture.height) as Texture;
                         (faceRawImage2.texture as Texture2D).SetPixels(faceTexture.GetPixels());  // = (Texture)combinedImage;

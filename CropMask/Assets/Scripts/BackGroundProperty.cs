@@ -5,17 +5,25 @@ using UnityEngine.UI;
 
 using System.Collections;
 
-public class BackGroundProperty : MonoBehaviour
+
+[Serializable]
+public class BackGroundProperty : MonoBehaviour, ISerializationCallbackReceiver
 {
+    [NonSerialized]
     public GameController gameController;
     public string backGroundName;
     public string backGroundPath;
+
+    public bool backgroundButton = false;
     // Use this for initialization
 
     private void Awake()
     {
-        GetComponent<Button>().onClick.AddListener(InvokeUseThisBackgroundStatic);
-        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        backGroundPath= Path.Combine("images/backgrounds", backGroundName);
+        if (backgroundButton)
+        {
+            InitBackgroundProperty();
+        }
     }
     void Start()
     {
@@ -28,16 +36,75 @@ public class BackGroundProperty : MonoBehaviour
 
     }
 
+
+    public void CopyTo(ref BackGroundProperty bp)
+    {
+        bp = new BackGroundProperty();
+        bp.backgroundButton = false;
+        bp.backGroundName = this.backGroundName;
+        bp.backGroundPath = this.backGroundPath;
+        return;
+    }
+
+    public void CopyFrom(BackGroundProperty bp)
+    {
+        
+        
+        this.backGroundName = bp.backGroundName;
+        this.backGroundPath= bp.backGroundPath;
+
+        return;
+    }
+
+    public void InitBackgroundProperty(string bn)
+    {
+        backGroundName = bn;
+        backGroundPath= Path.Combine("images/backgrounds", backGroundName);
+    }
+
+    public void InitBackgroundProperty()
+    {
+        GetComponent<Button>().onClick.AddListener(InvokeUseThisBackgroundStatic);
+        InitGameController();
+    }
+
+    public void InitGameController()
+    {
+        if(gameController==null)
+        {
+            gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        }
+    }
+
     public void InvokeUseThisBackgroundStatic()
     {
+        InitGameController();
+        
+        if(gameController==null)
+        {
+            return;
+        }
+        print("BackgroundProperty(InvokeUseThisBackgroundStatic) >>>  Gamecontroller init successfully");
         gameController.ShowLoadingPanelOnly();
+        print("loading panel is shown");
         Invoke("UseThisBackgroundStatic", .3f);
     }
 
     public void UseThisBackgroundStatic()
     {
-        if(gameController.currentBackgroundName==backGroundName)
+        print("in UseThisBackgroundStatic");
+        InitGameController();
+        if (gameController == null)
         {
+            HideLoadingPanelOnly();
+            return;
+        }
+
+        print("BackgroundProperty(UseThisBackgroundStatic) >>>  Gamecontroller init successfully");
+
+        if (gameController.currentBackgroundName==backGroundName)
+        {
+            HideLoadingPanelOnly();
             return;
         }
         string finalStaticPath = Path.Combine("images/backgrounds", backGroundName);
@@ -49,6 +116,7 @@ public class BackGroundProperty : MonoBehaviour
             {
                 gameController.backGroundImage.sprite = Sprite.Create(tmpTex, new Rect(0, 0, tmpTex.width, tmpTex.height), new Vector2(0.5f, 0.5f), 100f);
                 gameController.currentBackgroundName = backGroundName;
+                CopyTo(ref gameController.currentBackgroundProperty);
             }
             else
             {
@@ -60,11 +128,21 @@ public class BackGroundProperty : MonoBehaviour
             gameController.InstantiateInfoPopup(e.Message);
         }
 
-        Invoke("HideLoadingPanelOnly", .1f);
+        HideLoadingPanelOnly();
     }
 
     public void HideLoadingPanelOnly()
     {
         gameController.HideLoadingPanelOnly();
+    }
+
+    public void OnBeforeSerialize()
+    {
+        
+    }
+
+    public void OnAfterDeserialize()
+    {
+        
     }
 }

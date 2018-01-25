@@ -45,6 +45,14 @@ public class RotationController : MonoBehaviour {
         selectShapeController = selectShapeControllerObject.GetComponent<SelectShapeController>();
     }
 
+    public void InitControllers()
+    {
+        if(selectShapeController==null)
+        {
+            selectShapeController = selectShapeControllerObject.GetComponent<SelectShapeController>();
+        }
+    }
+
     // Use this for initialization
     void Start () {
         selectedShape = 0;
@@ -98,6 +106,11 @@ public class RotationController : MonoBehaviour {
         selectShapeController.SetCarouselSelectedBodyShapeAndTone(GetSelectedShape().GetComponent<SpriteRenderer>().sprite.texture.name);
         selectShapeController.SetcarouselSelectedRotation(currentRotation);
 
+        if(selectShapeController.gameController.autoAcceptChange)
+        {
+            selectShapeController.gameController.AcceptBodyShapeChange(true);
+        }
+
 
         print(string.Format("current selected is : {0}", GetSelectedShape().GetComponent<SpriteRenderer>().sprite.texture.name));
 
@@ -121,9 +134,12 @@ public class RotationController : MonoBehaviour {
         selectShapeController.SetcarouselSelectedRotation(currentRotation);
         
         selectShapeController.SetCarouselSelectedBodyShapeAndTone(GetSelectedShape().GetComponent<SpriteRenderer>().sprite.texture.name);
-        
-        
-        
+
+
+        if (selectShapeController.gameController.autoAcceptChange)
+        {
+            selectShapeController.gameController.AcceptBodyShapeChange(true);
+        }
 
         print(string.Format("current selected is : {0}", GetSelectedShape().GetComponent<SpriteRenderer>().sprite.texture.name));
 
@@ -132,6 +148,7 @@ public class RotationController : MonoBehaviour {
     }
     public void SelectThisModel(float rotation,int index=0)
     {
+        InitControllers();
         currentRotation = rotation;
 
         print("current rotation is : " + currentRotation);

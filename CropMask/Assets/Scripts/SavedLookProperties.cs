@@ -91,6 +91,13 @@ public class SavedLookProperties : MonoBehaviour {
             {
 
 
+				gameController.selectDressController.RemoveDress();
+				gameController.selectDressController.RemoveWig();
+				gameController.selectDressController.RemoveOrnament();
+				gameController.selectDressController.RemoveShoe();
+                gameController.RemoveMale();
+
+
                 gameController.mainModelIndex = sd.modelIndex;
                 gameController.mainCarouselRotation = sd.modelRotation;
                 
@@ -102,6 +109,13 @@ public class SavedLookProperties : MonoBehaviour {
                 gameController.AcceptEyeColorChange();
 
                 
+
+                if(sd.maleData.maleIsShowing)
+                {
+                    gameController.maleController.SelectThisParticularMaleModel( sd.maleData.maleCarouselRotation, sd.maleData.maleIndex,false);
+                    gameController.AcceptMaleBody(false);
+                    gameController.ShowMale();
+                }
 
                 print("game controller is ready");
                 if(sd.dressProperty==null)
@@ -150,8 +164,54 @@ public class SavedLookProperties : MonoBehaviour {
 
                 sd.shoeProperty = new ShoeProperties();
                 sd.shoeProperty.InitializeShoeProperty(sd.shoeData.serializedJsonObject);
-                    
-                if(sd.dressProperty.imgName!=null && sd.dressProperty.imgName!="")
+
+                if(sd.maleWigProperty==null&&sd.maleData.isWearingWig)
+                {
+                    try
+                    {
+                        if (sd.maleWigProperty.imgName == "" || sd.maleWigProperty.imgName == null)
+                        {
+                            print("male wig property is null reinitializing male wig property");
+                            sd.maleWigProperty = new MaleWigProperties();
+                            sd.maleWigProperty.InitializeWigProperty(sd.maleData.serializedMaleWigProperty);
+                            sd.maleWigProperty.SetMaleWigColor(sd.maleData.maleWigColor);
+                            //print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl, (sd.dressProperty == null)));
+                        }
+                    }
+                    catch
+                    {
+                        print("male wig property is null reinitializing male wig property");
+                        sd.maleWigProperty = new MaleWigProperties();
+                        sd.maleWigProperty.InitializeWigProperty(sd.maleData.serializedMaleWigProperty);
+                        sd.maleWigProperty.SetMaleWigColor(sd.maleData.maleWigColor);
+                        //print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl, (sd.dressProperty == null)));
+                    }
+                }
+
+                if (sd.maleTieProperty == null && sd.maleData.isWearingTie)
+                {
+                    try
+                    {
+                        if (sd.maleTieProperty.imgName == "" || sd.maleTieProperty.imgName == null)
+                        {
+                            print("male tie property is null reinitializing male tie property");
+                            sd.maleTieProperty = new MaleTieProperties();
+                            sd.maleTieProperty.InitializeTieProperty(sd.maleData.serializedMaleTieProperty);
+                            sd.maleTieProperty.SetMaleTieColor(sd.maleData.maleTieColor);
+                            //print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl, (sd.dressProperty == null)));
+                        }
+                    }
+                    catch
+                    {
+                        print("male tie property is null reinitializing male tie property");
+                        sd.maleTieProperty = new MaleTieProperties();
+                        sd.maleTieProperty.InitializeTieProperty(sd.maleData.serializedMaleTieProperty);
+                        sd.maleTieProperty.SetMaleTieColor(sd.maleData.maleTieColor);
+                        //print(string.Format("dressproperty final save url : {0} and dress property is null : {1}", sd.dressProperty.finalImageUrl, (sd.dressProperty == null)));
+                    }
+                }
+
+                if (sd.dressProperty.imgName!=null && sd.dressProperty.imgName!="")
                 {
                     print("found dressproperty");
                     gameController.selectDressController.PutOnLongDressDynamically(sd.dressProperty, true);
@@ -224,7 +284,28 @@ public class SavedLookProperties : MonoBehaviour {
                     gameController.ToggleShoe();
                 }
 
+
+                if(sd.maleData.maleIsShowing)
+                {
+                    if(sd.maleData.isWearingWig)
+                    {
+                        if (sd.maleWigProperty.imgName != "" && sd.maleWigProperty.imgName != null)
+                        {
+                            gameController.maleController.PutOnMaleWigDynamically(sd.maleWigProperty);
+                        }
+                    }
+
+                    if(sd.maleData.isWearingTie)
+                    {
+                        if (sd.maleTieProperty.imgName != "" && sd.maleTieProperty.imgName != null)
+                        {
+                            gameController.maleController.PutOnMaleTieDynamically(sd.maleTieProperty);
+                        }
+                    }
+                }
+
             }
+            sd.backgroundProperty.UseThisBackgroundStatic();
             gameController.GoToHome();
         }
 

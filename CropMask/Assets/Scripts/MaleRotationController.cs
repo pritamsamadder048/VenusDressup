@@ -13,7 +13,7 @@ public class MaleRotationController : MonoBehaviour {
     [SerializeField]
     private int selectedShape;
 
-    public int currentSelectedShape;
+    public int currentSelectedShape = 0;
     [SerializeField]
     private int backLeftShape;
     public int currentBackLeftShape;
@@ -24,14 +24,15 @@ public class MaleRotationController : MonoBehaviour {
 
     public GameObject[] shapes;
 
-    [SerializeField]
-    private float currentRotation = 0f;
+    public float currentRotation = 0f;
 
     private int totalShapes;
 
     public MaleController maleController;
 
     public string currentSelectedMaleModelName;
+
+    public string CurrentMaleName = "M1";
 
     // Use this for initialization
     void Start()
@@ -239,4 +240,22 @@ public class MaleRotationController : MonoBehaviour {
     {
         maleController.SetCarouselSelectedMaleModel(GetSelectedShape().GetComponent<SpriteRenderer>().sprite.texture.name);
     }
+
+    public void SelectThisMaleModel(float rotation, int index = 0)
+    {
+        
+        currentRotation = rotation;
+
+        print("current rotation is : " + currentRotation);
+        RotatorParent.transform.localEulerAngles = new Vector3(0f, currentRotation, 0f);
+        GetSelectedShapeIndex();
+        TransparentUnSelected();
+
+        maleController.SetCurrentMaleIndexAndRotation();
+        //maleController.SetcarouselSelectedRotation(currentRotation);
+        
+
+
+    }
+
 }

@@ -372,8 +372,73 @@ public class TouchController : MonoBehaviour
     }
 
 
-    public void ToggleActualMask(string maskName)
+    public void ToggleActualMask0(bool newState)
     {
+        if(newState)
+        {
+            maskButtons[0].transform.GetChild(0).gameObject.SetActive(true);
+
+        }
+        else
+        {
+            maskButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        }
+        string maskName = "default_mask_00";
+        ToggleActualMask(maskName,newState);
+    }
+
+    public void ToggleActualMask1(bool newState)
+    {
+        if (newState)
+        {
+            maskButtons[1].transform.GetChild(0).gameObject.SetActive(true);
+
+        }
+        else
+        {
+            maskButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+        }
+
+        string maskName = "default_mask_01";
+        ToggleActualMask(maskName, newState);
+    }
+
+    public void ToggleActualMask2(bool newState)
+    {
+        if (newState)
+        {
+            maskButtons[2].transform.GetChild(0).gameObject.SetActive(true);
+
+        }
+        else
+        {
+            maskButtons[2].transform.GetChild(0).gameObject.SetActive(false);
+        }
+        string maskName = "default_mask_02";
+        ToggleActualMask(maskName, newState);
+    }
+
+    public void ToggleActualMask3(bool newState)
+    {
+        if (newState)
+        {
+            maskButtons[3].transform.GetChild(0).gameObject.SetActive(true);
+
+        }
+        else
+        {
+            maskButtons[3].transform.GetChild(0).gameObject.SetActive(false);
+        }
+        string maskName = "default_mask_03";
+        ToggleActualMask(maskName, newState);
+    }
+
+
+
+    public void ToggleActualMask(string maskName,bool newState=false)
+    {
+        
+        
         if (currentMaskName == maskName)
         {
             
@@ -388,18 +453,58 @@ public class TouchController : MonoBehaviour
             {
                 return;
             }
-            if (maskImg.gameObject.activeSelf)
+            if (maskImg.gameObject.activeSelf || !newState)
             {
                 
                 maskImg.gameObject.SetActive(false);
+                
                 DestroyImmediate(maskImg.sprite);
             }
-            else
+            else if(newState)
             {
                 try
                 {
                     Texture2D tmptex2d = Resources.Load("images/masks/" + maskName) as Texture2D;
                     
+                    if (tmptex2d != null)
+                    {
+                        maskImg.sprite = Sprite.Create(tmptex2d, new Rect(0, 0, tmptex2d.width, tmptex2d.height), new Vector2(0.5f, 0.5f), 100f);
+                        maskImg.rectTransform.sizeDelta = new Vector3(tmptex2d.width, tmptex2d.height, 1f);
+                        maskImg.transform.eulerAngles = new Vector3(0f, 0f, 0f);
+                        //maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta / 2f;
+                        maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta;
+                        maskImg.rectTransform.anchoredPosition = new Vector2(500f, 800f);
+                        maskImg.gameObject.SetActive(true);
+                        maskImg.color = new Color(1, 1, 1, 180f / 255f);
+                        currentMaskName = maskName;
+                        maskImg.gameObject.SetActive(true);
+
+                    }
+                    else
+                    {
+                        throw new Exception("Error Occured :  the texture is Null");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    print("Error loading mask : " + e);
+                    maskImg.gameObject.SetActive(false);
+                }
+                
+            }
+            
+
+            
+        }
+        else
+        {
+            
+            if(newState)
+            {
+                try
+                {
+                    Texture2D tmptex2d = Resources.Load("images/masks/" + maskName) as Texture2D;
                     if (tmptex2d != null)
                     {
                         maskImg.sprite = Sprite.Create(tmptex2d, new Rect(0, 0, tmptex2d.width, tmptex2d.height), new Vector2(0.5f, 0.5f), 100f);
@@ -423,40 +528,6 @@ public class TouchController : MonoBehaviour
                     print("Error loading mask : " + e);
                     maskImg.gameObject.SetActive(false);
                 }
-                maskImg.gameObject.SetActive(true);
-            }
-            
-
-            
-        }
-        else
-        {
-            
-            try
-            {
-                Texture2D tmptex2d = Resources.Load("images/masks/"+maskName) as Texture2D;
-                if (tmptex2d!=null)
-                {
-                    maskImg.sprite = Sprite.Create(tmptex2d, new Rect(0, 0, tmptex2d.width, tmptex2d.height), new Vector2(0.5f, 0.5f), 100f);
-                    maskImg.rectTransform.sizeDelta = new Vector3(tmptex2d.width, tmptex2d.height, 1f);
-                    maskImg.transform.eulerAngles = new Vector3(0f, 0f, 0f);
-                    //maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta / 2f;
-                    maskImg.gameObject.GetComponent<BoxCollider2D>().size = maskImg.rectTransform.sizeDelta;
-                    maskImg.rectTransform.anchoredPosition = new Vector2(500f, 800f);
-                    maskImg.gameObject.SetActive(true);
-                    maskImg.color = new Color(1, 1, 1, 180f / 255f);
-                    currentMaskName = maskName;
-                }
-                else
-                {
-                    throw new Exception("Error Occured :  the texture is Null");
-                }
-
-            }
-            catch (Exception e)
-            {
-                print("Error loading mask : " + e);
-                maskImg.gameObject.SetActive(false);
             }
         }
 
@@ -848,6 +919,11 @@ public void DragMaskOriginal()
         #endregion PREVIOUSSTYLECROP
 
 
+        #region GRAYSCALE
+        //gameController.ChangeToGrayScale(combinedImage);
+        #endregion GRAYSCALE
+
+
         #region NEWSTYLECROP
 
         maskImg.sprite = Sprite.Create(combinedImage, new Rect(0, 0, combinedImage.width, combinedImage.height), new Vector2(0.5f, 0.5f), 100f);
@@ -859,7 +935,6 @@ public void DragMaskOriginal()
 
         //DestroyImmediate(combinedImage);
         gameController.ShowAcceptCropButton();
-
 
 
 

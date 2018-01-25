@@ -120,6 +120,11 @@ public class SelectDressController : MonoBehaviour {
     public Toggle[] dressEditUndoButton;
 
 
+    public GameObject[] dressEditButtons;
+    public GameObject[] wigEditButtons;
+
+    public bool dontShowPopup = false;
+
     
 
     public bool IsWearingDress()
@@ -193,7 +198,7 @@ public class SelectDressController : MonoBehaviour {
 
     private void OnDisable()
     {
-        
+        StopAllCoroutines();
     }
 
     public IEnumerator ReloadDresses()
@@ -229,7 +234,7 @@ public class SelectDressController : MonoBehaviour {
                     print(string.Format("showing wearings for : bodyShape : {0}  bodyTone:{1}  eyeColor : {2}", gameController.mainBodyShape, gameController.mainBodyTone, gameController.mainEyeColor));
 
                     StartCoroutine(GetWearingsForSelectedModel(gameController.mainBodyShape, gameController.mainBodyTone, gameController.mainEyeColor));
-                    gameController.bodyChanged = false;
+                    //gameController.bodyChanged = false;
                 }
             }
             catch(Exception e)
@@ -313,6 +318,7 @@ public class SelectDressController : MonoBehaviour {
             //    editButtons[0].SetActive(true);
             //}
             print("new state is true");
+            dressButtonObjects[0].GetComponent<Toggle>().isOn = true;
             if (isWearingDress)
             {
                 print("Dress is weared");
@@ -326,7 +332,7 @@ public class SelectDressController : MonoBehaviour {
         }
         else
         {
-            ToggleSideMenuSelectDress(0);
+            ToggleSideMenuSelectDress(0,2);
             editButtons[0].SetActive(false);
         }
     }
@@ -378,7 +384,7 @@ public class SelectDressController : MonoBehaviour {
         }
         else
         {
-            ToggleSideMenuSelectDress(1);
+            ToggleSideMenuSelectDress(1,2);
             editButtons[1].SetActive(false);
         }
 
@@ -527,8 +533,17 @@ public class SelectDressController : MonoBehaviour {
         }
     }
 
+    public void InitControllers()
+    {
+        if(gameController==null)
+        {
+            gameController = gameControllerObject.GetComponent<GameController>();
+        }
+    }
+
     public void RemoveDress()
     {
+        InitControllers();
         print("Remove Dress");
         dress.gameObject.GetComponent<Image>().DOFade(0f, .5f);
         isWearingDress = false;
@@ -537,6 +552,20 @@ public class SelectDressController : MonoBehaviour {
         
         editButtons[0].SetActive(false);
         return;
+    }
+
+    public void DeleteDress()
+    {
+        OnclickCloseEditDressButton();
+        RemoveDress();
+        
+    }
+
+    public void DeleteWig()
+    {
+        OnclickCloseEditWigButton();
+        RemoveWig();
+
     }
     public void PutOnLongDressDynamically(DressProperties dp,bool resetDress=false)  //for dynamically loading dress
     {
@@ -744,34 +773,6 @@ public class SelectDressController : MonoBehaviour {
 
     }
 
-    public void PutOnShortDress(string gender, string modelName, string dressName)
-    {
-        if (gender.ToLower() == "female")
-        {
-            
-            if (!dress.gameObject.activeSelf)
-            {
-                dress.gameObject.SetActive(true);
-            }
-            print("loading dress");
-            dress.gameObject.GetComponent<Image>().DOFade(0f, .8f);
-            //yield return new WaitForSeconds(.1f);
-
-
-
-            Texture2D tempTex = Resources.Load("images/shortdresses/female/" + modelName + "/images/" + dressName) as Texture2D;
-            dress.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
-            dress.gameObject.GetComponent<Image>().DOFade(0f, 0f);
-            print("image assigned");
-
-
-
-            dress.gameObject.GetComponent<Image>().DOFade(1f, 1f);
-            print("last fade");
-
-
-        }
-    }
 
     public void PutOnWig(string gender, string modelName, string wigName)
     {
@@ -1546,6 +1547,7 @@ public class SelectDressController : MonoBehaviour {
             ActiveWigEditSliders();
             gameController.sceneEditorController.enabled = false;
             editButtons[1].GetComponent<Toggle>().isOn = false;
+            //ToggleSideMenuSelectDress(5, 1);
             StartCoroutine(ToggleEditPanel(wigEditPanel));
             wigEditUndoButtons[1].gameObject.SetActive(false);
             wigEditUndoButtons[0].gameObject.SetActive(true);
@@ -1583,10 +1585,12 @@ public class SelectDressController : MonoBehaviour {
             ActiveDressEditSliders();
             gameController.sceneEditorController.enabled = false;
             editButtons[0].GetComponent<Toggle>().isOn = false;
+            //ToggleSideMenuSelectDress(4, 1);
             StartCoroutine(ToggleEditPanel(dressEditPanel));
-            ToggleSideMenuSelectDress(4, 1);
+            
             dressEditUndoButton[1].gameObject.SetActive(false);
             dressEditUndoButton[0].gameObject.SetActive(true);
+            ToggleSideMenuSelectDress(4, 1);
 
 
         }
@@ -1604,6 +1608,7 @@ public class SelectDressController : MonoBehaviour {
             yield return new WaitForSeconds(0.1f);
             editPanel.GetComponent<RectTransform>().DOAnchorPosY(0f, 0.3f);
             selectDressOptionPanel.GetComponent<RectTransform>().DOAnchorPosY(-800f, 0.3f);
+            print("Show dress edit panel if");
         }
         else
         {
@@ -1612,6 +1617,7 @@ public class SelectDressController : MonoBehaviour {
             selectDressOptionPanel.GetComponent<RectTransform>().DOAnchorPosY(0f, 0.3f);
             yield return new WaitForSeconds(0.1f);
             gameController.ActiveCurrentActive(true);
+            print("Show dress edit panel else");
         }
     }
 
@@ -1634,10 +1640,28 @@ public class SelectDressController : MonoBehaviour {
     {
         StartCoroutine(ToggleEditPanel(editPanel, false));
         ToggleSideMenuSelectDress(4, 2);
+        ToggleSideMenuSelectDress(6, 2);
 
         DiscardEditDress();
         DeactiveDressEditSliders();
-        
+
+
+        dressEditButtons[0].GetComponent<Toggle>().isOn = false;
+        dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        dressEditButtons[1].GetComponent<Toggle>().isOn = false;
+        dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+
+
+        editButtons[1].SetActive(false);
+
+        if (isWearingDress)
+        {
+            editButtons[0].SetActive(true);
+        }
+        else
+        {
+            editButtons[0].SetActive(false);
+        }
         gameController.sceneEditorController.enabled = true;
         //ToggleSideMenuSelectDress(5, 2);
     }
@@ -1645,9 +1669,30 @@ public class SelectDressController : MonoBehaviour {
     {
         StartCoroutine(ToggleEditPanel(dressEditPanel, false));
         ToggleSideMenuSelectDress(4, 2);
+        ToggleSideMenuSelectDress(6, 2);
 
         //DiscardEditDress();
         //DeactiveDressEditSliders();
+
+
+        dressEditButtons[0].GetComponent<Toggle>().isOn = false;
+        dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        dressEditButtons[1].GetComponent<Toggle>().isOn = false;
+        dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+
+
+        editButtons[1].SetActive(false);
+
+        if (isWearingDress)
+        {
+            editButtons[0].SetActive(true);
+        }
+        else
+        {
+            editButtons[0].SetActive(false);
+        }
+
+
 
         gameController.sceneEditorController.enabled = true;
         //ToggleSideMenuSelectDress(5, 2);
@@ -1661,6 +1706,7 @@ public class SelectDressController : MonoBehaviour {
 
     public void DiscardEditDressColor()
     {
+        print("In discard edit dress color");
         Color c = gameController.currentDressColor;
         
         c.b = dress.color.b;
@@ -1722,8 +1768,27 @@ public class SelectDressController : MonoBehaviour {
     {
         StartCoroutine(ToggleEditPanel(editPanel, false));
         ToggleSideMenuSelectDress(5, 2);
+        ToggleSideMenuSelectDress(7, 2);
         DiscardEditWig();
         DeactiveWigEditSliders();
+
+        wigEditButtons[0].GetComponent<Toggle>().isOn = false;
+        wigEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        wigEditButtons[1].GetComponent<Toggle>().isOn = false;
+        wigEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+
+
+        editButtons[0].SetActive(false);
+
+        if (isWearingWig)
+        {
+            editButtons[1].SetActive(true);
+        }
+        else
+        {
+            editButtons[1].SetActive(false);
+        }
+
 
         gameController.sceneEditorController.enabled = true;
     }
@@ -1732,8 +1797,16 @@ public class SelectDressController : MonoBehaviour {
     {
         StartCoroutine(ToggleEditPanel(wigEditPanel, false));
         ToggleSideMenuSelectDress(5, 2);
+        ToggleSideMenuSelectDress(7, 2);
         //DiscardEditWig();
         DeactiveWigEditSliders();
+
+
+        wigEditButtons[0].GetComponent<Toggle>().isOn = false;
+        wigEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        wigEditButtons[1].GetComponent<Toggle>().isOn = false;
+        wigEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+
 
         gameController.sceneEditorController.enabled = true;
     }
@@ -2732,8 +2805,8 @@ public class SelectDressController : MonoBehaviour {
 
         StartCoroutine(ResetAllWearings());
         WWWForm form = new WWWForm();
-        string device_id;
-        string device_type;
+        string device_id="A";
+        string device_type= SystemInfo.deviceUniqueIdentifier;
 
 #if UNITY_EDITOR
         device_type = "A";
@@ -2747,8 +2820,8 @@ public class SelectDressController : MonoBehaviour {
         device_id = SystemInfo.deviceUniqueIdentifier;
 
 #endif
-        //form.AddField("device_id", device_id);
-        //form.AddField("device_type", device_type);
+        form.AddField("device_id", device_id);
+        form.AddField("device_type", device_type);
 
         form.AddField("body_type", gameController.modelHash[body]);
         form.AddField("skin_color", gameController.toneHash[tone]);
@@ -2856,7 +2929,7 @@ public class SelectDressController : MonoBehaviour {
                         thesearenotavailable += "Shoe";
                     }
 
-                    if(thesearenotavailable!="" || thesearenotavailable.Length>=3)
+                    if((thesearenotavailable!="" || thesearenotavailable.Length>=3)&&(!dontShowPopup))
                     {
                         string formattedMessage = string.Format(notAvailableMessage, thesearenotavailable);
                         InstantiateInfoPopup(formattedMessage, CloseStyle.TapToClose);
@@ -2965,6 +3038,8 @@ public class SelectDressController : MonoBehaviour {
             www.Dispose();
 
         }
+        gameController.bodyChanged = false;
+        dontShowPopup = false;
     }
 
     public IEnumerator GetWearingsForSelectedModel_Old(string body, string tone, string eye)
@@ -3221,27 +3296,33 @@ public class SelectDressController : MonoBehaviour {
 
             dressEditUndoButton[1].gameObject.SetActive(false);
             dressEditUndoButton[0].gameObject.SetActive(true);
+            dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+            dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(true);
         }
         else
         {
             ToggleEditSidePanels(dressEditSidePanels[0], 2);
+            dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
         }
     }
     public void ToggleDressBrightnessPanel(bool newState)
     {
         
-            if (newState)
-            {
-                ToggleEditSidePanels(dressEditSidePanels[0], 2);
-                ToggleEditSidePanels(dressEditSidePanels[1], 1);
+        if (newState)
+        {
+            ToggleEditSidePanels(dressEditSidePanels[0], 2);
+            ToggleEditSidePanels(dressEditSidePanels[1], 1);
 
-                dressEditUndoButton[0].gameObject.SetActive(false);
-                dressEditUndoButton[1].gameObject.SetActive(true);
-            }
-            else
-            {
-                ToggleEditSidePanels(dressEditSidePanels[1], 2);
-            }
+            dressEditUndoButton[0].gameObject.SetActive(false);
+            dressEditUndoButton[1].gameObject.SetActive(true);
+            dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+            dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(true);
+        }
+        else
+        {
+            ToggleEditSidePanels(dressEditSidePanels[1], 2);
+            dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+        }
         
     }
 
@@ -3256,10 +3337,14 @@ public class SelectDressController : MonoBehaviour {
 
             wigEditUndoButtons[1].gameObject.SetActive(false);
             wigEditUndoButtons[0].gameObject.SetActive(true);
+
+            wigEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+            wigEditButtons[0].transform.GetChild(0).gameObject.SetActive(true);
         }
         else
         {
             ToggleEditSidePanels(wigEditSidePanels[0], 2);
+            wigEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
         }
     }
     public void ToggleWigBrightnessPanel(bool newState)
@@ -3272,11 +3357,15 @@ public class SelectDressController : MonoBehaviour {
 
                 wigEditUndoButtons[0].gameObject.SetActive(false);
                 wigEditUndoButtons[1].gameObject.SetActive(true);
-            }
+
+            wigEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+            wigEditButtons[1].transform.GetChild(0).gameObject.SetActive(true);
+        }
             else
             {
                 ToggleEditSidePanels(wigEditSidePanels[1], 2);
-            }
+            wigEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+        }
         
     }
 

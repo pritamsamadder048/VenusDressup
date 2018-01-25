@@ -27,7 +27,8 @@ namespace Lean.Touch
         public float minScaleSize = .05f;
         public float maxScaleSize = 5f;
         public bool useRangeForScaling = false;
-		
+        public bool useNegativeScale = false;
+
 #if UNITY_EDITOR
 		protected virtual void Reset()
 		{
@@ -60,7 +61,7 @@ namespace Lean.Touch
 		private void Scale(float scale, Vector2 screenCenter)
 		{
 			// Make sure the scale is valid
-			if (scale > 0.0f)
+			if (scale > 0.0f || useNegativeScale)
 			{
 				if (Relative == true)
 				{
@@ -86,17 +87,35 @@ namespace Lean.Touch
                             float newLocalY = newScale.y;
                             float newLocalZ = newScale.z;
                             //print(string.Format("before changing x:{0} y:{0} z:{0}", newLocalX, newLocalY, newLocalZ));
-                            if (newLocalX < minScaleSize)
+                            if(useNegativeScale)
                             {
-                                newLocalX = minScaleSize;
+                                if (newLocalX < (maxScaleSize*(-1)))
+                                {
+                                    newLocalX = (maxScaleSize * (-1));
+                                }
+                                if (newLocalY < (maxScaleSize * (-1)))
+                                {
+                                    newLocalY = (maxScaleSize * (-1));
+                                }
+                                if (newLocalZ < (maxScaleSize * (-1)))
+                                {
+                                    newLocalZ = (maxScaleSize * (-1));
+                                }
                             }
-                            if (newLocalY < minScaleSize)
+                            else
                             {
-                                newLocalY = minScaleSize;
-                            }
-                            if (newLocalZ < minScaleSize)
-                            {
-                                newLocalZ = minScaleSize;
+                                if (newLocalX < minScaleSize)
+                                {
+                                    newLocalX = minScaleSize;
+                                }
+                                if (newLocalY < minScaleSize)
+                                {
+                                    newLocalY = minScaleSize;
+                                }
+                                if (newLocalZ < minScaleSize)
+                                {
+                                    newLocalZ = minScaleSize;
+                                }
                             }
 
                             //print(string.Format("after changing x:{0} y:{0} z:{0}", newLocalX, newLocalY, newLocalZ));

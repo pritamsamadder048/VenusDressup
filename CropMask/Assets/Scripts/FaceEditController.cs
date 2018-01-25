@@ -67,6 +67,7 @@ public class FaceEditController : MonoBehaviour {
     public bool isShowingFaceBrightnessPanel = true;
     public bool isShowingFaceColorPanel = false;
     public bool isShowingFaceSaturationPanel = false;
+    public bool onlyEditing = false;
 
     // Use this for initialization
     void Start () {
@@ -97,6 +98,7 @@ public class FaceEditController : MonoBehaviour {
                 gameController.currentFaceBrightness = gameController.faceRawImage.color.b;
                 gameController.currentFaceColor = gameController.faceRawImage.color.r;
                 gameController.currentFaceSaturation = gameController.faceRawImage.color.g;
+                gameController.previouslyUsingFace1 = true;
 
             }
             else if (!gameController.isShowingMale)
@@ -110,6 +112,7 @@ public class FaceEditController : MonoBehaviour {
                 gameController.currentFaceBrightness = gameController.faceRawImage.color.b;
                 gameController.currentFaceColor = gameController.faceRawImage.color.r;
                 gameController.currentFaceSaturation = gameController.faceRawImage.color.g;
+                gameController.previouslyUsingFace1 = true;
 
             }
             else if (gameController.currentlySelectedFace == 2)
@@ -122,14 +125,35 @@ public class FaceEditController : MonoBehaviour {
                 gameController.currentFaceBrightness2 = gameController.faceRawImage2.color.b;
                 gameController.currentFaceColor2 = gameController.faceRawImage2.color.r;
                 gameController.currentFaceSaturation2 = gameController.faceRawImage2.color.g;
+                gameController.previouslyUsingFace2 = true;
+
 
             }
         }
         else
         {
+            if (gameController.currentlySelectedFace == 1)
+            {
+                
+                gameController.previouslyUsingFace1 = true;
 
+            }
+            else if (!gameController.isShowingMale)
+            {
+                
+                gameController.previouslyUsingFace1 = true;
+
+            }
+            else if (gameController.currentlySelectedFace == 2)
+            {
+                
+                gameController.previouslyUsingFace2 = true;
+
+
+            }
         }
 
+        
         backIsImageProcessingScreen = false;
         HideFaceEditPanel();
 
@@ -149,6 +173,21 @@ public class FaceEditController : MonoBehaviour {
 
 
 
+    public void DeleteFace()
+    {
+        if(gameController.currentlySelectedFace==1)
+        {
+            gameController.RemoveFace1();
+            
+        }
+        else if(gameController.currentlySelectedFace==2)
+        {
+            gameController.RemoveFace2();
+        }
+        DiscardFaceEdit();
+    }
+
+
     public void DiscardFaceEdit()
     {
         //gameController.currentlyUsingFace -= 1;
@@ -158,28 +197,121 @@ public class FaceEditController : MonoBehaviour {
         //    gameController.currentlyUsingFace = 0;
         //}
 
+        if(!onlyEditing)
+        {
             if (gameController.currentlySelectedFace == 1)
             {
-            gameController.saveDict["face1"] = false;
-            
-            gameController.RemoveFace1();
+                if(!gameController.previouslyUsingFace1)
+                {
+                    gameController.saveDict["face1"] = false;
+
+                    gameController.RemoveFace1();
+                }
+                else
+                {
+                    if(gameController.previousFaceIndex==1)
+                    {
+                        gameController.faceRawImage.texture = new Texture2D(gameController.previousImagetexture.width, gameController.previousImagetexture.height) as Texture;
+                        (gameController.faceRawImage.texture as Texture2D).SetPixels(gameController.previousImagetexture.GetPixels());
+                        (gameController.faceRawImage.texture as Texture2D).Apply();
+                        gameController.faceRawImage.color = gameController.previousColor;
+                        gameController.faceRawImage.transform.localScale = gameController.previousScale;
+                        gameController.faceRawImage.rectTransform.anchoredPosition3D = gameController.previousPosition;
+                        gameController.faceRawImage.transform.localEulerAngles = gameController.previousRotation;
+                        gameController.faceRawImage.rectTransform.sizeDelta = gameController.previousSizeDelta;
+                        if(gameController.previouslyLoaded)
+                        {
+                            gameController.isLoadedFace = gameController.previouslyLoaded;
+                            gameController.loadedFaceIndex = gameController.previousLoadedFaceIndex;
+                            gameController.faceHash = gameController.previousFaceHash;
+                        }
+                        gameController.saveDict["face1"] = false;
+                    }
+                    //else if(gameController.previousFaceIndex == 2)
+                    //{
+                        
+                    //}
+                }
             }
             else if (gameController.currentlySelectedFace == 2)
             {
-            gameController.saveDict["face2"] = false;
-            
-            gameController.RemoveFace2();
-            }
-        if(!gameController.isShowingMale)
-        {
-            gameController.saveDict["face1"] = false;
+                if(!gameController.previouslyUsingFace2)
+                {
+                    gameController.saveDict["face2"] = false;
 
-            gameController.RemoveFace1();
+                    gameController.RemoveFace2();
+                }
+                else
+                {
+                    if (gameController.previousFaceIndex == 2)
+                    {
+                        gameController.faceRawImage2.texture = new Texture2D(gameController.previousImagetexture.width, gameController.previousImagetexture.height) as Texture;
+                        (gameController.faceRawImage2.texture as Texture2D).SetPixels(gameController.previousImagetexture.GetPixels());
+                        (gameController.faceRawImage2.texture as Texture2D).Apply();
+                        gameController.faceRawImage2.color = gameController.previousColor;
+                        gameController.faceRawImage2.transform.localScale = gameController.previousScale;
+                        gameController.faceRawImage2.rectTransform.anchoredPosition3D = gameController.previousPosition;
+                        gameController.faceRawImage2.transform.localEulerAngles = gameController.previousRotation;
+                        gameController.faceRawImage2.rectTransform.sizeDelta = gameController.previousSizeDelta;
+
+                        if (gameController.previouslyLoaded)
+                        {
+                            gameController.isLoadedFace2 = gameController.previouslyLoaded;
+                            gameController.loadedFaceIndex2 = gameController.previousLoadedFaceIndex;
+                            gameController.faceHash2 = gameController.previousFaceHash;
+                        }
+                        gameController.saveDict["face2"] = false;
+                    }
+                }
+            }
+            if (!gameController.isShowingMale)
+            {
+               if(!gameController.previouslyUsingFace1)
+                {
+                    gameController.saveDict["face1"] = false;
+
+                    gameController.RemoveFace1();
+                }
+                else
+                {
+                    if (gameController.previousFaceIndex == 1)
+                    {
+                        gameController.faceRawImage.texture = new Texture2D(gameController.previousImagetexture.width, gameController.previousImagetexture.height) as Texture;
+                        (gameController.faceRawImage.texture as Texture2D).SetPixels(gameController.previousImagetexture.GetPixels());
+                        (gameController.faceRawImage.texture as Texture2D).Apply();
+                        gameController.faceRawImage.color = gameController.previousColor;
+                        gameController.faceRawImage.transform.localScale = gameController.previousScale;
+                        gameController.faceRawImage.rectTransform.anchoredPosition3D = gameController.previousPosition;
+                        gameController.faceRawImage.transform.localEulerAngles = gameController.previousRotation;
+                        gameController.faceRawImage.rectTransform.sizeDelta = gameController.previousSizeDelta;
+
+                        if (gameController.previouslyLoaded)
+                        {
+                            gameController.isLoadedFace = gameController.previouslyLoaded;
+                            gameController.loadedFaceIndex = gameController.previousLoadedFaceIndex;
+                            gameController.faceHash = gameController.previousFaceHash;
+                        }
+                        gameController.saveDict["face1"] = false;
+                    }
+                    //else if(gameController.previousFaceIndex == 2)
+                    //{
+
+                    //}
+                }
+            }
+        }
+        else
+        {
+            UndoFaceBrightnessEdit();
+            UndoFaceColorEdit();
+            UndoFaceSaturationEdit();
         }
 
+        
         print(string.Format("before gameController.saveDict[face1] : {0} gameController.saveDict[face2] : {1}", gameController.saveDict["face1"], gameController.saveDict["face2"]));
-        HideFaceEditPanel(true);
-
+        
+        HideFaceEditPanel(true & !onlyEditing);
+        onlyEditing = false;
         print(string.Format("after gameController.saveDict[face1] : {0} gameController.saveDict[face2] : {1}", gameController.saveDict["face1"], gameController.saveDict["face2"]));
     }
 
@@ -194,7 +326,7 @@ public class FaceEditController : MonoBehaviour {
             croppedFaceObject = croppedFace.gameObject;
             if (!gameController.isLoadedFace)
             {
-                gameController.saveDict["face1"] = true;
+                //gameController.saveDict["face1"] = true;
             }
         }
         else if (gameController.currentlySelectedFace == 2)
@@ -206,8 +338,42 @@ public class FaceEditController : MonoBehaviour {
             croppedFaceObject = croppedFace2.gameObject;
             if (!gameController.isLoadedFace2)
             {
-                gameController.saveDict["face2"] = true;
+                //gameController.saveDict["face2"] = true;
             }
+        }
+
+
+        faceLeanScale.enabled = true;
+        faceLeanRotate.enabled = true;
+        croppedFaceController.enabled = true;
+        faceParent.GetComponent<UILineRenderer>().enabled = true;
+    }
+
+    public void ActivateTouchOnEditingCroppedFace()
+    {
+        if (gameController.currentlySelectedFace == 1)
+        {
+            faceLeanScale = croppedFace.GetComponent<LeanCustomScale>();
+            faceLeanRotate = croppedFace.GetComponent<LeanRotate>();
+            croppedFaceController = croppedFace.GetComponent<CroppedFaceController>();
+            faceParent = croppedFace.transform.parent.gameObject;
+            croppedFaceObject = croppedFace.gameObject;
+            //if (!gameController.isLoadedFace)
+            //{
+            //    gameController.saveDict["face1"] = true;
+            //}
+        }
+        else if (gameController.currentlySelectedFace == 2)
+        {
+            faceLeanScale = croppedFace2.GetComponent<LeanCustomScale>();
+            faceLeanRotate = croppedFace2.GetComponent<LeanRotate>();
+            croppedFaceController = croppedFace2.GetComponent<CroppedFaceController>();
+            faceParent = croppedFace2.transform.parent.gameObject;
+            croppedFaceObject = croppedFace2.gameObject;
+            //if (!gameController.isLoadedFace2)
+            //{
+            //    gameController.saveDict["face2"] = true;
+            //}
         }
 
 
@@ -246,6 +412,104 @@ public class FaceEditController : MonoBehaviour {
         sceneEditorControllerObj.SetActive(false);
 
     }
+
+    public void EditSelectedFace(int selectedFace)
+    {
+        this.backIsImageProcessingScreen = false;
+        onlyEditing = true;
+        gameController.ToggleHomeSideMenu(2);
+        wigParent.SetActive(false);
+        maleWigParent.SetActive(false);
+        homeButton.SetActive(false);
+        menuButton.SetActive(false);
+        saveButton.SetActive(false);
+
+
+        if (gameController.isShowingMale)
+        {
+            gameController.currentlySelectedFace = selectedFace;
+            if (selectedFace==1)
+            {
+                if (gameController.faceRawImage.transform.parent.parent == gameController.femaleModelImageObject.transform)
+                {
+
+                    gameController.ZoomInFemaleModel();
+
+
+                    
+                    gameController.faceColorController.SetTarget(gameController.faceRawImage);
+                    gameController.faceBrightnessController.SetTarget(gameController.faceRawImage);
+                    gameController.faceSaturationController.SetTarget(gameController.faceRawImage);
+                    
+
+                }
+                else if(gameController.faceRawImage.transform.parent.parent == gameController.maleImage.transform)
+                {
+                    gameController.ZoomInMaleModel();
+
+
+
+                    gameController.faceColorController.SetTarget(gameController.faceRawImage);
+                    gameController.faceBrightnessController.SetTarget(gameController.faceRawImage);
+                    gameController.faceSaturationController.SetTarget(gameController.faceRawImage);
+                }
+            }
+            else if(selectedFace==2)
+            {
+                if (gameController.faceRawImage2.transform.parent.parent == gameController.femaleModelImageObject.transform)
+                {
+
+                    gameController.ZoomInFemaleModel();
+
+
+
+                    gameController.faceColorController.SetTarget(gameController.faceRawImage2);
+                    gameController.faceBrightnessController.SetTarget(gameController.faceRawImage2);
+                    gameController.faceSaturationController.SetTarget(gameController.faceRawImage2);
+
+
+                }
+                else if (gameController.faceRawImage2.transform.parent.parent == gameController.maleImage.transform)
+                {
+                    gameController.ZoomInMaleModel();
+
+
+
+                    gameController.faceColorController.SetTarget(gameController.faceRawImage2);
+                    gameController.faceBrightnessController.SetTarget(gameController.faceRawImage2);
+                    gameController.faceSaturationController.SetTarget(gameController.faceRawImage2);
+                }
+            }
+
+        }
+        else
+        {
+            gameController.currentlySelectedFace = selectedFace;
+            gameController.ZoomInFemaleModel();
+            
+
+            if(selectedFace==1)
+            {
+                gameController.faceColorController.SetTarget(gameController.faceRawImage);
+                gameController.faceBrightnessController.SetTarget(gameController.faceRawImage);
+                gameController.faceSaturationController.SetTarget(gameController.faceRawImage);
+            }
+
+            else if(selectedFace==2)
+            {
+                gameController.faceColorController.SetTarget(gameController.faceRawImage2);
+                gameController.faceBrightnessController.SetTarget(gameController.faceRawImage2);
+                gameController.faceSaturationController.SetTarget(gameController.faceRawImage2);
+            }
+        }
+
+
+        faceEditPanel.SetActive(true);
+        sceneEditorControllerObj.SetActive(false);
+        ActivateTouchOnEditingCroppedFace();
+    }
+
+
 
 
     public void ShowFaceEditPAnel(Texture2D faceTexture, Vector3 scale, Vector3 rotation, int imageIndex, int faceHash,Color col, bool backIsImageProcessingScreen)
@@ -319,24 +583,24 @@ public class FaceEditController : MonoBehaviour {
         
         if(discarding)
         {
-            if (gameController.currentlySelectedFace == 1)
-            {
-                gameController.saveDict["face1"] = false;
+            //if (gameController.currentlySelectedFace == 1)
+            //{
+            //    gameController.saveDict["face1"] = false;
 
-                gameController.RemoveFace1();
-            }
-            else if (gameController.currentlySelectedFace == 2)
-            {
-                gameController.saveDict["face2"] = false;
+            //    gameController.RemoveFace1();
+            //}
+            //else if (gameController.currentlySelectedFace == 2)
+            //{
+            //    gameController.saveDict["face2"] = false;
 
-                gameController.RemoveFace2();
-            }
-            if (!gameController.isShowingMale)
-            {
-                gameController.saveDict["face1"] = false;
+            //    gameController.RemoveFace2();
+            //}
+            //if (!gameController.isShowingMale)
+            //{
+            //    gameController.saveDict["face1"] = false;
 
-                gameController.RemoveFace1();
-            }
+            //    gameController.RemoveFace1();
+            //}
         }
     }
 
@@ -622,6 +886,8 @@ public class FaceEditController : MonoBehaviour {
                 UndoFaceBrightnessEdit();
                 UndoFaceColorEdit();
                 UndoFaceSaturationEdit();
+                UndoMirrorFaceImage();
+
             }
             else
             {
@@ -632,6 +898,7 @@ public class FaceEditController : MonoBehaviour {
                 UndoFaceBrightnessEdit();
                 UndoFaceColorEdit();
                 UndoFaceSaturationEdit();
+                UndoMirrorFaceImage();
             }
         }
         else if(gameController.currentlySelectedFace==2)
@@ -645,6 +912,7 @@ public class FaceEditController : MonoBehaviour {
                 UndoFaceBrightnessEdit();
                 UndoFaceColorEdit();
                 UndoFaceSaturationEdit();
+                UndoMirrorFaceImage();
             }
             else
             {
@@ -655,9 +923,35 @@ public class FaceEditController : MonoBehaviour {
                 UndoFaceBrightnessEdit();
                 UndoFaceColorEdit();
                 UndoFaceSaturationEdit();
+                UndoMirrorFaceImage();
             }
         }
     }
 
 
+
+
+    public void MirrorFaceImage()
+    {
+        if(gameController.currentlySelectedFace ==1)
+        {
+            gameController.faceRawImage.transform.localScale = new Vector3(gameController.faceRawImage.transform.localScale.x * -1, gameController.faceRawImage.transform.localScale.y, gameController.faceRawImage.transform.localScale.z);
+        }
+        else if(gameController.currentlySelectedFace==2)
+        {
+            gameController.faceRawImage2.transform.localScale = new Vector3(gameController.faceRawImage2.transform.localScale.x * -1, gameController.faceRawImage2.transform.localScale.y, gameController.faceRawImage2.transform.localScale.z);
+        }
+    }
+
+    public void UndoMirrorFaceImage()
+    {
+        if (gameController.currentlySelectedFace == 1)
+        {
+            gameController.faceRawImage.transform.localScale = new Vector3(Mathf.Abs(gameController.faceRawImage.transform.localScale.x), gameController.faceRawImage.transform.localScale.y, gameController.faceRawImage.transform.localScale.z);
+        }
+        else if (gameController.currentlySelectedFace == 2)
+        {
+            gameController.faceRawImage2.transform.localScale = new Vector3(Mathf.Abs(gameController.faceRawImage2.transform.localScale.x), gameController.faceRawImage2.transform.localScale.y, gameController.faceRawImage2.transform.localScale.z);
+        }
+    }
 }

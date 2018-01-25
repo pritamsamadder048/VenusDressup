@@ -24,6 +24,8 @@ public class CroppedFaceProperties : MonoBehaviour {
 
     public bool isInitialized = false;
 
+    public bool faceInUse = false;
+
     private void Awake()
     {
         
@@ -69,6 +71,7 @@ public class CroppedFaceProperties : MonoBehaviour {
 
         if(gameController.faceHash==faceHash  || gameController.faceHash2==faceHash)
         {
+            faceInUse = true;
             ShowRemoveButton(true);
 
             if(gameController.faceHash == faceHash)
@@ -91,20 +94,21 @@ public class CroppedFaceProperties : MonoBehaviour {
 
     public void Copy(ref CroppedFaceProperties cp)
     {
-        cp = new CroppedFaceProperties();
-
-        cp.imageName = this.imageName;
-        cp.imageIndex = this.imageIndex;
-        cp.dataPath = this.dataPath;
-        cp.finalSavePath = this.finalSavePath;
-        cp.faceHash = this.faceHash;
+        cp = new CroppedFaceProperties
+        {
+            imageName = this.imageName,
+            imageIndex = this.imageIndex,
+            dataPath = this.dataPath,
+            finalSavePath = this.finalSavePath,
+            faceHash = this.faceHash
+        };
         cfd.Copy(ref cp.cfd);
     }
 
     public void UseThisCroppedFace()
     {
         print("clicked");
-        if(isInitialized)
+        if(isInitialized && !faceInUse)
         {
             if (File.Exists(finalSavePath))
             {
@@ -134,9 +138,9 @@ public class CroppedFaceProperties : MonoBehaviour {
                     
 
 
-                    gameController.isLoadedFace = true;
-                    gameController.loadedFaceIndex = imageIndex;
-                    gameController.faceHash = faceHash;
+                    //gameController.isLoadedFace = true;
+                    //gameController.loadedFaceIndex = imageIndex;
+                    //gameController.faceHash = faceHash;
 
                     //this.Copy(gameController.loadedCroppedFaceProperty);
                     this.Copy(ref gameController.tempCroppedFaceProperty);
@@ -172,13 +176,16 @@ public class CroppedFaceProperties : MonoBehaviour {
         {
             gameController.RemoveFace1();
             
+            
         }
         if (gameController.isLoadedFace2 && (gameController.faceHash2 == faceHash))
         {
             gameController.RemoveFace2();
            
         }
+
         ShowRemoveButton(false);
+        faceInUse = false;
     }
 
     public void ShowRemoveButton(bool showStatus)

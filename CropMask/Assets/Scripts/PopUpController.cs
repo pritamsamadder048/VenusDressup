@@ -12,8 +12,11 @@ public class PopUpController : MonoBehaviour {
     protected GameObject[] popupPanels;
 
     public GameObject popupWithOkButton;
-	// Use this for initialization
-	void Start () {
+
+    public GameObject PrefabBodyshapeSelectionPopup;
+    public GameObject bodyshapeSelectionPopup;
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -38,6 +41,36 @@ public class PopUpController : MonoBehaviour {
         }
 
         p.SetActive(true);
+    }
+
+    public void InstantiateBodyShapeSelectionPopup()
+    {
+        if(bodyshapeSelectionPopup!=null)
+        {
+            Destroy(bodyshapeSelectionPopup);
+
+
+        }
+
+        bodyshapeSelectionPopup = Instantiate<GameObject>(PrefabBodyshapeSelectionPopup,Vector3.zero,Quaternion.identity, gameController.canvasObject.transform);
+        bodyshapeSelectionPopup.GetComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+        Button okButton = bodyshapeSelectionPopup.transform.GetChild(0).GetChild(2).GetComponent<Button>();
+        Button closeButton = bodyshapeSelectionPopup.transform.GetChild(0).GetChild(1).GetComponent<Button>();
+
+        if(closeButton!=null)
+        {
+            closeButton.onClick.AddListener(() => {
+                Destroy(bodyshapeSelectionPopup);
+            });
+        }
+
+        if(okButton!=null)
+        {
+            okButton.onClick.AddListener(() => {
+                gameController.selectShapeController.OnClickSelectShapeButton(true);
+                Destroy(bodyshapeSelectionPopup);
+            });
+        }
     }
 
     public void ResetAllSavedFaceStatic()

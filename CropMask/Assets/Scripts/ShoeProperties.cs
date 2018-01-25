@@ -360,10 +360,16 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         if (IsInitialized)
         {
             print("trying to load shoe image from : " + finalSavePath);
-            if (File.Exists(finalSavePath))
+            string thumbnailpath = finalSavePath.Replace(imgName, "");
+            thumbnailpath = Path.Combine(thumbnailpath, "thumb");
+
+            thumbnailpath = Path.Combine(thumbnailpath, imgName);
+
+            if (File.Exists(finalSavePath) && File.Exists(thumbnailpath))
             {
                 Texture2D t2d = new Texture2D(10, 10);
-                t2d.LoadImage(File.ReadAllBytes(finalSavePath));
+                //t2d.LoadImage(File.ReadAllBytes(finalSavePath));
+                t2d.LoadImage(File.ReadAllBytes(thumbnailpath));
                 t2d.Apply();
 
                 GetComponent<Image>().sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);

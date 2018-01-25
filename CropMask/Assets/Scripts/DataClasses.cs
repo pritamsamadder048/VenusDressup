@@ -188,6 +188,171 @@ public class ShoeData
 
     }
 }
+
+
+
+[Serializable]
+public class BackGroundData
+{
+    public string propertyType = "background";
+
+    public string backGroundName;
+    public string backGroundPath;
+
+    public void EncodeData(BackGroundProperty bp)
+    {
+
+        backGroundName = bp.backGroundName;
+        backGroundPath = bp.backGroundPath;
+    }
+
+    public void DecodeData(out BackGroundProperty bp)
+    {
+        bp = new BackGroundProperty
+        {
+            backGroundName = backGroundName,
+            backGroundPath = backGroundPath
+        };
+
+
+    }
+}
+
+
+[Serializable]
+public class MaleData
+{
+    public string propertyType = "male";
+    public bool maleIsShowing = false;
+
+    public string maleName;
+    public int maleIndex;
+    public float maleCarouselRotation;
+
+    public string maleWigName;
+    public string finalMaleWigImageUrl;
+    public string finalMaleWigSavePath;
+    public string serializedMaleWigProperty;
+
+    public string maleTieName;
+    public string finalMaleTieImageUrl;
+    public string finalMaleTieSavePath;
+    public string serializedMaleTieProperty;
+
+    public float[] maleWigColor;
+    public float[] maleTieColor;
+
+    public bool isWearingWig;
+    public bool isWearingTie;
+
+    public void EncodeData(GameController gameController)
+    {
+        if (gameController.isShowingMale)
+        {
+            maleIsShowing = true;
+            maleName = gameController.mainMaleBodyName;
+            maleIndex = gameController.maleController.currentMaleIndex;
+            maleCarouselRotation = gameController.maleController.currentCarouselRotation;
+            try
+            {
+                if (gameController.maleController.isWearingWig&&gameController.currentMaleWigProperty.imgName != "" && gameController.currentMaleWigProperty.imgName != null)
+                {
+                    maleWigName = gameController.currentMaleWigProperty.imgName;
+                    finalMaleWigImageUrl = gameController.currentMaleWigProperty.finalImageUrl;
+                    finalMaleWigSavePath = gameController.currentMaleWigProperty.finalSavePath;
+                    serializedMaleWigProperty = gameController.currentMaleWigProperty.serializedJsonObject;
+                    maleWigColor = new float[] {gameController.maleWig.color.r, gameController.maleWig.color.g, gameController.maleWig.color.b, gameController.maleWig.color.a };
+                    isWearingWig = true;
+                }
+                else
+                {
+                    isWearingWig = false;
+                }
+            }
+            catch (Exception e)
+            {
+                isWearingWig = false;
+                Debug.Log("male wig error : " + e.Message);
+            }
+
+            try
+            {
+                if (gameController.maleController.isWearingTie && gameController.currentMaleTieProperty.imgName != "" && gameController.currentMaleTieProperty.imgName != null)
+                {
+                    maleTieName = gameController.currentMaleTieProperty.imgName;
+                    finalMaleTieImageUrl = gameController.currentMaleTieProperty.finalImageUrl;
+                    finalMaleTieSavePath = gameController.currentMaleTieProperty.finalSavePath;
+                    serializedMaleTieProperty = gameController.currentMaleTieProperty.serializedJsonObject;
+                    maleTieColor = new float[] { gameController.maleTie.color.r, gameController.maleTie.color.g, gameController.maleTie.color.b, gameController.maleTie.color.a };
+                    isWearingTie = true;
+                }
+                else
+                {
+                    isWearingTie = false;
+                }
+            }
+            catch (Exception e)
+            {
+                isWearingTie = false;
+                Debug.Log("male tie error : " + e.Message);
+            }
+        }
+        else
+        {
+            maleIsShowing = false;
+        }
+    }
+
+    
+
+    public void DecodeData(out MaleWigProperties maleWigProperty,out MaleTieProperties maleTieProperty,out bool malePresent)
+    {
+        malePresent = maleIsShowing;
+        if(maleIsShowing)
+        {
+            if(isWearingWig)
+            {
+                maleWigProperty = new MaleWigProperties
+                {
+                     wearingCode=5,
+                     mfType = 2,
+                     imgName=maleWigName,
+                     finalImageUrl=finalMaleWigImageUrl,
+                     finalSavePath=finalMaleWigSavePath,
+                     serializedJsonObject = serializedMaleWigProperty,
+                };
+            }
+            else
+            {
+                maleWigProperty = null;
+            }
+
+
+            if (isWearingTie)
+            {
+                maleTieProperty = new MaleTieProperties
+                {
+                    wearingCode = 6,
+                    mfType = 2,
+                    imgName = maleTieName,
+                    finalImageUrl = finalMaleTieImageUrl,
+                    finalSavePath = finalMaleTieSavePath,
+                    serializedJsonObject = serializedMaleTieProperty,
+                };
+            }
+            else
+            {
+                maleTieProperty = null;
+            }
+        }
+        else
+        {
+            maleWigProperty = null;
+            maleTieProperty = null;
+            return;
+        }
+    }
+}
 #endregion APPARELDATA
 
 #region SAVEDATA
@@ -204,6 +369,8 @@ public class SaveData
     public string wigName;
     public string ornamentName;
     public string shoeName;
+    public string backgroundName;
+    public bool isShowingMale=false;
 
     [NonSerialized]
     public DressProperties dressProperty;
@@ -213,11 +380,21 @@ public class SaveData
     public OrnamentProperties ornamentProperty;
     [NonSerialized]
     public ShoeProperties shoeProperty;
+    [NonSerialized]
+    public BackGroundProperty backgroundProperty;
+    [NonSerialized]
+    public MaleWigProperties maleWigProperty;
+    [NonSerialized]
+    public MaleTieProperties maleTieProperty;
 
     public DressData dressData;
     public FemaleWigData femaleWigData;
     public OrnamentData ornamentData;
     public ShoeData shoeData;
+    public BackGroundData backgroundData;
+
+    public MaleData maleData;
+    
 
 
     private void Initialize(int modelindex,float modelrotation,string model,string bodytone,string eye,GameController gameController, string dress="", string wig="", string ornament="", string shoe="")
@@ -226,6 +403,7 @@ public class SaveData
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
         shoeData = new ShoeData();
+        backgroundData = new BackGroundData();
 
         modelindex = modelIndex;
         modelRotation = modelrotation;
@@ -236,7 +414,9 @@ public class SaveData
         wigName = wig;
         ornamentName = ornament;
         shoeName = shoe;
-
+        gameController.currentBackgroundProperty.CopyTo(ref backgroundProperty);
+        backgroundName = backgroundProperty.backGroundName;
+        isShowingMale = gameController.isShowingMale;
         
     }
 
@@ -246,6 +426,8 @@ public class SaveData
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
         shoeData = new ShoeData();
+        backgroundData = new BackGroundData();
+        maleData = new MaleData();
         modelIndex = modelindex;
         modelRotation = modelrotation;
         modelNameame = model;
@@ -255,7 +437,27 @@ public class SaveData
         this.femaleWigProperty = wigproperty;
         this.ornamentProperty = ornamentproperty;
         this.shoeProperty = shoeproperty;
-        if(dressProperty!=null)
+        gameController.currentBackgroundProperty.CopyTo(ref backgroundProperty);
+
+        
+        //gameController.currentBackgroundProperty.CopyTo(ref backgroundProperty);
+        isShowingMale = gameController.isShowingMale;
+
+        if (gameController.isShowingMale)
+        {
+
+            maleData.maleIsShowing = true;
+            maleWigProperty = gameController.currentMaleWigProperty;
+            maleTieProperty = gameController.currentMaleTieProperty;
+
+            maleData.EncodeData(gameController);
+
+        }
+        else
+        {
+            maleData.maleIsShowing = false;
+        }
+        if (dressProperty!=null)
         {
             
             dressData.EncodeData(dressProperty,gameController.currentDressColor);
@@ -284,7 +486,7 @@ public class SaveData
 
             shoeName = shoeProperty.imgName;
         }
-
+        backgroundData.EncodeData(backgroundProperty);
 
     }
 
@@ -295,6 +497,10 @@ public class SaveData
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
         shoeData = new ShoeData();
+        backgroundData = new BackGroundData();
+        maleData = new MaleData();
+        gameController.currentBackgroundProperty.CopyTo(ref backgroundProperty);
+        maleData.maleIsShowing=isShowingMale = gameController.isShowingMale;
 
         try
         {
@@ -361,9 +567,15 @@ public class SaveData
         catch (Exception e)
         {
 
-            Debug.Log(string.Format("Shoe rechec Error : {0}", e.Message));
+            Debug.Log(string.Format("Shoe recheck Error : {0}", e.Message));
         }
 
+
+        maleData.EncodeData(gameController);
+
+        backgroundData.EncodeData(backgroundProperty);
+        //Debug.Log(string.Format("Recheck data : background name :{0}  background path {1} ", backgroundData.backGroundName, backgroundData.backGroundPath));
+        Debug.Log(string.Format("male data : male showing : {0}  Wearing wig : {1}  wearing tie : {2}", maleData.maleIsShowing, maleData.isWearingWig, maleData.isWearingTie));
 
     }
 
@@ -374,6 +586,8 @@ public class SaveData
         femaleWigData.DecodeData(out this.femaleWigProperty);
         ornamentData.DecodeData(out this.ornamentProperty);
         shoeData.DecodeData(out this.shoeProperty);
+        backgroundData.DecodeData(out this.backgroundProperty);
+        maleData.DecodeData(out this.maleWigProperty, out this.maleTieProperty, out this.isShowingMale);
     }
     public void InitializeProperties()
     {
@@ -387,6 +601,13 @@ public class SaveData
         ornamentProperty.InitializeOrnamentProperty(ornamentData.serializedJsonObject);
         shoeProperty = new ShoeProperties();
         shoeProperty.InitializeShoeProperty(shoeData.serializedJsonObject);
+
+        backgroundProperty = new BackGroundProperty();
+        backgroundData.DecodeData(out backgroundProperty);
+
+        Debug.Log(string.Format(" InitializeProperties-- background data : {0}....{1}", backgroundData.backGroundName, backgroundData.backGroundPath));
+        Debug.Log(string.Format(" InitializeProperties-- background Properties : {0}....{1}", backgroundProperty.backGroundName, backgroundProperty.backGroundPath));
+
     }
     public static int SaveWearings(string saveDataFileName, SaveData sd,GameController gc)
     {
@@ -424,6 +645,10 @@ public class SaveData
                 }
                 MonoBehaviour.print(string.Format("total saves :{0}", totalSaves));
 
+                if(totalSaves>=10)
+                {
+                    return 0;
+                }
 
 
                 if (totalSaves < 10)
@@ -431,7 +656,7 @@ public class SaveData
                     FileStream fileStream;
                     fileStream = new FileStream(finalSavePath, FileMode.Create, FileAccess.Write);
                     BinaryFormatter b = new BinaryFormatter();
-                    string save_name = string.Format("savedata_{0}.png", (int)(UnityEngine.Random.Range(0, 9999)));
+                    string save_name = string.Format("savedata_{0}.jpg", (int)(UnityEngine.Random.Range(0, 9999)));
                     sd.saveName = save_name;
                     saveDatas.Add(sd);
                     MonoBehaviour.print(string.Format("total saves : {0}", saveDatas.Count));
@@ -481,7 +706,7 @@ public class SaveData
                 List<SaveData> saveDatas = new List<SaveData>();
 
                 MonoBehaviour.print(string.Format(" total saves :{0}", saveDatas.Count));
-                string save_name = string.Format("savedata_{0}.png", (int)(UnityEngine.Random.Range(0, 9999)));
+                string save_name = string.Format("savedata_{0}.jpg", (int)(UnityEngine.Random.Range(0, 9999)));
                 sd.saveName = save_name;
                 saveDatas.Add(sd);
 

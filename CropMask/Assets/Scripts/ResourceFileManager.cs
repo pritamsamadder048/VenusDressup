@@ -19,12 +19,15 @@ public  class ResourceFileManager : MonoBehaviour {
     public int totalFileDownloaded = 0;
     public float downloadPercent = 0.0f;
     public int downloadStarted = 0;
-
+    public float sceneloadPercent = 0.0f;
     public int fileChecked=0;
 
     public Text downloadInfoUIText;
+    public Text sceneloadInfoUIText;
     [HideInInspector]
     public string downloadInfoString = "Downloading : {0} %\n[{1}/{2}]";
+    [HideInInspector]
+    public string sceneLoadingInfoString = "Loading Game : {0} %";
 
     [HideInInspector]
     public string imageUrlFormat = "http://demowebz.cu.cc/venusfashion/img/item_image/{0}";
@@ -44,6 +47,7 @@ public  class ResourceFileManager : MonoBehaviour {
     public GameObject downloadInfoPanel;
     public GameObject checkForUpdatePanel;
     public GameObject firstInstallPanel;
+    public GameObject loadMainScenePanel;
     public GameObject retryButton;
 
     public object lockObjectFileChecked=new object();
@@ -64,6 +68,9 @@ public  class ResourceFileManager : MonoBehaviour {
 
 
     public bool DownloadAll = false;
+
+
+    bool sceneIsNotLoaded = true;
 
     private void Awake()
     {
@@ -88,7 +95,17 @@ public  class ResourceFileManager : MonoBehaviour {
         dataPathDict["shoeFemaleDataPath"] = Path.Combine(resourceDataPath, "shoe");
         dataPathDict["tieMaleDataPath"] = Path.Combine(resourceDataPath, "tie");
 
+
+        dataPathDict["thumb_dressFemaleDataPath"] = Path.Combine(dataPathDict["dressFemaleDataPath"], "thumb");
+        dataPathDict["thumb_wigFemaleDataPath"] = Path.Combine(dataPathDict["wigFemaleDataPath"], "thumb");
+        dataPathDict["thumb_wigMaleDataPAth"] = Path.Combine(dataPathDict["wigMaleDataPAth"],"thumb");
+        dataPathDict["thumb_ornamentFemaleDataPath"] = Path.Combine(dataPathDict["ornamentFemaleDataPath"], "thumb");
+        dataPathDict["thumb_shoeFemaleDataPath"] = Path.Combine(dataPathDict["shoeFemaleDataPath"], "thumb");
+        dataPathDict["thumb_tieMaleDataPath"] = Path.Combine(dataPathDict["tieMaleDataPath"], "thumb");
+
         dataPathDict["resourceDataPath"] = resourceDataPath;
+
+
 
 
         totalDownloadableFile = -999;
@@ -132,9 +149,10 @@ public  class ResourceFileManager : MonoBehaviour {
     
     private void FixedUpdate()
     {
-        if(fileChecked==totalDownloadableFile)
+        if(fileChecked==totalDownloadableFile && sceneIsNotLoaded)
         {
             StartCoroutine(LoadMainScene());
+            sceneIsNotLoaded = false;
         }
     }
     
@@ -152,8 +170,8 @@ public  class ResourceFileManager : MonoBehaviour {
     {
         isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
         WWWForm form = new WWWForm();
-        string device_id;
-        string device_type;
+        string device_id="";
+        string device_type="";
 #if UNITY_ANDROID
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
@@ -175,6 +193,7 @@ public  class ResourceFileManager : MonoBehaviour {
 
         if (isNewInstall == 1)
         {
+			Debug.Log(firstInstallUrl);
             using (UnityWebRequest www = UnityWebRequest.Post(firstInstallUrl, form))
             {
                 //print(www.url);
@@ -229,7 +248,8 @@ public  class ResourceFileManager : MonoBehaviour {
                     }
                     else if(error_code==2)
                     {
-                        LoadMainSceneStatic();
+                        //LoadMainSceneStatic();
+                        StartCoroutine("LoadMainSceneAsync");
                     }
 
 
@@ -306,7 +326,8 @@ public  class ResourceFileManager : MonoBehaviour {
                     }
                     else if(error_code==2)
                     {
-                        LoadMainSceneStatic();
+                        //LoadMainSceneStatic();
+                        StartCoroutine("LoadMainSceneAsync");
                     }
                     else
                     {
@@ -525,6 +546,16 @@ public  class ResourceFileManager : MonoBehaviour {
                     File.WriteAllBytes(savePath, t2d.EncodeToPNG());
                     print("Writing data completed");
                     yield return new WaitForFixedUpdate();
+                    string imageName = imageUrl.Split('/')[imageUrl.Split('/').Length-1];
+                    
+                    string thumbnailpath = savePath.Replace(imageName, "");
+                    thumbnailpath = Path.Combine(thumbnailpath, "thumb");
+                    
+                    thumbnailpath = Path.Combine(thumbnailpath, imageName);
+                    t2d = GameController.ResizeTexture2D(t2d, 140, 214);
+                    t2d.Apply();
+                    File.WriteAllBytes(thumbnailpath, t2d.EncodeToPNG());
+                    yield return new WaitForSeconds(.2f);
                     DestroyImmediate(t2d, true);
                     //DestroyImmediate(t2d);
                     UpdateDownloadInfoStatic();
@@ -573,8 +604,8 @@ public  class ResourceFileManager : MonoBehaviour {
     public IEnumerator DownloadAllFile()
     {
         WWWForm form = new WWWForm();
-        string device_id;
-        string device_type;
+        string device_id="";
+        string device_type="";
 #if UNITY_ANDROID
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
@@ -662,8 +693,8 @@ public  class ResourceFileManager : MonoBehaviour {
     public IEnumerator DownloadAllFile2()
     {
         WWWForm form = new WWWForm();
-        string device_id;
-        string device_type;
+        string device_id="";
+        string device_type="";
 #if UNITY_ANDROID
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
@@ -1418,6 +1449,19 @@ public  class ResourceFileManager : MonoBehaviour {
 
 
 
+
+
+    public void UpdateSceneloadInfoStatic(float loadpercent)
+    {
+
+        
+        sceneloadPercent = (float)Math.Round(100f* loadpercent,2);
+        
+        sceneloadInfoUIText.text = string.Format(sceneLoadingInfoString, sceneloadPercent);
+
+
+    }
+
     public IEnumerator CreateDirectories()  // creates necessary directories
     {
         foreach(string k in dataPathDict.Keys)
@@ -1453,8 +1497,8 @@ public  class ResourceFileManager : MonoBehaviour {
         //yield return new WaitUntil(() => { return (fileChecked == totalDownloadableFile); });
 //#if !UNITY_EDITOR
         WWWForm form = new WWWForm();
-        string device_id;
-        string device_type;
+        string device_id="";
+        string device_type="";
 #if UNITY_ANDROID
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
@@ -1491,7 +1535,8 @@ public  class ResourceFileManager : MonoBehaviour {
 //#endif
         yield return new WaitForEndOfFrame();
         PlayerPrefs.SetInt("isNewInstall", 0);
-        SceneManager.LoadScene(1);
+        //SceneManager.LoadScene(1);
+        StartCoroutine("LoadMainSceneAsync");
     }
 
 
@@ -1503,14 +1548,24 @@ public  class ResourceFileManager : MonoBehaviour {
         SceneManager.LoadScene(1);
     }
 
+
     public IEnumerator LoadMainSceneAsync()
     {
+        sceneIsNotLoaded = false;
+        print("Loading new scene");
         PlayerPrefs.SetInt("isNewInstall", 0);
+        checkForUpdatePanel.SetActive(false);
+        downloadInfoPanel.SetActive(false);
+        firstInstallPanel.SetActive(false);
+        loadMainScenePanel.SetActive(true);
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(1,LoadSceneMode.Single);
 
         while(!asyncLoad.isDone)
         {
-            print(string.Format("Loading Percent : {0}", asyncLoad.progress));
+            float asyncloadpercent = asyncLoad.progress;
+            UpdateSceneloadInfoStatic(asyncloadpercent);
+            print(string.Format("Loading Percent : {0}", asyncloadpercent));
+
             yield return null;
         }
     }

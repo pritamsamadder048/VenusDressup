@@ -9,14 +9,14 @@ public class SelectShapeController : MonoBehaviour {
 
     [SerializeField]
     private GameObject gameControllerObject;
-    private GameController gameController;
+    public GameController gameController;
     [SerializeField]
     private GameObject[] sideMenus;
     [SerializeField]
     private GameObject[] shapeButtonObjects;
     [SerializeField]
     private GameObject rotationControllerObject;
-    private RotationController rotationController;
+    public RotationController rotationController;
 
     [SerializeField]
     private GameObject previousButtonObject;
@@ -111,12 +111,21 @@ public class SelectShapeController : MonoBehaviour {
 
     }
 	
+
+    public void InitControllers()
+    {
+        if(rotationController==null)
+        {
+            rotationController = rotationControllerObject.GetComponent<RotationController>();
+        }
+    }
 	// Update is called once per frame
 	void Update () {
 		
 	}
     public void SelectThisParticularModel(float rotation,int index=0)
     {
+        InitControllers();
         rotationController.SelectThisModel(rotation, index);
 
         
@@ -134,6 +143,50 @@ public class SelectShapeController : MonoBehaviour {
         }
 
     }
+
+    public void PreLoadOnClickSelectShapeButton(bool newState)
+    {
+        if (gameController == null)
+        {
+            gameController = gameControllerObject.GetComponent<GameController>();
+        }
+        shapeButtonObjects[0].GetComponent<Toggle>().isOn = newState;
+
+        if (newState)
+        {
+            if (!gameController.isFirstTime)
+            {
+                if (gameController.shouldShowDressResetWarning && newState)
+                {
+                    if (gameController.selectDressController.isWearingDress || gameController.selectDressController.isWearingWig || gameController.selectDressController.isWearingOrnament || gameController.selectDressController.isWearingShoe)
+                    {
+                        gameController.popupController.InstantiateBodyShapeSelectionPopup();
+                        gameController.shouldShowDressResetWarning = false;
+                        //OnClickSelectBodyToneButton(true);
+                    }
+                    else
+                    {
+                        OnClickSelectShapeButton(newState);
+
+                    }
+
+                }
+                else if(newState)
+                {
+                    OnClickSelectShapeButton(newState);
+                    
+                }
+            }
+            else
+            {
+                OnClickSelectShapeButton(newState);
+            }
+            
+
+        }
+
+        //shapeButtonObjects[0].GetComponent<Toggle>().isOn = newState;
+    }
     public void OnClickSelectShapeButton(bool newState)
     {
         if(gameController==null)
@@ -144,17 +197,18 @@ public class SelectShapeController : MonoBehaviour {
 
         if(newState)
         {
-            if (!gameController.isFirstTime)
-            {
-                if (gameController.shouldShowDressResetWarning && newState)
-                {
-                    gameController.popupController.ShowPopup(3, null);
-                    gameController.shouldShowDressResetWarning = false;
-                    OnClickSelectBodyToneButton(true);
-                    return;
+     //       if (!gameController.isFirstTime)
+     //       {
+     //           if (gameController.shouldShowDressResetWarning && newState)
+     //           {
+					//if (gameController.selectDressController.isWearingDress || gameController.selectDressController.isWearingWig || gameController.selectDressController.isWearingOrnament || gameController.selectDressController.isWearingShoe) {
+					//	gameController.popupController.ShowPopup(3, null);
+					//	gameController.shouldShowDressResetWarning = false;
+					//	//OnClickSelectBodyToneButton(true);
+					//}
 
-                }
-            }
+     //           }
+     //       }
             gameController.ToggleOptionSideMenu(2);
             ToggleSideMenuSelectShape(0, 2);
             ToggleSideMenuSelectShape(1, 2);
@@ -165,10 +219,16 @@ public class SelectShapeController : MonoBehaviour {
             if (gameController.autoAcceptChange)
             {
                 gameController.HideFemaleModelAndAppearings();
+                acceptDiscardPanelForBodyTone.SetActive(false);
+                acceptDiscardPanelForEyeColor.SetActive(false);
+                acceptDiscardPanelForBodyShape.SetActive(false);
             }
             else
             {
                 gameController.HideFemaleModelAndAppearings();
+                acceptDiscardPanelForBodyTone.SetActive(false);
+                acceptDiscardPanelForEyeColor.SetActive(false);
+                acceptDiscardPanelForBodyShape.SetActive(true);
             }
 
             rotationController.ShowAllShapes(true);
@@ -178,10 +238,17 @@ public class SelectShapeController : MonoBehaviour {
             }
             shapeButtonObjects[0].transform.GetChild(0).gameObject.SetActive(true);
             //PlayerPrefs.SetInt("selectedBodyShape", 1);
-            acceptDiscardPanelForBodyTone.SetActive(false);
-            acceptDiscardPanelForEyeColor.SetActive(false);
-            acceptDiscardPanelForBodyShape.SetActive(true);
+
+//			shapeButtonObjects[1].GetComponent<Toggle>().isOn = false;
+//			shapeButtonObjects[2].GetComponent<Toggle>().isOn = false;
+
+			shapeButtonObjects[1].GetComponent<Toggle>().isOn = false;
+			shapeButtonObjects[2].GetComponent<Toggle>().isOn = false;
+            
         }
+
+		shapeButtonObjects[0].GetComponent<Toggle>().isOn = newState;
+
     }
 
     public void OnClickSelectBodyToneButton(bool newState)
@@ -224,7 +291,14 @@ public class SelectShapeController : MonoBehaviour {
                 //gameController.faceRawImage.transform.parent.gameObject.SetActive(true);
                 gameController.faceRawImage2.transform.parent.gameObject.SetActive(false);
             }
+
+//			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;
+//			shapeButtonObjects[1].GetComponent<Toggle>().isOn = false;
+
+			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;
+			shapeButtonObjects[2].GetComponent<Toggle>().isOn = false;
         }
+		shapeButtonObjects[1].GetComponent<Toggle>().isOn = newState;
 
         if (gameController.autoAcceptChange)
         {
@@ -273,6 +347,10 @@ public class SelectShapeController : MonoBehaviour {
             ToggleSideMenuSelectShape(1, 1, shapeButtonObjects[2]);
             gameController.ShowFemaleModelAndAppearings();
             gameController.ZoomInFemaleModel();
+
+			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;
+			shapeButtonObjects[1].GetComponent<Toggle>().isOn = false;
+
         }
         else
         {

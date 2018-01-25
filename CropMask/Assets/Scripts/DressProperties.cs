@@ -123,7 +123,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
-                        
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_dressFemaleDataPath"], imgName);
+
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
 
@@ -137,7 +138,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
-                        
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigFemaleDataPath"], imgName);
+
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
 
@@ -151,7 +153,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
-                        
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_ornamentFemaleDataPath"], imgName);
+
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
 
@@ -165,7 +168,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
-                        
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_shoeFemaleDataPath"], imgName);
+
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
 
@@ -179,7 +183,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
-                        
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigMaleDataPAth"], imgName);
+
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
 
@@ -193,7 +198,8 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
-                        
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_tieMaleDataPath"], imgName);
+
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
 
@@ -254,6 +260,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_dressFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -268,6 +275,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -282,6 +290,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_ornamentFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -296,6 +305,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_shoeFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -310,6 +320,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigMaleDataPAth"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -324,6 +335,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_tieMaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -389,6 +401,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_dressFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -403,6 +416,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -417,6 +431,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_ornamentFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -431,6 +446,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_shoeFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -445,6 +461,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigMaleDataPAth"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -459,6 +476,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_tieMaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -526,6 +544,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_dressFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -540,6 +559,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -554,6 +574,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_ornamentFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -568,6 +589,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_shoeFemaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -582,6 +604,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigMaleDataPAth"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -596,6 +619,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                     {
                         finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
                         finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_tieMaleDataPath"], imgName);
 
 
                         //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
@@ -665,10 +689,16 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
         if (IsInitialized)
         {
             //print("trying to load dress image from : " + finalSavePath);
-            if (File.Exists(finalSavePath))
+            string thumbnailpath = finalSavePath.Replace(imgName, "");
+            thumbnailpath = Path.Combine(thumbnailpath, "thumb");
+
+            thumbnailpath = Path.Combine(thumbnailpath, imgName);
+
+            if (File.Exists(finalSavePath) && File.Exists(thumbnailpath))
             {
                 Texture2D t2d = new Texture2D(10,10);
-                t2d.LoadImage(File.ReadAllBytes(finalSavePath));
+                //t2d.LoadImage(File.ReadAllBytes(finalSavePath));
+                t2d.LoadImage(File.ReadAllBytes(thumbnailpath));
                 t2d.Apply();
 
                 GetComponent<Image>().sprite = Sprite.Create(t2d, new Rect(0, 0, t2d.width, t2d.height), new Vector2(0.5f, 0.5f), 100f);
