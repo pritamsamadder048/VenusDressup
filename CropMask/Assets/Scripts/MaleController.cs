@@ -810,7 +810,7 @@ public class MaleController : MonoBehaviour {
                 StartCoroutine(LoadIconOnMaleWigButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false; 
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
@@ -849,7 +849,7 @@ public class MaleController : MonoBehaviour {
                 StartCoroutine(LoadIconOnMaleWigButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
@@ -928,7 +928,7 @@ public class MaleController : MonoBehaviour {
                 StartCoroutine(LoadIconOnMaleTieButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
@@ -967,7 +967,7 @@ public class MaleController : MonoBehaviour {
                 StartCoroutine(LoadIconOnMaleTieButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }

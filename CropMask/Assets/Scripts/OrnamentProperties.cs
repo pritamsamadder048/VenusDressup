@@ -90,7 +90,7 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         if (!gameController.IsPaidUser && lockStatus == "true")
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false; // may we need to change this..?
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
@@ -337,23 +337,33 @@ public class OrnamentProperties : MonoBehaviour , ISerializationCallbackReceiver
     {
         if(gameController!=null)
         {
-            if(_isInitialized)
+            if(_isInitialized && gameController.IsPaidUser)
             {
                 gameController.ShowLoadingPanelOnlyTransparent();
                 Invoke("UseThisOrnament", .2f);
+            }
+            else
+            {
+                gameController.HideLoadingPanelOnlyTransparent();
+                return;
+                //return;
             }
         }
     }
 
     public void UseThisOrnament()
     {
-        if (_isInitialized)
+        if (_isInitialized && gameController.IsPaidUser)
         {
             gameController.InstantiateNotInteractablePanel();
             gameController.selectDressController.PutOnOrnamentDynamically(this);
             Invoke("DestroyUninteractivePanel", .5f);
             gameController.HideLoadingPanelOnly();
             gameController.HideLoadingPanelOnlyTransparent();
+        }
+        else if (!gameController.IsPaidUser)
+        {
+            gameController.InstantiateInfoPopupForPurchase();
         }
         else
         {

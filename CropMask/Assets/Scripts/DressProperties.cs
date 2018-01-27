@@ -111,7 +111,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         if (!gameController.IsPaidUser && lockStatus == "true")
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false;   // may we need to change this..not sure
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
@@ -248,7 +248,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         if (!gameController.IsPaidUser && lockStatus == "true")
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false;    // may we need to change this..not sure
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
@@ -657,10 +657,15 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
     {
         if(gameController!=null)
         {
-            if(_isInitialized)
+            if(_isInitialized && gameController.IsPaidUser)
             {
                 gameController.ShowLoadingPanelOnlyTransparent();
                 Invoke("UseThisDress", .2f);
+            }
+            else if(!gameController.IsPaidUser)
+            {
+                gameController.InstantiateInfoPopupForPurchase();
+                return;
             }
         }
     }

@@ -1946,7 +1946,7 @@ public class SelectDressController : MonoBehaviour {
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if(!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;    // may we need to change this..not sure
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
@@ -1985,7 +1985,7 @@ public class SelectDressController : MonoBehaviour {
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;    // may we need to change this..not sure
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
@@ -2043,7 +2043,7 @@ public class SelectDressController : MonoBehaviour {
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;   // may we need to change this..not sure
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }
@@ -2078,7 +2078,7 @@ public class SelectDressController : MonoBehaviour {
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
-                    d.GetComponent<Button>().interactable = false;
+                    //d.GetComponent<Button>().interactable = false;   // may we need to change this..not sure
                     d.transform.GetChild(0).gameObject.SetActive(true);
                 }
             }

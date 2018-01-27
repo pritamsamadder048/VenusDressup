@@ -110,7 +110,7 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
 
         if (!gameController.IsPaidUser && lockStatus == "true")
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false; 
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
@@ -239,7 +239,7 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
 
         if (!gameController.IsPaidUser && lockStatus == "true")
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false;
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
@@ -630,17 +630,22 @@ public class FemaleWigProperties : MonoBehaviour , ISerializationCallbackReceive
     {
         if(gameController!=null)
         {
-            if(_isInitialized)
+            if(_isInitialized && gameController.IsPaidUser)
             {
                 gameController.ShowLoadingPanelOnlyTransparent();
                 Invoke("UseThisWig", .2f);
+            }
+            else if (!gameController.IsPaidUser)
+            {
+                gameController.InstantiateInfoPopupForPurchase();
+                return;
             }
         }
     }
 
     public void UseThisWig()
     {
-        if (_isInitialized)
+        if (_isInitialized && gameController.IsPaidUser)
         {
             gameController.InstantiateNotInteractablePanel();
             gameController.selectDressController.PutOnWigDynamically(this);

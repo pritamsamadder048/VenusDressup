@@ -110,10 +110,10 @@ public class SceneEditorController : MonoBehaviour {
         if (dressImage.color.a > 0 && dressImage.gameObject.activeSelf && dressImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectDressPrefab, container.transform);
-            sceneObjectDress = g.GetComponent<Image>();
+            sceneObjectDress = g.transform.GetChild(0).GetComponent<Image>();
 
             g.GetComponent<Button>().onClick.AddListener(OnclickDressSceneObject);
-            g.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(RemoveDressFromScene);
+            g.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(RemoveDressFromScene);
             sceneObjectDress.sprite = Sprite.Create(gameController.currentDressTexture, new Rect(0, 0, gameController.currentDressTexture.width, gameController.currentDressTexture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectDress.gameObject.SetActive(true);
             totalObjects += 1;
@@ -122,11 +122,11 @@ public class SceneEditorController : MonoBehaviour {
         if (wigImage.color.a > 0 && wigImage.gameObject.activeSelf && wigImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectWigPrefab, container.transform);
-            sceneObjectWig = g.GetComponent<Image>();
+            sceneObjectWig = g.transform.GetChild(0).GetComponent<Image>();
 
             g.GetComponent<Button>().onClick.AddListener(OnclickWigSceneObject);
 
-            g.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(RemoveWigFromScene);
+            g.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(RemoveWigFromScene);
             sceneObjectWig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectWig.gameObject.SetActive(true);
             totalObjects += 1;
@@ -161,10 +161,10 @@ public class SceneEditorController : MonoBehaviour {
         if (maleWigImage.color.a > 0 && maleWigImage.gameObject.activeSelf && maleWigImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectMaleWigPrefab, container.transform);
-            sceneObjectMaleWig = g.GetComponent<Image>();
+            sceneObjectMaleWig = g.transform.GetChild(0).GetComponent<Image>();
 
             g.GetComponent<Button>().onClick.AddListener(OnClickMaleWigSceneObject);
-            g.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(RemoveMaleWigFromScene);
+            g.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(RemoveMaleWigFromScene);
 
             sceneObjectMaleWig.sprite = Sprite.Create(gameController.maleWig.sprite.texture, new Rect(0, 0, gameController.maleWig.sprite.texture.width, gameController.maleWig.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectMaleWig.gameObject.SetActive(true);
@@ -174,10 +174,10 @@ public class SceneEditorController : MonoBehaviour {
         if (maleTieImage.color.a > 0 && maleTieImage.gameObject.activeSelf && maleTieImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectMaleTiePrefab, container.transform);
-            sceneObjectMaleTie = g.GetComponent<Image>();
+            sceneObjectMaleTie = g.transform.GetChild(0).GetComponent<Image>();
 
             g.GetComponent<Button>().onClick.AddListener(OnClickMaleTieSceneObject);
-            g.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(RemoveMaleTieFromScene);
+            g.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(RemoveMaleTieFromScene);
 
             sceneObjectMaleTie.sprite = Sprite.Create(gameController.maleTie.sprite.texture, new Rect(0, 0, gameController.maleTie.sprite.texture.width, gameController.maleTie.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectMaleTie.gameObject.SetActive(true);

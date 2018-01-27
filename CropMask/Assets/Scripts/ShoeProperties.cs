@@ -88,7 +88,7 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
 
         if (!gameController.IsPaidUser && lockStatus=="true")
         {
-            GetComponent<Button>().interactable = false;
+            //GetComponent<Button>().interactable = false;
             transform.GetChild(0).gameObject.SetActive(true);
         }
 
@@ -329,11 +329,20 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
     {
         if(gameController!=null)
         {
-            if(_isInitialized)
+            if(_isInitialized && gameController.IsPaidUser)
             {
                 gameController.ShowLoadingPanelOnlyTransparent();
 
                 Invoke("UseThisShoe", .2f);
+            }
+            else if (!gameController.IsPaidUser)
+            {
+                gameController.InstantiateInfoPopupForPurchase();
+            }
+            else
+            {
+                gameController.HideLoadingPanelOnlyTransparent();
+                return;
             }
         }
     }
