@@ -134,6 +134,8 @@ public class MaleController : MonoBehaviour {
     {
         ResetMalePanel(true);
         StopAllCoroutines();
+        DiscardEditMaleWig();
+        DiscardEditMaleTie();
     }
 
     public void SetCurrentMaleIndexAndRotation()
@@ -587,7 +589,7 @@ public class MaleController : MonoBehaviour {
         form.AddField("body_type", maleName);
         //form.AddField("model_type", "M");
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/maleDresses", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/maleDresses", form))
         {
             //print(www.url);
             yield return www.SendWebRequest();
@@ -1149,7 +1151,7 @@ public class MaleController : MonoBehaviour {
 
     public void OnClickSelectMale(bool newState)
     {
-        gameController.ToggleFace(false,false);
+        //gameController.ToggleFace(false,false);
         //maleButtonObjects[0].GetComponent<Toggle>().isOn = newState;
         gameController.ToggleOptionSideMenu(2);
         for (int i = 0; i < maleButtonObjects.Length; i++)
@@ -1169,6 +1171,10 @@ public class MaleController : MonoBehaviour {
 
         if (newState)
         {
+            //maleButtonObjects[0].GetComponent<Toggle>().isOn = true;
+            //maleButtonObjects[1].GetComponent<Toggle>().isOn = false;
+            //maleButtonObjects[2].GetComponent<Toggle>().isOn = false;
+            gameController.DeActiveSceneEditorController();
             ToggleSideMenuMale(0, 2);
             ToggleSideMenuMale(1, 2);
             editButtons[0].SetActive(false);
@@ -1188,7 +1194,7 @@ public class MaleController : MonoBehaviour {
         }
         else
         {
-            
+            gameController.ActiveSceneEditorController();
             //editButtons[0].SetActive(false);
         }
     }
@@ -1217,12 +1223,17 @@ public class MaleController : MonoBehaviour {
 
         if (newState)
         {
+            //maleButtonObjects[1].GetComponent<Toggle>().isOn = true;
+            //maleButtonObjects[0].GetComponent<Toggle>().isOn = false;
+            //maleButtonObjects[2].GetComponent<Toggle>().isOn = false;
             ToggleSideMenuMale(0, 1, maleButtonObjects[1]);
+            gameController.ActiveSceneEditorController();
             //maleRotationController.HideUnSelectedShapes(newState);
 
             //maleAcceptDiscardSidePanels[1].SetActive(true);
 
             SetPreviouslyActive(maleSideMenus[0], maleOptionPanel, maleButtonObjects[1]);
+            StopCoroutine(HideProjectorShowMainMaleModel());
             StartCoroutine(HideProjectorShowMainMaleModel());
             maleNextPrevButtonParent.SetActive(false);
             if (gameController.maleWig.transform.parent.gameObject.activeSelf && gameController.maleWig.gameObject.activeSelf && gameController.maleWig.color.a > 0)
@@ -1234,12 +1245,14 @@ public class MaleController : MonoBehaviour {
             {
                 editButtons[0].SetActive(false);
             }
-            
+
+            maleButtonObjects[1].GetComponent<Toggle>().isOn = true;
         }
         else
         {
             ToggleSideMenuMale(0);
             editButtons[0].SetActive(false);
+            maleButtonObjects[1].GetComponent<Toggle>().isOn = false;
         }
     }
 
@@ -1265,7 +1278,11 @@ public class MaleController : MonoBehaviour {
 
         if (newState)
         {
+            //maleButtonObjects[2].GetComponent<Toggle>().isOn = true;
+            //maleButtonObjects[1].GetComponent<Toggle>().isOn = false;
+            //maleButtonObjects[0].GetComponent<Toggle>().isOn = false;
             ToggleSideMenuMale(1, 1, maleButtonObjects[2]);
+            gameController.ActiveSceneEditorController();
             //maleRotationController.HideUnSelectedShapes(newState);
 
             //maleAcceptDiscardSidePanels[2].SetActive(true);
@@ -1300,7 +1317,7 @@ public class MaleController : MonoBehaviour {
             gameController.maleProjectionParent.SetActive(false);
             if (gameController.IsUsingCustomFace())
             {
-                gameController.ToggleFace(true, false);
+                //gameController.ToggleFace(true, false);
             }
         };
         
@@ -1426,6 +1443,7 @@ public class MaleController : MonoBehaviour {
         gameController.maleWig.color = new Color(currentMaleWigColor.r, currentMaleWigColor.g, currentMaleWigColor.b,1f);
         DeactivateAllEditPanels();
         gameController.ActiveSceneEditorController();
+        gameController.ZoomOutMaleModel();
     }
 
 
@@ -1462,6 +1480,7 @@ public class MaleController : MonoBehaviour {
         gameController.currentMaleWigColor= currentMaleWigColor = gameController.maleWig.color;
         DeactivateAllEditPanels();
         gameController.ActiveSceneEditorController();
+        gameController.ZoomOutMaleModel();
     }
 
     public void ActiveMaleWigEditSliders(bool setAsMaleWig=false)
@@ -1554,6 +1573,7 @@ public class MaleController : MonoBehaviour {
         ActiveMaleWigEditSliders(true);
         wigEditPanel.GetComponent<RectTransform>().DOAnchorPosY(0f, .3f);
         ToggleMaleWigColorPanel(true);
+        gameController.ZoomInMaleModel();
     }
 
 
@@ -1569,6 +1589,7 @@ public class MaleController : MonoBehaviour {
         gameController.maleTie.color = new Color(currentMaleTieColor.r, currentMaleTieColor.g, currentMaleTieColor.b,1f);
         DeactivateAllEditPanels();
         gameController.ActiveSceneEditorController();
+        gameController.ZoomOutMaleModel();
     }
 
     public void AcceptEditTie()
@@ -1576,6 +1597,7 @@ public class MaleController : MonoBehaviour {
         gameController.currentMaleTieColor=currentMaleTieColor= gameController.maleTie.color;
         DeactivateAllEditPanels();
         gameController.ActiveSceneEditorController();
+        gameController.ZoomOutMaleModel();
     }
 
 
@@ -1700,6 +1722,7 @@ public class MaleController : MonoBehaviour {
         ActiveMaleTieEditSliders(true);
         tieEditPanel.GetComponent<RectTransform>().DOAnchorPosY(0f, .3f);
         ToggleMaleTieColorPanel(true);
+        gameController.ZoomInMaleModel(); ;
     }
 
 
@@ -1751,6 +1774,7 @@ public class MaleController : MonoBehaviour {
 
         gameController.currentMaleWigProperty = null;
         editButtons[0].SetActive(false);
+        gameController.ZoomOutMaleModel();
         return;
     }
 

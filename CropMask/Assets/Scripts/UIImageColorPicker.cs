@@ -22,6 +22,8 @@ public class UIImageColorPicker : MonoBehaviour
     public bool dressbrightness = false;
     public bool wigcolor = false;
     public bool wigbrightness = false;
+    public bool shoecolor = false;
+    public bool shoebrightness = false;
 
     public void Start()
 	{
@@ -47,20 +49,16 @@ public class UIImageColorPicker : MonoBehaviour
 	{
 		if (resetSlider)
 		{
-			if(wigbrightness || dressbrightness)
-            {
-                base.GetComponent<Slider>().value = 0.5f; //base.GetComponent<Slider>().maxValue;
-            }
-            else
-            {
-                base.GetComponent<Slider>().value = 0.5f;// base.GetComponent<Slider>().minValue;
-            }
+			
+            base.GetComponent<Slider>().value = 0.5f; //base.GetComponent<Slider>().maxValue;
+            
+           
 		}
         activated = true;
         //this.ValueChangeCheck();
         shouldChangeToGrayScale = true;
 
-        if (wigbrightness || dressbrightness)
+        if (wigbrightness || dressbrightness || shoebrightness)
         {
             this.mainSlider.onValueChanged.AddListener(delegate
             {
@@ -68,7 +66,7 @@ public class UIImageColorPicker : MonoBehaviour
 
             });
         }
-        else if(wigcolor || dresscolor)
+        else if(wigcolor || dresscolor || shoecolor)
         {
 
             this.mainSlider.onValueChanged.AddListener(delegate
@@ -81,14 +79,10 @@ public class UIImageColorPicker : MonoBehaviour
     public void DeactivateColorSlider()
     {
         activated = false;
-        if (wigbrightness || dressbrightness)
-        {
-            base.GetComponent<Slider>().value = 0.5f;// base.GetComponent<Slider>().maxValue;
-        }
-        else
-        {
-            base.GetComponent<Slider>().value = 0.5f;// base.GetComponent<Slider>().minValue;
-        }
+        
+        
+        base.GetComponent<Slider>().value = 0.5f;// base.GetComponent<Slider>().minValue;
+        
 
 
         this.mainSlider.onValueChanged.RemoveAllListeners();
@@ -124,6 +118,11 @@ public class UIImageColorPicker : MonoBehaviour
             {
                 color.r = value;
                 gameController.selectDressController.wigColor = value;
+            }
+            if (shoecolor)
+            {
+                color.r = value;
+                gameController.selectDressController.shoeColor = value;
             }
             print("Later color is : " + color.ToString());
             this.targetImage.GetComponent<Image>().color = color;
@@ -200,6 +199,11 @@ public class UIImageColorPicker : MonoBehaviour
             {
                 //color = Color.HSVToRGB(gameController.selectDressController.wigColor, s, value);
                 gameController.selectDressController.wigBrightness = value;
+            }
+            if (shoebrightness)
+            {
+                //color = Color.HSVToRGB(gameController.selectDressController.wigColor, s, value);
+                gameController.selectDressController.shoeBrightness = value;
             }
             print("Later Brightness is : " + color.ToString());
             this.targetImage.GetComponent<Image>().color = color;

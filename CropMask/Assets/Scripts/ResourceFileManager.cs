@@ -30,7 +30,7 @@ public  class ResourceFileManager : MonoBehaviour {
     public string sceneLoadingInfoString = "Loading Game : {0} %";
 
     [HideInInspector]
-    public string imageUrlFormat = "http://demowebz.cu.cc/venusfashion/img/item_image/{0}";
+    public string imageUrlFormat = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/img/item_image/{0}";
 
     public Dictionary<string, string> dataPathDict;
     public string resourceDataPath;
@@ -48,6 +48,7 @@ public  class ResourceFileManager : MonoBehaviour {
     public GameObject checkForUpdatePanel;
     public GameObject firstInstallPanel;
     public GameObject loadMainScenePanel;
+    public GameObject updateAvailablePanel;
     public GameObject retryButton;
 
     public object lockObjectFileChecked=new object();
@@ -70,14 +71,17 @@ public  class ResourceFileManager : MonoBehaviour {
     public bool DownloadAll = false;
 
 
+    public bool updateDownloader = false;
+
+
     bool sceneIsNotLoaded = true;
 
     private void Awake()
     {
 
-        firstInstallUrl = "http://demowebz.cu.cc/venusfashion/api/Headings/firstTime";
-        testUrl = "http://demowebz.cu.cc/venusfashion/api/Headings/test";
-        defaultUrl = "http://demowebz.cu.cc/venusfashion/api/Headings";
+        firstInstallUrl = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/firstTime";
+        testUrl = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/test";
+        defaultUrl = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings";
         resourceDataPath = Application.persistentDataPath;
         if (Application.platform != RuntimePlatform.OSXPlayer)
         {
@@ -111,29 +115,63 @@ public  class ResourceFileManager : MonoBehaviour {
         totalDownloadableFile = -999;
         totalFileDownloaded = 0;
         downloadPercent = 0.0f;
-        imageUrlFormat = "http://demowebz.cu.cc/venusfashion/img/item_image/{0}";
+        imageUrlFormat = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/img/item_image/{0}";
     downloadInfoString = "Downloading : {0} %\n[{2}/{1}]";
 
         isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
     }
     // Use this for initialization
     void Start () {
-        totalDownloadableFile = -999;
-        totalFileDownloaded = 0;
-        downloadPercent = 0.0f;
-        imageUrlFormat = "http://demowebz.cu.cc/venusfashion/img/item_image/{0}";
-        downloadInfoString = "Downloading : {0} %\n[{2}/{1}]";
-        dmo = new MiniJsonObject();
-        if(standAloneDownloader)
+        if(!updateDownloader)
         {
+            StartCoroutine(CreateDirectories());
+            int isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
             if(isNewInstall==1)
             {
-                checkForUpdatePanel.SetActive(false);
-                firstInstallPanel.SetActive(true);
+                ExtractPreloadableData();
             }
+            
+            //return;
+            totalDownloadableFile = -999;
+            totalFileDownloaded = 0;
+            downloadPercent = 0.0f;
+            imageUrlFormat = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/img/item_image/{0}";
+            downloadInfoString = "Downloading : {0} %\n[{2}/{1}]";
+            dmo = new MiniJsonObject();
+            if (standAloneDownloader)
+            {
+                //if (isNewInstall == 1)
+                //{
+                //    checkForUpdatePanel.SetActive(false);
+                //    firstInstallPanel.SetActive(true);
+                //}
+                StartCoroutine(CreateDirectories());
+                StartCoroutine(DownloadAllFile0());
+
+            }
+        }
+        else
+        {
             StartCoroutine(CreateDirectories());
-            StartCoroutine(DownloadAllFile0());
-           
+            //ExtractPreloadableData();
+            //return;
+            totalDownloadableFile = -999;
+            totalFileDownloaded = 0;
+            downloadPercent = 0.0f;
+            imageUrlFormat = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/img/item_image/{0}";
+            downloadInfoString = "Downloading : {0} %\n[{2}/{1}]";
+            dmo = new MiniJsonObject();
+            if (standAloneDownloader)
+            {
+                //if (isNewInstall == 1)
+                //{
+                //    checkForUpdatePanel.SetActive(false);
+                //    firstInstallPanel.SetActive(true);
+                //}
+                //StartCoroutine(CreateDirectories());
+                StartCoroutine(DownloadAllFile02());
+
+            }
         }
     }
 	
@@ -151,7 +189,13 @@ public  class ResourceFileManager : MonoBehaviour {
     {
         if(fileChecked==totalDownloadableFile && sceneIsNotLoaded)
         {
-            StartCoroutine(LoadMainScene());
+            PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+            if (updateDownloader)
+            {
+                PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+            }
+            SendFileDownloadedMessageToServer();
+            StartCoroutine(LoadMainSceneAsync());
             sceneIsNotLoaded = false;
         }
     }
@@ -163,7 +207,84 @@ public  class ResourceFileManager : MonoBehaviour {
     }
 
     
+    
 
+
+    public void ExtractPreloadableData()
+    {
+        try
+        {
+            string preloadData = Path.Combine(Application.streamingAssetsPath, "PreparedData");
+            //string preloadData = Path.Combine(Application.persistentDataPath, "resources.zip");
+            preloadData = Path.Combine(preloadData, "resources/images.zip");
+            //preloadData = Path.Combine(preloadData, "resources/images");
+            print(string.Format("datapath : {0}", preloadData));
+            print(string.Format("preloadable data Exists : {0}", File.Exists(preloadData)));
+            string dataextractionPath = Path.Combine(Application.persistentDataPath, "resources/images.zip");
+            print(string.Format("extraction path : {0} ", dataextractionPath));
+            //Directory.Move(preloadData, dataextractionDir);
+
+            if (Application.platform == RuntimePlatform.Android)
+            {
+
+                WWW loadData = new WWW(preloadData);
+                while (!loadData.isDone)
+                {
+                    continue;
+                }
+                File.WriteAllBytes(dataextractionPath, loadData.bytes);
+            }
+            else
+            {
+                File.Copy(preloadData, dataextractionPath);
+            }
+
+            //ZipManager.Decompress(new FileInfo(dataextractionPath));
+            //ZipUtil.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
+            SharpUnzip.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
+
+            //File.Delete(preloadData);
+            File.Delete(dataextractionPath);
+
+        }
+        catch (Exception e)
+        {
+            print(string.Format("error occured while extracting preload data : {0}", e.Message));
+        }
+
+    }
+
+
+
+
+    public void CheckForUpdate()
+    {
+        int isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
+        string defaultUrl = /*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings";
+        WWWForm form = new WWWForm();
+        string device_id = "";
+        string device_type = "";
+#if UNITY_ANDROID
+        device_type = "A";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+
+#elif UNITY_IPHONE
+        device_type="I";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+#elif UNITY_EDITOR
+        device_type = "A";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+#endif
+        form.AddField("device_id", device_id);
+        form.AddField("device_type", device_type);
+
+        if (DownloadAll || isNewInstall==1)
+        {
+            defaultUrl = firstInstallUrl;
+        }
+
+
+    }
 
 #region ZERO
     public IEnumerator DownloadAllFile0()
@@ -228,28 +349,44 @@ public  class ResourceFileManager : MonoBehaviour {
                         downloadInfoUIText.text = string.Format(downloadInfoString, downloadPercent, totalDownloadableFile, totalFileDownloaded);
                         print(string.Format("total male image : {0}   total Female Image : {1}", malesArrayData.Count, femalesArrayData.Count));
 
-                        if (femalesArrayData.Count > 0)
+
+
+                        if(femalesArrayData.Count>0 || malesArrayData .Count>0)
                         {
                             checkForUpdatePanel.SetActive(false);
-                            firstInstallPanel.SetActive(false);
-                            downloadInfoPanel.SetActive(true);
-                            yield return new WaitForFixedUpdate();
-                            StartCoroutine(DownloadFemalesData0(femalesArrayData));
+                            PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+                            InstantiateUpdateAvailableInfoPopup(femalesArrayData,malesArrayData);
                         }
-                        if (malesArrayData.Count > 0)
+                        else
                         {
-                            checkForUpdatePanel.SetActive(false);
-                            firstInstallPanel.SetActive(false);
-                            downloadInfoPanel.SetActive(true);
-                            yield return new WaitForFixedUpdate();
-                            StartCoroutine(DownloadMalesData0(malesArrayData));
+                            PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+                            StartCoroutine(LoadMainSceneAsync());
                         }
+
+
+                        //if (femalesArrayData.Count > 0)
+                        //{
+                        //    checkForUpdatePanel.SetActive(false);
+                        //    firstInstallPanel.SetActive(false);
+                        //    downloadInfoPanel.SetActive(true);
+                        //    yield return new WaitForFixedUpdate();
+                        //    StartCoroutine(DownloadFemalesData0(femalesArrayData));
+                        //}
+                        //if (malesArrayData.Count > 0)
+                        //{
+                        //    checkForUpdatePanel.SetActive(false);
+                        //    firstInstallPanel.SetActive(false);
+                        //    downloadInfoPanel.SetActive(true);
+                        //    yield return new WaitForFixedUpdate();
+                        //    StartCoroutine(DownloadMalesData0(malesArrayData));
+                        //}
 
                     }
                     else if(error_code==2)
                     {
                         //LoadMainSceneStatic();
-                        StartCoroutine("LoadMainSceneAsync");
+                        PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+                        StartCoroutine(LoadMainSceneAsync());
                     }
 
 
@@ -303,13 +440,144 @@ public  class ResourceFileManager : MonoBehaviour {
                         totalDownloadableFile = malesArrayData.Count + femalesArrayData.Count;
                         downloadInfoUIText.text = string.Format(downloadInfoString, downloadPercent, totalDownloadableFile, totalFileDownloaded);
                         print(string.Format("total male image : {0}   total Female Image : {1}", malesArrayData.Count, femalesArrayData.Count));
-                        if(totalDownloadableFile==0)
+
+
+
+                        if (femalesArrayData.Count > 0 || malesArrayData.Count > 0)
                         {
-                            LoadMainSceneStatic();
+                            checkForUpdatePanel.SetActive(false);
+                            PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+                            InstantiateUpdateAvailableInfoPopup(femalesArrayData, malesArrayData);
                         }
+                        else
+                        {
+                            PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+                            StartCoroutine(LoadMainSceneAsync());
+                        }
+
+
+                        //if (femalesArrayData.Count > 0)
+                        //{
+                        //    checkForUpdatePanel.SetActive(false);
+                        //    firstInstallPanel.SetActive(false);
+                        //    downloadInfoPanel.SetActive(true);
+                        //    yield return new WaitForFixedUpdate();
+                        //    StartCoroutine(DownloadFemalesData0(femalesArrayData));
+                        //}
+                        //if (malesArrayData.Count > 0)
+                        //{
+                        //    checkForUpdatePanel.SetActive(false);
+                        //    firstInstallPanel.SetActive(false);
+                        //    downloadInfoPanel.SetActive(true);
+                        //    yield return new WaitForFixedUpdate();
+                        //    StartCoroutine(DownloadMalesData0(malesArrayData));
+                        //}
+
+
+                    }
+                    else if(error_code==2)
+                    {
+                        //LoadMainSceneStatic();
+                        StartCoroutine("LoadMainSceneAsync");
+                    }
+                    else
+                    {
+                        InstantiateInfoPopup("Unable To Fetch Data From Server");
+                        retryButton.SetActive(true);
+                        Debug.Log(www.error);
+                    }
+
+
+
+                }
+                //www.Dispose();
+            }
+
+
+        }
+
+    }
+
+
+
+
+
+    public IEnumerator DownloadAllFile02()
+    {
+        isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
+        WWWForm form = new WWWForm();
+        string device_id = "";
+        string device_type = "";
+#if UNITY_ANDROID
+        device_type = "A";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+
+#elif UNITY_IPHONE
+        device_type="I";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+#elif UNITY_EDITOR
+        device_type = "A";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+#endif
+        form.AddField("device_id", device_id);
+        form.AddField("device_type", device_type);
+
+        if (DownloadAll)
+        {
+            firstInstallUrl = testUrl;
+        }
+
+        if (isNewInstall == 1)
+        {
+            Debug.Log(firstInstallUrl);
+            using (UnityWebRequest www = UnityWebRequest.Post(firstInstallUrl, form))
+            {
+                //print(www.url);
+                yield return www.SendWebRequest();
+
+                if (www.isNetworkError || www.isHttpError)
+                {
+                    InstantiateInfoPopup("No Internet Connection");
+                    retryButton.SetActive(true);
+                    Debug.Log(www.error);
+                }
+                else
+                {
+                    Debug.Log("Form upload complete! first time update");
+
+                    string jsonString = www.downloadHandler.text;
+                    print(jsonString);
+
+
+
+
+                    dmo = new MiniJsonObject(jsonString);
+
+                    int error_code = dmo.GetField("error_code", -1);
+                    print(error_code);
+                    if (error_code == 0)
+                    {
+                        MiniJsonObject rData = dmo.GetJsonObject("data");
+                        MiniJsonArray malesArrayData = rData.GetJsonArray("males");
+                        MiniJsonArray femalesArrayData = rData.GetJsonArray("females");
+                        totalDownloadableFile = malesArrayData.Count + femalesArrayData.Count;
+                        downloadInfoUIText.text = string.Format(downloadInfoString, downloadPercent, totalDownloadableFile, totalFileDownloaded);
+                        print(string.Format("first time update total male image : {0}   total Female Image : {1}", malesArrayData.Count, femalesArrayData.Count));
+
+
+
+                        if (femalesArrayData.Count > 0 || malesArrayData.Count > 0)
+                        {
+                            //checkForUpdatePanel.SetActive(false);
+                            PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+                            //InstantiateUpdateAvailableInfoPopup(femalesArrayData, malesArrayData);
+                        }
+
+
                         if (femalesArrayData.Count > 0)
                         {
                             checkForUpdatePanel.SetActive(false);
+                            firstInstallPanel.SetActive(false);
                             downloadInfoPanel.SetActive(true);
                             yield return new WaitForFixedUpdate();
                             StartCoroutine(DownloadFemalesData0(femalesArrayData));
@@ -317,6 +585,93 @@ public  class ResourceFileManager : MonoBehaviour {
                         if (malesArrayData.Count > 0)
                         {
                             checkForUpdatePanel.SetActive(false);
+                            firstInstallPanel.SetActive(false);
+                            downloadInfoPanel.SetActive(true);
+                            yield return new WaitForFixedUpdate();
+                            StartCoroutine(DownloadMalesData0(malesArrayData));
+                        }
+
+                    }
+                    else if (error_code == 2)
+                    {
+                        //LoadMainSceneStatic();
+                        PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+                        StartCoroutine(LoadMainSceneAsync());
+                    }
+
+
+
+                }
+                www.Dispose();
+            }
+        }
+
+        else
+        {
+            if (DownloadAll)
+            {
+                defaultUrl = firstInstallUrl;
+            }
+#if !UNITY_EDITOR
+        using (UnityWebRequest www = UnityWebRequest.Post(defaultUrl, form))  
+        //using (UnityWebRequest www = UnityWebRequest.Post(testUrl, form))
+#else
+            using (UnityWebRequest www = UnityWebRequest.Post(defaultUrl, form))
+#endif
+            {
+                //print(www.url);
+                yield return www.SendWebRequest();
+
+                if (www.isNetworkError || www.isHttpError)
+                {
+                    InstantiateInfoPopup("No Internet Connection");
+                    retryButton.SetActive(true);
+                    Debug.Log(www.error);
+                }
+                else
+                {
+                    Debug.Log("Form upload complete for update!");
+
+                    string jsonString = www.downloadHandler.text;
+                    print("Json String : " + jsonString);
+
+
+
+
+                    dmo = new MiniJsonObject(jsonString);
+
+                    int error_code = dmo.GetField("error_code", -1);
+                    print(error_code);
+                    if (error_code == 0)
+                    {
+                        MiniJsonObject rData = dmo.GetJsonObject("data");
+                        MiniJsonArray malesArrayData = rData.GetJsonArray("males");
+                        MiniJsonArray femalesArrayData = rData.GetJsonArray("females");
+                        totalDownloadableFile = malesArrayData.Count + femalesArrayData.Count;
+                        downloadInfoUIText.text = string.Format(downloadInfoString, downloadPercent, totalDownloadableFile, totalFileDownloaded);
+                        print(string.Format("update total male image : {0}   total Female Image : {1}", malesArrayData.Count, femalesArrayData.Count));
+
+
+                        if(femalesArrayData.Count > 0 || malesArrayData.Count > 0)
+                        {
+                            //checkForUpdatePanel.SetActive(false);
+                            PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+                            //InstantiateUpdateAvailableInfoPopup(femalesArrayData, malesArrayData);
+                        }
+
+
+                        if (femalesArrayData.Count > 0)
+                        {
+                            checkForUpdatePanel.SetActive(false);
+                            firstInstallPanel.SetActive(false);
+                            downloadInfoPanel.SetActive(true);
+                            yield return new WaitForFixedUpdate();
+                            StartCoroutine(DownloadFemalesData0(femalesArrayData));
+                        }
+                        if (malesArrayData.Count > 0)
+                        {
+                            checkForUpdatePanel.SetActive(false);
+                            firstInstallPanel.SetActive(false);
                             downloadInfoPanel.SetActive(true);
                             yield return new WaitForFixedUpdate();
                             StartCoroutine(DownloadMalesData0(malesArrayData));
@@ -324,9 +679,11 @@ public  class ResourceFileManager : MonoBehaviour {
 
 
                     }
-                    else if(error_code==2)
+                    else if (error_code == 2)
                     {
                         //LoadMainSceneStatic();
+                        PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+                        SendFileDownloadedMessageToServer();
                         StartCoroutine("LoadMainSceneAsync");
                     }
                     else
@@ -598,14 +955,16 @@ public  class ResourceFileManager : MonoBehaviour {
 
 
 
+
+
     #region GOOD
 
 
     public IEnumerator DownloadAllFile()
     {
         WWWForm form = new WWWForm();
-        string device_id="";
-        string device_type="";
+        string device_id = "";
+        string device_type = "";
 #if UNITY_ANDROID
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
@@ -621,9 +980,9 @@ public  class ResourceFileManager : MonoBehaviour {
         form.AddField("device_type", device_type);
 
 #if !UNITY_EDITOR
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings", form))  
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings", form))  
 #else
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/test", form)) // debug
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/test", form)) // debug
 #endif
         {
             //print(www.url);
@@ -693,8 +1052,8 @@ public  class ResourceFileManager : MonoBehaviour {
     public IEnumerator DownloadAllFile2()
     {
         WWWForm form = new WWWForm();
-        string device_id="";
-        string device_type="";
+        string device_id = "";
+        string device_type = "";
 #if UNITY_ANDROID
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
@@ -709,9 +1068,9 @@ public  class ResourceFileManager : MonoBehaviour {
         form.AddField("device_id", device_id);
         form.AddField("device_type", device_type);
 #if !UNITY_EDITOR
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings", form))  
-#else
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/test", form)) // debug
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings", form))  
+#else                                                                             
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/test", form)) // debug
 #endif
         {
             //print(www.url);
@@ -1490,7 +1849,59 @@ public  class ResourceFileManager : MonoBehaviour {
 
 
 
+    public void SendFileDownloadedMessageToServer()
+    {
+        WWWForm form = new WWWForm();
+        string device_id = "";
+        string device_type = "";
+#if UNITY_ANDROID
+        device_type = "A";
+        device_id = SystemInfo.deviceUniqueIdentifier;
 
+#elif UNITY_IPHONe
+        device_type="I";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+#elif UNITY_EDITOR
+        device_type="A";
+        device_id = SystemInfo.deviceUniqueIdentifier;
+#endif
+        form.AddField("device_id", device_id);
+        form.AddField("device_type", device_type);
+
+
+
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/fileDownloaded", form)) // debug
+
+        {
+            //print(www.url);
+            www.SendWebRequest();
+            print("sent request to inform server that update is downladed");
+            while(!www.isDone )
+            {
+                if(www.isNetworkError || www.isHttpError)
+                {
+                    break;
+                }
+                continue;
+            }
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                //InstantiateInfoPopup("No Internet Connection");
+                //retryButton.SetActive(true);
+                Debug.Log(www.error);
+                return;
+            }
+            else
+            {
+                print("informed to server ");
+                print("server message : "+www.downloadHandler.text);
+            }
+
+        }
+        //#endif
+        PlayerPrefs.SetInt("isNewInstall", 0);
+    }
 
     public IEnumerator LoadMainScene()
     {
@@ -1515,7 +1926,7 @@ public  class ResourceFileManager : MonoBehaviour {
 
 
         
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/fileDownloaded", form)) // debug
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/fileDownloaded", form)) // debug
 
         {
             //print(www.url);
@@ -1585,6 +1996,36 @@ public  class ResourceFileManager : MonoBehaviour {
         b.onClick.AddListener(() => { Destroy(g); });
     }
 
+
+    public void InstantiateUpdateAvailableInfoPopup(MiniJsonArray femalesArrayData=null,MiniJsonArray malesArrayData=null)
+    {
+        GameObject g = Instantiate<GameObject>(updateAvailablePanel, canvasObject.transform);
+
+        Button b1 = g.transform.GetChild(2).GetComponent<Button>();
+        Button b2 = g.transform.GetChild(3).GetComponent<Button>();
+        b1.onClick.AddListener(() => {
+            if (femalesArrayData.Count > 0)
+            {
+                checkForUpdatePanel.SetActive(false);
+                firstInstallPanel.SetActive(false);
+                downloadInfoPanel.SetActive(true);
+                //yield return new WaitForFixedUpdate();
+                StartCoroutine(DownloadFemalesData0(femalesArrayData));
+            }
+            if (malesArrayData.Count > 0)
+            {
+                checkForUpdatePanel.SetActive(false);
+                firstInstallPanel.SetActive(false);
+                downloadInfoPanel.SetActive(true);
+                //yield return new WaitForFixedUpdate();
+                StartCoroutine(DownloadMalesData0(malesArrayData));
+            }
+            Destroy(g); });
+        b2.onClick.AddListener(() => {
+            PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+            StartCoroutine(LoadMainSceneAsync());
+            Destroy(g); });
+    }
 
 
 

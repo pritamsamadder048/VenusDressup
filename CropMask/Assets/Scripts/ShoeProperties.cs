@@ -31,6 +31,8 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
     // Use this for initialization
 
 
+    public float[] shoeColor = new float[] { 0.5f, 0.5f, 0.5f, 1f };
+
     public bool IsInitialized
     {
         get
@@ -60,6 +62,21 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
 
     }
 
+
+    public void Clone(ShoeProperties sp)
+    {
+        this.shoeColor = new float[] { sp.shoeColor[0], sp.shoeColor[1],sp.shoeColor[2], sp.shoeColor[3] };
+        this.imgName = sp.imgName;
+        this.finalImageUrl = sp.finalImageUrl;
+        this.wearingCode = sp.wearingCode;
+        this.mfType = sp.mfType;
+        this.finalSavePath = sp.finalSavePath;
+        this.lockStatus = sp.lockStatus;
+        this.serializedJsonObject = sp.serializedJsonObject;
+        this.gameController = sp.gameController;
+        this.mo = sp.mo;
+
+    }
 
     public void InitializeShoeProperty(MiniJsonObject m)
     {
@@ -188,6 +205,143 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
         StartCoroutine(SetImage());
 
     }
+
+
+    public void InitializeShoeProperty(MiniJsonObject m, Color sc)
+    {
+        if (gameController == null)
+        {
+            gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        }
+
+        if (rfm == null)
+        {
+            rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
+        }
+        propertyType = "shoe";
+
+        GetComponent<Button>().onClick.RemoveAllListeners();
+        GetComponent<Button>().onClick.AddListener(InvokeUseThisShoe);
+
+        mo = m;
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(mo);
+
+        wearingCode = mo.GetField("type_id", -1);
+
+        imgName = mo.GetField("icon", "");
+
+        lockStatus = mo.GetField("lock_status", "false");
+
+        if (!gameController.IsPaidUser && lockStatus == "true")
+        {
+            //GetComponent<Button>().interactable = false;    // may we need to change this..not sure
+            transform.GetChild(0).gameObject.SetActive(true);
+        }
+
+        switch (wearingCode)
+        {
+            case 1: //download female dress
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_dressFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 2:  //download female wig
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 3:  //download female ornament
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_ornamentFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 4:  //download female shoe
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_shoeFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 5: //download male wig
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigMaleDataPAth"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 6: // download male tie
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_tieMaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+        }
+        shoeColor = new float[] { sc.r, sc.g, sc.b, sc.a };
+        _isInitialized = true;
+        StartCoroutine(SetImage());
+
+    }
+
+
 
     public void InitializeShoeProperty(string jsonString)
     {
@@ -319,11 +473,166 @@ public class ShoeProperties : MonoBehaviour , ISerializationCallbackReceiver
                 }
         }
 
+        shoeColor = new float[] { 0.5f, 0.5f, 0.5f, 1f };
         _isInitialized = true;
         print("successfully init shoe property");
         //StartCoroutine(SetImage());
 
     }
+
+
+    public void InitializeShoeProperty(string jsonString, Color sc)
+    {
+        if (jsonString == "" || jsonString == null)
+        {
+            IsInitialized = false;
+            return;
+        }
+        MiniJsonObject m = new MiniJsonObject(jsonString);
+        if (gameController == null)
+        {
+            gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        }
+
+        if (rfm == null)
+        {
+            rfm = GameObject.FindGameObjectWithTag("ResourceFileManager").GetComponent<ResourceFileManager>();
+        }
+        propertyType = "shoe";
+
+        //GetComponent<Button>().onClick.RemoveAllListeners();
+        //GetComponent<Button>().onClick.AddListener(UseThisDress);
+
+        mo = m;
+        serializedJsonObject = mo.ToString(); //MiniJSON.jsonEncode(mo);
+
+        wearingCode = mo.GetField("type_id", -1);
+
+        imgName = mo.GetField("icon", "");
+
+        lockStatus = mo.GetField("lock_status", "false");
+
+        //if (!gameController.IsPaidUser && lockStatus == "true")
+        //{
+        //    GetComponent<Button>().interactable = false;
+        //    transform.GetChild(0).gameObject.SetActive(true);
+        //}
+
+        switch (wearingCode)
+        {
+            case 1: //download female dress
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["dressFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_dressFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 2:  //download female wig
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["wigFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 3:  //download female ornament
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["ornamentFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_ornamentFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 4:  //download female shoe
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["shoeFemaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_shoeFemaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 5: //download male wig
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["wigMaleDataPAth"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_wigMaleDataPAth"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            case 6: // download male tie
+                {
+                    if (imgName != "")
+                    {
+                        finalImageUrl = string.Format(rfm.imageUrlFormat, imgName);
+                        finalSavePath = Path.Combine(rfm.dataPathDict["tieMaleDataPath"], imgName);
+                        //finalSavePath = Path.Combine(rfm.dataPathDict["thumb_tieMaleDataPath"], imgName);
+
+
+                        //StartCoroutine(DownloadImage(finalImageUrl, finalSavePath));
+
+                        //UpdateDownloadInfo();
+                    }
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+        }
+
+        shoeColor = new float[] { sc.r, sc.g, sc.b, sc.a };
+        _isInitialized = true;
+        print("successfully init shoeproperty");
+        //StartCoroutine(SetImage());
+
+    }
+
+
+    public void SetShoeColor(Color sc)
+    {
+        shoeColor = new float[] { sc.r, sc.g, sc.b, sc.a };
+    }
+    public void SetShoeColor(float[] sc)
+    {
+        shoeColor = new float[] { sc[0], sc[1], sc[2], sc[3] };
+    }
+
 
     public void InvokeUseThisShoe()
     {

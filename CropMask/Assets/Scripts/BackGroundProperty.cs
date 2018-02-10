@@ -87,7 +87,7 @@ public class BackGroundProperty : MonoBehaviour, ISerializationCallbackReceiver
         print("BackgroundProperty(InvokeUseThisBackgroundStatic) >>>  Gamecontroller init successfully");
         gameController.ShowLoadingPanelOnly();
         print("loading panel is shown");
-        Invoke("UseThisBackgroundStatic", .3f);
+        Invoke("UseThisBackgroundStatic", .1f);
     }
 
     public void UseThisBackgroundStatic()

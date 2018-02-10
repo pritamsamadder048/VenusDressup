@@ -36,8 +36,9 @@ public class SavedLookProperties : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-		
-	}
+        
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -107,7 +108,7 @@ public class SavedLookProperties : MonoBehaviour {
                 gameController.AcceptBodyShapeChange();
                 gameController.AcceptBodyToneChange();
                 gameController.AcceptEyeColorChange();
-
+                gameController.selectShapeController.SetBodyToneColor(sd.bodyToneColor);
                 
 
                 if(sd.maleData.maleIsShowing)
@@ -159,11 +160,31 @@ public class SavedLookProperties : MonoBehaviour {
                     }
                 }
 
+
+                if (sd.shoeProperty == null)
+                {
+                    try
+                    {
+                        if (sd.shoeProperty.imgName == "" || sd.shoeProperty.imgName == null)
+                        {
+                            sd.shoeProperty = new ShoeProperties();
+                            sd.shoeProperty.InitializeShoeProperty(sd.shoeData.serializedJsonObject);
+                            sd.shoeProperty.SetShoeColor(sd.shoeData.pColor);
+                        }
+                    }
+                    catch
+                    {
+                        sd.shoeProperty = new ShoeProperties();
+                        sd.shoeProperty.InitializeShoeProperty(sd.shoeData.serializedJsonObject);
+                        sd.shoeProperty.SetShoeColor(sd.shoeData.pColor);
+                    }
+                }
+
                 sd.ornamentProperty = new OrnamentProperties();
                 sd.ornamentProperty.InitializeOrnamentProperty(sd.ornamentData.serializedJsonObject);
 
-                sd.shoeProperty = new ShoeProperties();
-                sd.shoeProperty.InitializeShoeProperty(sd.shoeData.serializedJsonObject);
+                //sd.shoeProperty = new ShoeProperties();
+                //sd.shoeProperty.InitializeShoeProperty(sd.shoeData.serializedJsonObject);
 
                 if(sd.maleWigProperty==null&&sd.maleData.isWearingWig)
                 {
@@ -278,6 +299,7 @@ public class SavedLookProperties : MonoBehaviour {
                 if (sd.shoeProperty.imgName != null && sd.shoeProperty.imgName != "")
                 {
                     gameController.selectDressController.PutOnShoeDynamically(sd.shoeProperty);
+                    Color c = new Color(sd.shoeData.pColor[0], sd.shoeData.pColor[1], sd.shoeData.pColor[2], sd.shoeData.pColor[3]);
                 }
                 else
                 {

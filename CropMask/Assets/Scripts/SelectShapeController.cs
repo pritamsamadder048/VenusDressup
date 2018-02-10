@@ -44,7 +44,11 @@ public class SelectShapeController : MonoBehaviour {
     public float carouselSelectedRotation = 0f;
 
     public RawImage faceCloseup;
-    public SpriteRenderer femaleSprite;
+    //public SpriteRenderer femaleSprite;
+
+
+    public GameObject bodyToneColorSlider;
+    public BodyToneColorPicker bodyToneColorPicker;
 
     public float GetcarouselSelectedRotation()
     {
@@ -144,6 +148,26 @@ public class SelectShapeController : MonoBehaviour {
 
     }
 
+
+    public void SetBodyToneColor(Color color)
+    {
+        gameController.femaleModelImageObject.GetComponent<Image>().color = color;
+        gameController.currentBodyToneColor = color;
+    }
+
+    public void SetBodyToneColor(float[] color)
+    {
+        gameController.femaleModelImageObject.GetComponent<Image>().color = new Color(color[0], color[1], color[2], color[3]);
+        gameController.currentBodyToneColor= new Color(color[0], color[1], color[2], color[3]);
+    }
+
+
+    public void ResetToDefaultColor()
+    {
+        gameController.femaleModelImageObject.GetComponent<Image>().color = new Color(0.5f, 0.5f, 0.5f, 1f);
+    }
+
+
     public void PreLoadOnClickSelectShapeButton(bool newState)
     {
         if (gameController == null)
@@ -215,6 +239,8 @@ public class SelectShapeController : MonoBehaviour {
             previousButtonObject.SetActive(true);
             nextButtonObject.SetActive(true);
             rotationControllerObject.SetActive(true);
+            gameController.ZoomOutFemaleModel();
+            gameController.DeActiveSceneEditorController();
 
             if (gameController.autoAcceptChange)
             {
@@ -246,7 +272,10 @@ public class SelectShapeController : MonoBehaviour {
 			shapeButtonObjects[2].GetComponent<Toggle>().isOn = false;
             
         }
-
+        else
+        {
+            gameController.ActiveSceneEditorController();
+        }
 		shapeButtonObjects[0].GetComponent<Toggle>().isOn = newState;
 
     }
@@ -292,11 +321,19 @@ public class SelectShapeController : MonoBehaviour {
                 gameController.faceRawImage2.transform.parent.gameObject.SetActive(false);
             }
 
-//			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;
-//			shapeButtonObjects[1].GetComponent<Toggle>().isOn = false;
+            //			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;
+            //			shapeButtonObjects[1].GetComponent<Toggle>().isOn = false;
 
+
+            gameController.ZoomInFemaleModel();
+            bodyToneColorPicker.ActivateColorSlider(false);
 			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;
 			shapeButtonObjects[2].GetComponent<Toggle>().isOn = false;
+
+        }
+        else
+        {
+            bodyToneColorPicker.DeactivateColorSlider();
         }
 		shapeButtonObjects[1].GetComponent<Toggle>().isOn = newState;
 
@@ -342,7 +379,7 @@ public class SelectShapeController : MonoBehaviour {
             gameController.faceRawImage.transform.parent.gameObject.SetActive(false);
             gameController.faceRawImage2.transform.parent.gameObject.SetActive(false);
 
-            femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
+            //femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
             ToggleSideMenuSelectShape(0, 2);
             ToggleSideMenuSelectShape(1, 1, shapeButtonObjects[2]);
             gameController.ShowFemaleModelAndAppearings();
@@ -355,7 +392,7 @@ public class SelectShapeController : MonoBehaviour {
         else
         {
             ToggleSideMenuSelectShape(1, 2, shapeButtonObjects[2]);
-            gameController.ZoomOutFemaleModel();
+            //gameController.ZoomOutFemaleModel();
         }
 
         //faceCloseup.gameObject.SetActive(newState);
@@ -500,7 +537,7 @@ public class SelectShapeController : MonoBehaviour {
                 gameController.AcceptEyeColorChange(true);
             }
 
-            femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
+            //femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
         }
         catch
         {

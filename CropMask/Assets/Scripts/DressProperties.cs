@@ -693,7 +693,7 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
     {
         if (IsInitialized)
         {
-            //print("trying to load dress image from : " + finalSavePath);
+            print("trying to load dress image from : " + finalSavePath);
             string thumbnailpath = finalSavePath.Replace(imgName, "");
             thumbnailpath = Path.Combine(thumbnailpath, "thumb");
 
@@ -717,9 +717,11 @@ public class DressProperties : MonoBehaviour , ISerializationCallbackReceiver
                 //}
 
                 //DestroyImmediate(t2d, true);
+                print("Dress loaded");
             }
             else
             {
+                print("file does not exist  : " + finalSavePath);
                 Destroy(gameObject);
 
                 //gameController.selectDressController.dressCoroutineInQueue -= 1;

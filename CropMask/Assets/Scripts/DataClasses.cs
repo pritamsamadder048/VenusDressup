@@ -53,6 +53,7 @@ public class DressData
             finalSavePath = finalSavePath,
             lockStatus = lockStatus,
             serializedJsonObject = serializedJsonObject,
+            dressColor = pColor
         };
         
     }
@@ -82,8 +83,9 @@ public class FemaleWigData
         finalSavePath = p.finalSavePath;
         lockStatus = p.lockStatus;
         serializedJsonObject = p.serializedJsonObject;
-        _isInitialized = false;
         pColor = new float[] { pcolor.r, pcolor.g, pcolor.b, pcolor.a };
+        _isInitialized = false;
+        
     }
 
     public void DecodeData(out FemaleWigProperties p)
@@ -96,12 +98,65 @@ public class FemaleWigData
             finalImageUrl = finalImageUrl,
             finalSavePath = finalSavePath,
             lockStatus = lockStatus,
-            serializedJsonObject = serializedJsonObject
+            serializedJsonObject = serializedJsonObject,
+            wigColor=pColor
             
     };
         
     }
 }
+
+
+
+[Serializable]
+public class ShoeData
+{
+    public string propertyType = "shoe";
+
+    public int wearingCode;
+    public int mfType = 1;
+    public string imgName;
+    public string finalImageUrl;
+    public string finalSavePath;
+    public string lockStatus = "";
+    public string serializedJsonObject = "";
+    public bool _isInitialized = false;
+    public float[] pColor = new float[] { .5f, .5f, .5f, 1f };
+
+    public void EncodeData(ShoeProperties p, Color pcolor)
+    {
+
+        wearingCode = p.wearingCode;
+        mfType = p.mfType;
+        imgName = p.imgName;
+        finalImageUrl = p.finalImageUrl;
+        finalSavePath = p.finalSavePath;
+        lockStatus = p.lockStatus;
+        serializedJsonObject = p.serializedJsonObject;
+        pColor = new float[] { pcolor.r, pcolor.g, pcolor.b, pcolor.a };
+        _isInitialized = false;
+    }
+
+    public void DecodeData(out ShoeProperties p)
+    {
+        p = new ShoeProperties
+        {
+            wearingCode = wearingCode,
+            mfType = mfType,
+            imgName = imgName,
+            finalImageUrl = finalImageUrl,
+            finalSavePath = finalSavePath,
+            lockStatus = lockStatus,
+            serializedJsonObject = serializedJsonObject,
+            shoeColor=pColor
+        };
+
+
+    }
+}
+
+
+
 
 [Serializable]
 public class OrnamentData
@@ -145,49 +200,6 @@ public class OrnamentData
     }
 }
 
-[Serializable]
-public class ShoeData
-{
-    public string propertyType = "shoe";
-
-    public int wearingCode;
-    public int mfType = 1;
-    public string imgName;
-    public string finalImageUrl;
-    public string finalSavePath;
-    public string lockStatus = "";
-    public string serializedJsonObject = "";
-    public bool _isInitialized = false;
-
-    public void EncodeData(ShoeProperties p)
-    {
-        
-        wearingCode = p.wearingCode;
-        mfType = p.mfType;
-        imgName = p.imgName;
-        finalImageUrl = p.finalImageUrl;
-        finalSavePath = p.finalSavePath;
-        lockStatus = p.lockStatus;
-        serializedJsonObject = p.serializedJsonObject;
-        _isInitialized = false;
-    }
-
-    public void DecodeData(out ShoeProperties p)
-    {
-        p = new ShoeProperties
-        {
-            wearingCode = wearingCode,
-            mfType = mfType,
-            imgName = imgName,
-            finalImageUrl = finalImageUrl,
-            finalSavePath = finalSavePath,
-            lockStatus = lockStatus,
-            serializedJsonObject = serializedJsonObject
-        };
-
-
-    }
-}
 
 
 
@@ -371,6 +383,7 @@ public class SaveData
     public string shoeName;
     public string backgroundName;
     public bool isShowingMale=false;
+    public float[] bodyToneColor;
 
     [NonSerialized]
     public DressProperties dressProperty;
@@ -437,6 +450,7 @@ public class SaveData
         this.femaleWigProperty = wigproperty;
         this.ornamentProperty = ornamentproperty;
         this.shoeProperty = shoeproperty;
+        this.bodyToneColor = new float[] {0.5f,gameController.femaleModelImageObject.GetComponent<Image>().color.g,0.5f,1f };
         gameController.currentBackgroundProperty.CopyTo(ref backgroundProperty);
 
         
@@ -482,7 +496,7 @@ public class SaveData
         if(shoeProperty!=null)
         {
 
-            shoeData.EncodeData(shoeProperty);
+            shoeData.EncodeData(shoeProperty, gameController.currentShoeColor);
 
             shoeName = shoeProperty.imgName;
         }
@@ -501,6 +515,7 @@ public class SaveData
         maleData = new MaleData();
         gameController.currentBackgroundProperty.CopyTo(ref backgroundProperty);
         maleData.maleIsShowing=isShowingMale = gameController.isShowingMale;
+        this.bodyToneColor = new float[] { 0.5f, gameController.femaleModelImageObject.GetComponent<Image>().color.g, 0.5f, 1f };
 
         try
         {
@@ -559,7 +574,7 @@ public class SaveData
             if (shoeProperty != null || shoeProperty.imgName != "" || shoeProperty.imgName != null)
             {
 
-                shoeData.EncodeData(shoeProperty);
+                shoeData.EncodeData(shoeProperty, gameController.currentShoeColor);
 
                 shoeName = shoeProperty.imgName;
             }
@@ -601,6 +616,7 @@ public class SaveData
         ornamentProperty.InitializeOrnamentProperty(ornamentData.serializedJsonObject);
         shoeProperty = new ShoeProperties();
         shoeProperty.InitializeShoeProperty(shoeData.serializedJsonObject);
+        shoeProperty.SetShoeColor(shoeData.pColor);
 
         backgroundProperty = new BackGroundProperty();
         backgroundData.DecodeData(out backgroundProperty);

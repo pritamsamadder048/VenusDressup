@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEditor;
 #endif
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 
@@ -110,7 +111,9 @@ public class GameController : MonoBehaviour
 
 	public GameObject[] homeMenuButtonObjects;
 
-	[SerializeField]
+    public GameObject[] optionButtons;
+
+    [SerializeField]
 	private GameObject CameraDownMenuPanel;
 
 	[SerializeField]
@@ -283,18 +286,22 @@ public class GameController : MonoBehaviour
 
 	public Texture2D currentWigTexture;
 
+    public Texture2D currentShoeTexture;
+
 
     public Texture2D currentMaleWigTexture;
     public Texture2D currentMaleTieTexture;
 
-    public Color currentDressColor = Color.white;
+    public Color currentDressColor = new Color(0.5f, 0.5f, 0.5f, 0f);
 
-	public Color currentWigColor = Color.white;
+    public Color currentWigColor = new Color(0.5f,0.5f,0.5f,0f);
 
-    public Color currentMaleWigColor = Color.white;
-    public Color currentMaleTieColor = Color.white;
+    public Color currentShoeColor = new Color(0.5f, 0.5f, 0.5f, 0f);
 
-	public int currentlyUsingFace = 0;
+    public Color currentMaleWigColor = new Color(0.5f, 0.5f, 0.5f, 0f);
+    public Color currentMaleTieColor = new Color(0.5f, 0.5f, 0.5f, 0f);
+
+    public int currentlyUsingFace = 0;
 
 	public CroppedFaceProperties cfp1;
 
@@ -392,6 +399,12 @@ public class GameController : MonoBehaviour
     public int previousLoadedFaceIndex = -1;
     public bool previouslyLoaded = false;
 
+
+    public Color currentBodyToneColor = new Color(0.5f, 0.5f, 0.5f,1f);
+
+
+
+    
 
 
 
@@ -583,6 +596,11 @@ public class GameController : MonoBehaviour
         }
 	}
 
+    public void DownloadUpdate()
+    {
+        SceneManager.LoadScene(2);
+    }
+
 	public bool IsInHome()
 	{
 		return this.isInHome;
@@ -605,6 +623,9 @@ public class GameController : MonoBehaviour
         PurchaseCallBack(true, "Purchase Completed");
 
     }
+
+
+
 
     public void InstantiateInfoPopup(String message, CloseStyle closeStyle = CloseStyle.None)
     {
@@ -657,6 +678,12 @@ public class GameController : MonoBehaviour
 			}
 		}
 	}
+
+
+    public void SetFemaleBodyTone()
+    {
+        currentBodyToneColor = this.femaleModelImageObject.GetComponent<Image>().color;
+    }
 
 	public void UsingCustomFace(bool customFaceStatus = false)
 	{
@@ -1222,7 +1249,17 @@ public class GameController : MonoBehaviour
 		if (showCode == 1)
 		{
 			this.DeactiveCurrentActive(false, false);
-			if (!this.isScreenSpaceCamera)
+            int st= PlayerPrefs.GetInt("NewUpdateAvailable", 0);
+            if(st==1)
+            {
+                optionButtons[3].GetComponent<Button>().interactable = true;
+
+            }
+            else
+            {
+                optionButtons[3].GetComponent<Button>().interactable = false;
+            }
+            if (!this.isScreenSpaceCamera)
 			{
 				ShortcutExtensions46.DOAnchorPosX(this.OptionSideMenuPanel.GetComponent<RectTransform>(), 0f, 0.3f, false);
 			}
@@ -1246,8 +1283,21 @@ public class GameController : MonoBehaviour
 		}
 		else if (!this.isShowingOptionSideMenu)
 		{
+            
 			this.DeactiveCurrentActive(false, false);
-			if (!this.isScreenSpaceCamera)
+            //GoToHome();
+            int st = PlayerPrefs.GetInt("NewUpdateAvailable", 0);
+            if (st == 1)
+            {
+                optionButtons[3].GetComponent<Button>().interactable = true;
+
+            }
+            else
+            {
+                optionButtons[3].GetComponent<Button>().interactable = false;
+            }
+
+            if (!this.isScreenSpaceCamera)
 			{
 				ShortcutExtensions46.DOAnchorPosX(this.OptionSideMenuPanel.GetComponent<RectTransform>(), 0f, 0.3f, false);
 			}
@@ -1255,6 +1305,7 @@ public class GameController : MonoBehaviour
 			{
 				ShortcutExtensions46.DOAnchorPosX(this.OptionSideMenuPanel.GetComponent<RectTransform>(), 0f, 0.3f, false);
 			}
+
 			this.isShowingOptionSideMenu = true;
 		}
 		else
@@ -1285,7 +1336,18 @@ public class GameController : MonoBehaviour
 		{
 			this.sceneEditorController.HideObjectsInSceePanel();
 		}
-	}
+
+        int tst = PlayerPrefs.GetInt("NewUpdateAvailable", 0);
+        if (tst == 1)
+        {
+            optionButtons[3].GetComponent<Button>().interactable = true;
+
+        }
+        else
+        {
+            optionButtons[3].GetComponent<Button>().interactable = false;
+        }
+    }
 
 	public void ToggleBackGroundSideMenu(int showCode = 0)
 	{
@@ -1862,10 +1924,27 @@ public class GameController : MonoBehaviour
 		ShortcutExtensions46.DOFade(this.maleProjectionParent.transform.GetChild(0).GetComponent<RawImage>(), 1f, 0.3f);
 	}
 
-	public void OnPressBackGroundbutton(GameObject g)
+    public void OnPressForHimButton()
+    {
+        if (this.animateHint.IsShowingHint())
+        {
+            this.animateHint.StopAnimating();
+        }
+        this.ToggleHomeSideMenu(2);
+        this.isInHome = false;
+        for (int i = 2; i < this.panels.Length; i++)
+        {
+            this.panels[i].SetActive(false);
+        }
+        this.panels[9].SetActive(true);
+        this.maleProjectionParent.SetActive(false);
+        //ShortcutExtensions46.DOFade(this.maleProjectionParent.transform.GetChild(0).GetComponent<RawImage>(), 1f, 0.3f);
+    }
+
+    public void OnPressBackGroundbutton(GameObject g)
 	{
         ShowLoadingPanelOnly();
-        Invoke("InvokeOnPressBackGroundbutton", .3f);
+        Invoke("InvokeOnPressBackGroundbutton", .01f);
 	}
 
     public void InvokeOnPressBackGroundbutton()
@@ -2361,8 +2440,8 @@ public class GameController : MonoBehaviour
 	{
 		if (this.isUsingCustomFace)
 		{
-			this.ShowFaceImage(newStatus);
-		}
+            this.ShowFaceImage(newStatus);
+        }
 		if (this.isUsingCustomFace2)
 		{
 			this.ShowFaceImage2(newStatus);
@@ -2373,6 +2452,8 @@ public class GameController : MonoBehaviour
 			this.isUsingCustomFace2 = newStatus;
 		}
 	}
+
+
 
 	public void ToggleWig(bool changeEditButtonState = false)
 	{
@@ -2460,13 +2541,15 @@ public class GameController : MonoBehaviour
 			if (this.mainBodyShape != b || this.mainBodyTone != b2 || this.mainEyeColor != b3)
 			{
 				this.bodyChanged = true;
-			}
+                ResetWearing();
+                selectShapeController.ResetToDefaultColor();
+            }
 			this.mainBodyShape = b;
 			this.mainBodyTone = b2;
 			this.mainEyeColor = b3;
 			this.mainCarouselRotation = this.selectShapeController.GetcarouselSelectedRotation();
 			this.mainModelIndex = this.selectShapeController.GetCarouselSelectedModelIndex();
-            ResetWearing();
+            
             
 
             if (!autoAccept)
@@ -4370,4 +4453,26 @@ public class GameController : MonoBehaviour
         }
     }
     #endregion MALEFEMALETOGGLESCENE
+
+
+
+
+    #region SHARING
+
+
+    public void OnClickShareButton()
+    {
+        Share();
+    }
+
+    public void Share()
+    {
+        GoToHome();
+    }
+
+
+
+    #endregion
+
+
 }

@@ -148,10 +148,10 @@ public class SceneEditorController : MonoBehaviour {
         if (shoeImage.color.a > 0 && shoeImage.gameObject.activeSelf && shoeImage.transform.parent.gameObject.activeSelf)
         {
             GameObject g = Instantiate<GameObject>(sceneObjectShoePrefab, container.transform);
-            sceneObjectShoe = g.GetComponent<Image>();
+            sceneObjectShoe = g.transform.GetChild(0).GetComponent<Image>();
 
             g.GetComponent<Button>().onClick.AddListener(OnclickShoeSceneObject);
-            g.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(RemoveShoeFromScene);
+            g.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(RemoveShoeFromScene);
 
             sceneObjectShoe.sprite = Sprite.Create(gameController.shoe.sprite.texture, new Rect(0, 0, gameController.shoe.sprite.texture.width, gameController.shoe.sprite.texture.height), new Vector2(0.5f, 0.5f), 100f);
             sceneObjectShoe.gameObject.SetActive(true);
@@ -360,7 +360,7 @@ public class SceneEditorController : MonoBehaviour {
     public void RemoveDressFromScene()
     {
         gameController.selectDressController.RemoveDress();
-        Destroy(sceneObjectDress.gameObject);
+        Destroy(sceneObjectDress.transform.parent.gameObject);
 
         totalObjects -= 1;
         if(totalObjects<=0)
@@ -389,7 +389,7 @@ public class SceneEditorController : MonoBehaviour {
     public void RemoveWigFromScene()
     {
         gameController.selectDressController.RemoveWig();
-        Destroy(sceneObjectWig.gameObject);
+        Destroy(sceneObjectWig.transform.parent.gameObject);
 
         totalObjects -= 1;
         if (totalObjects <= 0)
@@ -418,7 +418,7 @@ public class SceneEditorController : MonoBehaviour {
     public void RemoveOrnamentFromScene()
     {
         gameController.selectDressController.RemoveOrnament();
-        Destroy(sceneObjectOrnament.gameObject);
+        Destroy(sceneObjectOrnament.transform.parent.gameObject);
 
         totalObjects -= 1;
         if (totalObjects <= 0)
@@ -440,12 +440,18 @@ public class SceneEditorController : MonoBehaviour {
         gameController.selectDressController.OnClickSelectShoeButton(true);
         gameController.selectDressController.editButtons[0].SetActive(false);
         gameController.selectDressController.editButtons[1].SetActive(false);
+        gameController.selectDressController.editButtons[2].SetActive(true);
+        Invoke("InvokeEditShoe", .3f);
         //gameController.selectDressController.OnClickEditDressButton(true);
+    }
+    public void InvokeEditShoe()
+    {
+        gameController.selectDressController.OnClickEditShoeButton(true);
     }
     public void RemoveShoeFromScene()
     {
         gameController.selectDressController.RemoveShoe();
-        Destroy(sceneObjectShoe.gameObject);
+        Destroy(sceneObjectShoe.transform.parent.gameObject);
 
         totalObjects -= 1;
         if (totalObjects <= 0)
@@ -459,7 +465,8 @@ public class SceneEditorController : MonoBehaviour {
     {
         InitGamaController();
         gameController.GoToHome();
-        gameController.OnPressForHimButton(gameController.homeMenuButtonObjects[3]);
+        //gameController.OnPressForHimButton(gameController.homeMenuButtonObjects[3]);
+        gameController.OnPressForHimButton();
         gameController.maleController.OnClickSelectWigsForMale(true);
         gameController.maleController.OnClickEditMaleWigButton();
     }
@@ -468,7 +475,7 @@ public class SceneEditorController : MonoBehaviour {
     public void RemoveMaleWigFromScene()
     {
         gameController.maleController.RemoveMaleWig();
-        Destroy(sceneObjectMaleWig.gameObject);
+        Destroy(sceneObjectMaleWig.transform.parent.gameObject);
 
         totalObjects -= 1;
         if (totalObjects <= 0)
@@ -483,7 +490,8 @@ public class SceneEditorController : MonoBehaviour {
     {
         InitGamaController();
         gameController.GoToHome();
-        gameController.OnPressForHimButton(gameController.homeMenuButtonObjects[3]);
+        //gameController.OnPressForHimButton(gameController.homeMenuButtonObjects[3]);
+        gameController.OnPressForHimButton();
         gameController.maleController.OnClickSelectTiesForMale(true);
         gameController.maleController.OnClickEditMaleTieButton();
     }

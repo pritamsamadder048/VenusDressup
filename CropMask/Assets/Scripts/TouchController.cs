@@ -458,7 +458,7 @@ public class TouchController : MonoBehaviour
                 
                 maskImg.gameObject.SetActive(false);
                 
-                DestroyImmediate(maskImg.sprite);
+                Destroy(maskImg.sprite);
             }
             else if(newState)
             {

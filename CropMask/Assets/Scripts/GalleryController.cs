@@ -86,7 +86,7 @@ public class GalleryController : MonoBehaviour {
 		}
 
 		if (!Application.isMobilePlatform) {
-			print ("shoul have opened gallery");
+			print ("should have opened gallery");
 
 		}
 	}

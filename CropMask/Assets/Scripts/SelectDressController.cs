@@ -40,10 +40,12 @@ public class SelectDressController : MonoBehaviour {
     
     public GameObject[] editButtons;
 
-    [SerializeField]
-    private GameObject wigEditPanel;
-    [SerializeField]
-    private GameObject dressEditPanel;
+
+    public GameObject wigEditPanel;
+
+    public GameObject dressEditPanel;
+
+    public GameObject shoeEditPanel;
 
     public bool dressDataLoadingComplete = false;
     public bool femaleWigDataLoadingComplete = false;
@@ -86,6 +88,8 @@ public class SelectDressController : MonoBehaviour {
     public GameObject dressBrightnessSlider;
     public GameObject wigColorSlider;
     public GameObject wigBrightnessSlider;
+    public GameObject shoeColorSlider;
+    public GameObject shoeBrightnessSlider;
 
     public GameObject selectDressOptionPanel;
 
@@ -93,6 +97,8 @@ public class SelectDressController : MonoBehaviour {
     public UIImageColorPicker dressBrigtnessPicker;
     public UIImageColorPicker wigColorPicker;
     public UIImageColorPicker wigBrightnessPicker;
+    public UIImageColorPicker shoeColorPicker;
+    public UIImageColorPicker shoeBrightnessPicker;
 
     public GameObject selectWearingRoot;
 
@@ -109,19 +115,24 @@ public class SelectDressController : MonoBehaviour {
 
     public GameObject[] wigEditSidePanels;
     public GameObject[] dressEditSidePanels;
+    public GameObject[] shoeEditSidePanels;
 
 
     public float dressColor = 0.5f;
     public float dressBrightness = .5f;
     public float wigColor = 0.5f;
     public float wigBrightness = .5f;
+    public float shoeColor = 0.5f;
+    public float shoeBrightness = .5f;
 
     public Toggle[] wigEditUndoButtons;
-    public Toggle[] dressEditUndoButton;
+    public Toggle[] dressEditUndoButtons;
+    public Toggle[] shoeEditUndoButtons;
 
 
     public GameObject[] dressEditButtons;
     public GameObject[] wigEditButtons;
+    public GameObject[] shoeEditButtons;
 
     public bool dontShowPopup = false;
 
@@ -176,6 +187,8 @@ public class SelectDressController : MonoBehaviour {
         dressBrigtnessPicker = dressBrightnessSlider.GetComponent<UIImageColorPicker>();
         wigColorPicker = wigColorSlider.GetComponent<UIImageColorPicker>();
         wigBrightnessPicker = wigBrightnessSlider.GetComponent<UIImageColorPicker>();
+        shoeColorPicker = shoeColorSlider.GetComponent<UIImageColorPicker>();
+        shoeBrightnessPicker = shoeBrightnessSlider.GetComponent<UIImageColorPicker>();
         //wigColorPicker = wigColorSlider.GetComponent<UIImageColorPicker>();
 
 
@@ -199,6 +212,9 @@ public class SelectDressController : MonoBehaviour {
     private void OnDisable()
     {
         StopAllCoroutines();
+        DiscardEditDress();
+        DiscardEditWig();
+        DiscardEditShoe();
     }
 
     public IEnumerator ReloadDresses()
@@ -213,6 +229,7 @@ public class SelectDressController : MonoBehaviour {
     {
         OnclickCloseEditDressButton();
         OnclickCloseEditWigButton();
+        OnclickCloseEditShoeButton();
         CheckForChanges();
         
     }
@@ -298,8 +315,8 @@ public class SelectDressController : MonoBehaviour {
     public void OnClickSelectLongDressButton(bool newState)   //select long dress handler
     {
         
-        editButtons[1].SetActive(false);
-        if(gameController==null)
+        
+        if (gameController==null)
         {
             gameController = gameControllerObject.GetComponent<GameController>();
         }
@@ -312,6 +329,8 @@ public class SelectDressController : MonoBehaviour {
 
         if(newState)
         {
+            editButtons[1].SetActive(false);
+            editButtons[2].SetActive(false);
             ToggleSideMenuSelectDress(0, 1, dressButtonObjects[0]);
             //if (dress.transform.parent.gameObject.activeSelf && dress.gameObject.activeSelf && dress.color.a > 0)
             //{
@@ -361,7 +380,7 @@ public class SelectDressController : MonoBehaviour {
     public void OnClickSelectWigButton(bool newState)    //select wig handler
     {
 
-        editButtons[0].SetActive(false);
+        
         gameController.ToggleOptionSideMenu(2);
         for (int i = 0; i < dressButtonObjects.Length; i++)
         {
@@ -371,6 +390,8 @@ public class SelectDressController : MonoBehaviour {
 
         if (newState )
         {
+            editButtons[0].SetActive(false);
+            editButtons[2].SetActive(false);
             ToggleSideMenuSelectDress(1, 1, dressButtonObjects[1]);
             
             if (wig.transform.parent.gameObject.activeSelf && wig.gameObject.activeSelf && wig.color.a>0)
@@ -397,6 +418,7 @@ public class SelectDressController : MonoBehaviour {
     public void OnClickSelectOrnamentButton(bool newState)    //select ornament handler
     {
 
+        
 
         gameController.ToggleOptionSideMenu(2);
         for (int i = 0; i < dressButtonObjects.Length; i++)
@@ -407,6 +429,9 @@ public class SelectDressController : MonoBehaviour {
 
         if (newState)
         {
+            editButtons[0].SetActive(false);
+            editButtons[1].SetActive(false);
+            editButtons[2].SetActive(false);
             ToggleSideMenuSelectDress(2, 1, dressButtonObjects[2]);
         }
         else
@@ -429,9 +454,16 @@ public class SelectDressController : MonoBehaviour {
         if (newState)
         {
             ToggleSideMenuSelectDress(3, 1, dressButtonObjects[3]);
+            editButtons[0].SetActive(false);
+            editButtons[1].SetActive(false);
+            if(isWearingShoe)
+            {
+                editButtons[2].SetActive(true);
+            }
         }
         else
         {
+            editButtons[2].SetActive(false);
             ToggleSideMenuSelectDress(3);
         }
     }
@@ -567,6 +599,15 @@ public class SelectDressController : MonoBehaviour {
         RemoveWig();
 
     }
+
+    public void DeleteShoe()
+    {
+        OnclickCloseEditShoeButton();
+        RemoveShoe();
+
+    }
+
+
     public void PutOnLongDressDynamically(DressProperties dp,bool resetDress=false)  //for dynamically loading dress
     {
         gameController = gameControllerObject.GetComponent<GameController>();
@@ -865,6 +906,7 @@ public class SelectDressController : MonoBehaviour {
         currentWigName = "";
         gameController.currentFemaleWigProperty = null;
         editButtons[1].SetActive(false);
+        gameController.ZoomOutFemaleModel();
         return;
     }
 
@@ -881,6 +923,7 @@ public class SelectDressController : MonoBehaviour {
                 print(string.Format("if (!wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f && {0} == {1})",wigName,currentWigName));
                 wig.transform.parent.gameObject.SetActive(true);
                 editButtons[0].SetActive(false);
+                editButtons[2].SetActive(false);
                 editButtons[1].SetActive(true);
                 isWearingWig = true;
                 return;
@@ -891,9 +934,11 @@ public class SelectDressController : MonoBehaviour {
                 wig.transform.parent.gameObject.SetActive(true);
                 wig.DOFade(1f, .5f);
                 print("else if");
-                isWearingWig = true;
                 editButtons[0].SetActive(false);
+                editButtons[2].SetActive(false);
                 editButtons[1].SetActive(true);
+                isWearingWig = true;
+                
                 return;
             }
 
@@ -1388,18 +1433,23 @@ public class SelectDressController : MonoBehaviour {
         isWearingShoe = false;
         currentShoeName = "";
         gameController.currentShoeProperty = null;
+        editButtons[2].SetActive(false);
         return;
     }
 
-    public void PutOnShoeDynamically(ShoeProperties sp)
+    public void PutOnShoeDynamically(ShoeProperties sp,bool resetShoe=false)
     {
         gameController = gameControllerObject.GetComponent<GameController>();
         string shoeName = sp.imgName;
+        if(!resetShoe)
+        {
             if (!shoe.transform.parent.gameObject.activeSelf && shoe.color.a > 0.5f && shoeName == currentShoeName)
             {
                 shoe.transform.parent.gameObject.SetActive(true);
-                //editButtons[0].SetActive(false);
-                //editButtons[1].SetActive(true);
+                editButtons[0].SetActive(false);
+                editButtons[1].SetActive(false);
+                editButtons[2].SetActive(true);
+                isWearingShoe = true;
                 return;
             }
             else if (!shoe.transform.parent.gameObject.activeSelf && shoe.color.a <= 0.5f && shoeName == currentShoeName)
@@ -1407,19 +1457,28 @@ public class SelectDressController : MonoBehaviour {
                 shoe.transform.parent.gameObject.SetActive(true);
                 shoe.DOFade(1f, .5f);
                 //print("else if");
+                shoe.transform.parent.gameObject.SetActive(true);
+                editButtons[0].SetActive(false);
+                editButtons[1].SetActive(false);
+                editButtons[2].SetActive(true);
                 isWearingShoe = true;
-                //editButtons[0].SetActive(false);
-                //editButtons[1].SetActive(true);
+                
                 return;
             }
             if (isWearingShoe && shoeName == currentShoeName)
             {
+                editButtons[0].SetActive(false);
+                editButtons[1].SetActive(false);
+                editButtons[2].SetActive(false);
                 shoe.gameObject.GetComponent<Image>().DOFade(0f, .5f);
                 isWearingShoe = false;
                 return;
             }
             else if (!isWearingShoe && shoeName == currentShoeName)
             {
+                editButtons[0].SetActive(false);
+                editButtons[1].SetActive(false);
+                editButtons[2].SetActive(true);
                 shoe.gameObject.GetComponent<Image>().DOFade(1f, .5f);
                 isWearingShoe = true;
                 return;
@@ -1438,78 +1497,193 @@ public class SelectDressController : MonoBehaviour {
                 shoe.transform.parent.gameObject.SetActive(true);
             }
             print("loading shoe");
+        }
+        else
+        {
+            print("resetting shoe");
+            //wig.gameObject.GetComponent<Image>().DOFade(0f, .5f);
+            if (!shoe.gameObject.activeSelf)
+            {
+                shoe.gameObject.SetActive(true);
+            }
+            if (!shoe.transform.parent.gameObject.activeSelf)
+            {
+                shoe.transform.parent.gameObject.SetActive(true);
+            }
+        }
+            
             //shoe.gameObject.GetComponent<Image>().DOFade(0f, .8f);
             //yield return new WaitForSeconds(.1f);
 
 
 
-       if(File.Exists(sp.finalSavePath))
+       //if(File.Exists(sp.finalSavePath))
+       // {
+       //     Texture2D tempTex = new Texture2D(10, 10);
+       //     tempTex.LoadImage(File.ReadAllBytes(sp.finalSavePath));
+       //     tempTex.Apply();
+       //     if (isWearingShoe)
+       //     {
+       //         DestroyImmediate(gameController.tmpShoe.sprite, true);
+       //         gameController.tmpShoe.sprite = shoe.sprite;
+       //         gameController.tmpShoe.color = new Color(shoe.color.r, shoe.color.g, shoe.color.b, 1f);
+       //     }
+       //     else
+       //     {
+       //         DestroyImmediate(gameController.tmpShoe.sprite, true);
+       //         gameController.tmpShoe.sprite = shoe.sprite;
+       //         //gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
+       //     }
+       //     gameController.tmpShoe.gameObject.SetActive(true);
+       //     shoe.gameObject.SetActive(false);
+
+       //     float fadeDuration = .5f;
+       //     if (!isWearingShoe)
+       //     {
+       //         fadeDuration = 0f;
+       //     }
+
+
+       //     {
+       //         shoe.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+       //         shoe.gameObject.SetActive(true);
+       //         isWearingShoe = true;
+       //         currentShoeName = shoeName;
+       //         //ornament.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+       //         print("image assigned");
+       //     }
+
+       //     gameController.tmpShoe.DOFade(0f, fadeDuration).SetEase(Ease.OutSine).onComplete += delegate
+       //     {
+       //         gameController.tmpShoe.gameObject.SetActive(false);
+       //         DestroyImmediate(gameController.tmpShoe.sprite, true);
+
+       //     };
+
+
+       //     shoe.gameObject.GetComponent<Image>().DOFade(1f, .8f).SetDelay(.2f).SetEase(Ease.InSine).onComplete += delegate
+       //     {
+       //         print("last fade");
+
+
+
+       //         gameController.currentShoeProperty = new ShoeProperties();
+       //         gameController.currentShoeProperty = sp;
+       //     };
+
+       // }
+
+       //else
+       // {
+       //     gameController.HideLoadingPanelOnly();
+       //     gameController.HideLoadingPanelOnlyTransparent();
+       //     gameController.InstantiateInfoPopup("Could not Load Shoe");
+       //     DestroyImmediate(gameController.tmpShoe.sprite);
+       //     gameController.tmpShoe.gameObject.SetActive(false);
+       // }
+
+
+
+
+
+
+
+
+
+        if (File.Exists(sp.finalSavePath))
         {
-            Texture2D tempTex = new Texture2D(10, 10);
-            tempTex.LoadImage(File.ReadAllBytes(sp.finalSavePath));
-            tempTex.Apply();
+
             if (isWearingShoe)
             {
-                DestroyImmediate(gameController.tmpShoe.sprite, true);
+                Destroy(gameController.tmpShoe.sprite);
                 gameController.tmpShoe.sprite = shoe.sprite;
                 gameController.tmpShoe.color = new Color(shoe.color.r, shoe.color.g, shoe.color.b, 1f);
             }
             else
             {
-                DestroyImmediate(gameController.tmpShoe.sprite, true);
+                Destroy(gameController.tmpShoe.sprite);
                 gameController.tmpShoe.sprite = shoe.sprite;
                 //gameController.tmpDress.color = new Color(dress.color.r, dress.color.g, dress.color.b, 1f);
             }
             gameController.tmpShoe.gameObject.SetActive(true);
             shoe.gameObject.SetActive(false);
 
-            float fadeDuration = .5f;
+
+            float fadeDuration = 1f;
             if (!isWearingShoe)
             {
                 fadeDuration = 0f;
             }
-
+            Texture2D tempTex = new Texture2D(10, 10);
+            tempTex.LoadImage(File.ReadAllBytes(sp.finalSavePath));
+            tempTex.Apply();
 
             {
                 shoe.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+                shoe.color = new Color(sp.shoeColor[0], sp.shoeColor[1], sp.shoeColor[2], 0f); //new Color(0.5f, .5f, .5f, 0f); //Color.white;
                 shoe.gameObject.SetActive(true);
+                gameController.currentShoeColor = new Color(sp.shoeColor[0], sp.shoeColor[1], sp.shoeColor[2], 1f); //Color.white;
+
                 isWearingShoe = true;
+                editButtons[2].SetActive(true);
                 currentShoeName = shoeName;
-                //ornament.gameObject.GetComponent<Image>().DOFade(0f, 0f);
-                print("image assigned");
             }
+
 
             gameController.tmpShoe.DOFade(0f, fadeDuration).SetEase(Ease.OutSine).onComplete += delegate
             {
                 gameController.tmpShoe.gameObject.SetActive(false);
-                DestroyImmediate(gameController.tmpShoe.sprite, true);
+                DestroyImmediate(gameController.tmpShoe.sprite);
 
             };
 
-
-            shoe.gameObject.GetComponent<Image>().DOFade(1f, .8f).SetDelay(.2f).SetEase(Ease.InSine).onComplete += delegate
+            shoe.DOFade(1f, .8f).SetEase(Ease.InSine).onComplete += delegate
             {
                 print("last fade");
 
-
-
+                gameController.currentShoeTexture = new Texture2D(1, 1);
+                gameController.currentShoeTexture.LoadImage(File.ReadAllBytes(sp.finalSavePath));
+                gameController.currentShoeTexture.Apply();
                 gameController.currentShoeProperty = new ShoeProperties();
                 gameController.currentShoeProperty = sp;
+                //gameController.currentWigColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
             };
 
-        }
+            //wig.gameObject.GetComponent<Image>().DOFade(0f, fadeDuration).onComplete += delegate
+            //      {
+            //          //wig.sprite = Sprite.Create(tempTex, new Rect(0, 0, tempTex.width, tempTex.height), new Vector2(0.5f, 0.5f), 100f);
+            //          //wig.color = new Color(fwp.wigColor[0], fwp.wigColor[1], fwp.wigColor[2],0f); //new Color(0.5f, .5f, .5f, 0f); //Color.white;
+            //          //gameController.currentWigColor = new Color(fwp.wigColor[0], fwp.wigColor[1], fwp.wigColor[2], 1f); //Color.white;
+            //          //isWearingWig = true;
+            //          //editButtons[1].SetActive(true);
+            //          //currentWigName = wigName;
+            //          //wig.gameObject.GetComponent<Image>().DOFade(0f, 0f);
+            //          //print("image assigned");
 
-       else
+
+
+            //          //wig.gameObject.GetComponent<Image>().DOFade(1f, .5f).onComplete+=delegate
+            //          //{
+            //          //    print("last fade");
+
+            //          //    gameController.currentWigTexture = new Texture2D(1, 1);
+            //          //    gameController.currentWigTexture.LoadImage(File.ReadAllBytes(fwp.finalSavePath));
+            //          //    gameController.currentWigTexture.Apply();
+            //          //    gameController.currentFemaleWigProperty = new FemaleWigProperties();
+            //          //    gameController.currentFemaleWigProperty = fwp;
+            //          //    //gameController.currentWigColor = new Color(0.5f, .5f, .5f, 1f); //Color.white;
+            //          //};
+
+            //      };
+        }
+        else
         {
             gameController.HideLoadingPanelOnly();
             gameController.HideLoadingPanelOnlyTransparent();
-            gameController.InstantiateInfoPopup("Could not Load Shoe");
+            gameController.InstantiateInfoPopup("Could not Load shoe");
             DestroyImmediate(gameController.tmpShoe.sprite);
             gameController.tmpShoe.gameObject.SetActive(false);
         }
-
-
-        
     }
 
 
@@ -1540,6 +1714,9 @@ public class SelectDressController : MonoBehaviour {
         wigBrightnessSlider.SetActive(false);
     }
 
+
+
+
     public void OnClickEditWigButton(bool newState)
     {
         if(newState)
@@ -1552,6 +1729,7 @@ public class SelectDressController : MonoBehaviour {
             wigEditUndoButtons[1].gameObject.SetActive(false);
             wigEditUndoButtons[0].gameObject.SetActive(true);
             ToggleSideMenuSelectDress(5, 1);
+            gameController.ZoomInFemaleModel();
         }
 
         
@@ -1588,11 +1766,59 @@ public class SelectDressController : MonoBehaviour {
             //ToggleSideMenuSelectDress(4, 1);
             StartCoroutine(ToggleEditPanel(dressEditPanel));
             
-            dressEditUndoButton[1].gameObject.SetActive(false);
-            dressEditUndoButton[0].gameObject.SetActive(true);
+            dressEditUndoButtons[1].gameObject.SetActive(false);
+            dressEditUndoButtons[0].gameObject.SetActive(true);
             ToggleSideMenuSelectDress(4, 1);
 
 
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+    public void ActiveShoeEditSliders()
+    {
+        shoeColorSlider.SetActive(true);
+        shoeColorPicker.ActivateColorSlider();
+        shoeBrightnessSlider.SetActive(true);
+        shoeBrightnessPicker.ActivateColorSlider();
+    }
+
+    public void DeactiveShoeEditSliders()
+    {
+
+        ToggleEditSidePanels(shoeEditSidePanels[0], 2);
+        ToggleEditSidePanels(shoeEditSidePanels[1], 2);
+
+        shoeColorPicker.DeactivateColorSlider();
+        shoeColorSlider.SetActive(false);
+        shoeBrightnessPicker.DeactivateColorSlider();
+        shoeBrightnessSlider.SetActive(false);
+    }
+
+
+
+
+    public void OnClickEditShoeButton(bool newState)
+    {
+        if (newState)
+        {
+            ActiveShoeEditSliders();
+            gameController.sceneEditorController.enabled = false;
+            editButtons[2].GetComponent<Toggle>().isOn = false;
+            //ToggleSideMenuSelectDress(5, 1);
+            StartCoroutine(ToggleEditPanel(shoeEditPanel));
+            shoeEditUndoButtons[1].gameObject.SetActive(false);
+            shoeEditUndoButtons[0].gameObject.SetActive(true);
+            ToggleSideMenuSelectDress(8, 1);
+            //gameController.ZoomInFemaleModel();
         }
 
 
@@ -1621,7 +1847,7 @@ public class SelectDressController : MonoBehaviour {
         }
     }
 
-#region DRESSWIGCOLOR
+#region DRESSWIGSHOECOLOR
 
     public void OnclickAcceptDressColorChangeButton(GameObject editPanel)
     {
@@ -1682,6 +1908,7 @@ public class SelectDressController : MonoBehaviour {
 
 
         editButtons[1].SetActive(false);
+        editButtons[2].SetActive(false);
 
         if (isWearingDress)
         {
@@ -1762,6 +1989,7 @@ public class SelectDressController : MonoBehaviour {
 
         DeactiveWigEditSliders();
         gameController.sceneEditorController.enabled = true;
+        gameController.ZoomOutFemaleModel();
     }
 
     public void OnclickCloseEditWigButton(GameObject editPanel)
@@ -1769,6 +1997,7 @@ public class SelectDressController : MonoBehaviour {
         StartCoroutine(ToggleEditPanel(editPanel, false));
         ToggleSideMenuSelectDress(5, 2);
         ToggleSideMenuSelectDress(7, 2);
+        gameController.ZoomOutFemaleModel();
         DiscardEditWig();
         DeactiveWigEditSliders();
 
@@ -1779,6 +2008,7 @@ public class SelectDressController : MonoBehaviour {
 
 
         editButtons[0].SetActive(false);
+        editButtons[2].SetActive(false);
 
         if (isWearingWig)
         {
@@ -1813,6 +2043,7 @@ public class SelectDressController : MonoBehaviour {
 
     public void DiscardEditWig()
     {
+        //gameController.ZoomOutFemaleModel();
         DiscardEditWigColor();
         DiscardEditWigBrightness();
     }
@@ -1853,6 +2084,7 @@ public class SelectDressController : MonoBehaviour {
         wigBrightnessPicker.DeactivateColorSlider();
         wigBrightnessPicker.mainSlider.value = 0.5f;
         wigBrightnessPicker.ActivateColorSlider();
+        //gameController.ZoomOutFemaleModel();
     }
 
     
@@ -1866,9 +2098,157 @@ public class SelectDressController : MonoBehaviour {
         wigBrightnessPicker.DeactivateColorSlider();
         wigBrightnessPicker.mainSlider.value = 0.5f;
         wigBrightnessPicker.ActivateColorSlider();
+        //gameController.ZoomOutFemaleModel();
     }
 
-    #endregion DRESSWIGCOLOR
+
+
+
+
+
+
+/// <summary>
+///  Shoe edit
+/// </summary>
+
+
+    public void OnclickAcceptShoeColorChangeButton(GameObject editPanel)
+    {
+        StartCoroutine(ToggleEditPanel(editPanel, false));
+        ToggleSideMenuSelectDress(8, 2);
+        ToggleSideMenuSelectDress(9, 2);
+        gameController.currentShoeColor = shoe.color;
+        Color[] scs = shoe.sprite.texture.GetPixels();
+        gameController.currentShoeTexture.SetPixels(scs);
+        gameController.currentShoeTexture.Apply();
+
+        DeactiveShoeEditSliders();
+        gameController.sceneEditorController.enabled = true;
+        if(isWearingShoe)
+        {
+            editButtons[2].SetActive(true);
+        }
+        else
+        {
+            editButtons[2].SetActive(false);
+        }
+        //gameController.ZoomOutFemaleModel();
+    }
+
+    public void OnclickCloseEditShoeButton(GameObject editPanel)
+    {
+        StartCoroutine(ToggleEditPanel(editPanel, false));
+        ToggleSideMenuSelectDress(8, 2);
+        ToggleSideMenuSelectDress(9, 2);
+        //gameController.ZoomOutFemaleModel();
+        DiscardEditShoe();
+        DeactiveShoeEditSliders();
+
+        shoeEditButtons[0].GetComponent<Toggle>().isOn = false;
+        shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        shoeEditButtons[1].GetComponent<Toggle>().isOn = false;
+        shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+
+
+        editButtons[0].SetActive(false);
+        editButtons[1].SetActive(false);
+
+        if (isWearingShoe)
+        {
+            editButtons[2].SetActive(true);
+        }
+        else
+        {
+            editButtons[2].SetActive(false);
+        }
+
+
+        gameController.sceneEditorController.enabled = true;
+    }
+
+    public void OnclickCloseEditShoeButton()
+    {
+        StartCoroutine(ToggleEditPanel(shoeEditPanel, false));
+        ToggleSideMenuSelectDress(8, 2);
+        ToggleSideMenuSelectDress(9, 2);
+        //DiscardEditWig();
+        DeactiveShoeEditSliders();
+
+
+        shoeEditButtons[0].GetComponent<Toggle>().isOn = false;
+        shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+        shoeEditButtons[1].GetComponent<Toggle>().isOn = false;
+        shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+
+
+        gameController.sceneEditorController.enabled = true;
+    }
+
+    public void DiscardEditShoe()
+    {
+        //gameController.ZoomOutFemaleModel();
+        DiscardEditShoeColor();
+        DiscardEditShoeBrightness();
+    }
+
+    public void DiscardEditShoeColor()
+    {
+        Color c = gameController.currentShoeColor;
+        c.b = shoe.color.b;
+        shoe.color = c;
+        //wig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
+        shoeColorPicker.DeactivateColorSlider();
+        shoeColorPicker.mainSlider.value = c.r;
+        shoeColorPicker.ActivateColorSlider();
+        //wigBrightnessPicker.DeactivateColorSlider();
+        //wigBrightnessPicker.mainSlider.value = 0.5f;
+        //wigBrightnessPicker.ActivateColorSlider();
+    }
+    public void DiscardEditShoeBrightness()
+    {
+        Color c = gameController.currentShoeColor;
+        c.r = shoe.color.r;
+        shoe.color = c;
+        //wig.sprite = Sprite.Create(gameController.currentWigTexture, new Rect(0, 0, gameController.currentWigTexture.width, gameController.currentWigTexture.height), new Vector2(0.5f, 0.5f), 100f);
+        //wigColorPicker.DeactivateColorSlider();
+        //wigColorPicker.mainSlider.value = 0.5f;
+        //wigColorPicker.ActivateColorSlider();
+        shoeBrightnessPicker.DeactivateColorSlider();
+        shoeBrightnessPicker.mainSlider.value = c.b;
+        shoeBrightnessPicker.ActivateColorSlider();
+    }
+
+    public void ResetDefaultShoe()
+    {
+        PutOnShoeDynamically(gameController.currentShoeProperty, true);
+        shoeColorPicker.DeactivateColorSlider();
+        shoeColorPicker.mainSlider.value = 0.5f;
+        shoeColorPicker.ActivateColorSlider();
+        shoeBrightnessPicker.DeactivateColorSlider();
+        shoeBrightnessPicker.mainSlider.value = 0.5f;
+        shoeBrightnessPicker.ActivateColorSlider();
+        //gameController.ZoomOutFemaleModel();
+    }
+
+
+
+    public void ResetDefaultShoeBrightness()
+    {
+        PutOnShoeDynamically(gameController.currentShoeProperty, true);
+        shoeBrightnessPicker.DeactivateColorSlider();
+        shoeBrightnessPicker.mainSlider.value = 0.5f;
+        shoeBrightnessPicker.ActivateColorSlider();
+        shoeBrightnessPicker.DeactivateColorSlider();
+        shoeBrightnessPicker.mainSlider.value = 0.5f;
+        shoeBrightnessPicker.ActivateColorSlider();
+        //gameController.ZoomOutFemaleModel();
+    }
+
+
+
+
+
+    #endregion DRESSWIGSHOECOLOR
 
 
     public void InstantiateInfoPopup(String message,CloseStyle closeStyle=CloseStyle.None)
@@ -2000,11 +2380,13 @@ public class SelectDressController : MonoBehaviour {
         }
 
         dressCoroutineInQueue = 0;
-
+        
         if (partialDressArray !=null)
         {
-            if(partialDressArray.Count>0)
+            print("partial data count : " + partialDressArray.Count);
+            if (partialDressArray.Count>0)
             {
+                print("starting resetting partial dress data");
                 StartCoroutine(ResetPartiallyMatchingDresses(partialDressArray));
             }
         }
@@ -2040,6 +2422,7 @@ public class SelectDressController : MonoBehaviour {
                     dressCoroutineInQueue = 0;
                     yield return new WaitForSeconds(.1f);
                 }
+                print("Loading icon on partial dress button");
                 StartCoroutine(LoadIconOnDressButton(d, fa.Get(i)));
                 if (!gameController.IsPaidUser)
                 {
@@ -2094,7 +2477,7 @@ public class SelectDressController : MonoBehaviour {
         dressCoroutineInQueue = 0;
         yield return null;
     }
-
+    
 
     
 
@@ -2828,8 +3211,8 @@ public class SelectDressController : MonoBehaviour {
         form.AddField("eye_color", gameController.eyeHash[eye]);
         form.AddField("model_type", "F");
 
-        //using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/getWearings", form))
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/getWearingsTwo", form))
+        //using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/getWearings", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/getWearingsTwo", form))
         {
             //print(www.url);
             yield return www.SendWebRequest();
@@ -3074,8 +3457,8 @@ public class SelectDressController : MonoBehaviour {
         form.AddField("eye_color", gameController.eyeHash[eye]);
         form.AddField("model_type", "F");
 
-        using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/getWearings", form))
-        //using (UnityWebRequest www = UnityWebRequest.Post("http://demowebz.cu.cc/venusfashion/api/Headings/getWearingsTwo", form))
+        using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/getWearings", form))
+        //using (UnityWebRequest www = UnityWebRequest.Post(/*"http://demowebz.cu.cc*/"http://demowebz.cu.cc.bh-43.webhostbox.net/venusfashion/api/Headings/getWearingsTwo", form))
         {
             //print(www.url);
             yield return www.SendWebRequest();
@@ -3294,8 +3677,8 @@ public class SelectDressController : MonoBehaviour {
             ToggleEditSidePanels(dressEditSidePanels[1], 2);
             ToggleEditSidePanels(dressEditSidePanels[0], 1);
 
-            dressEditUndoButton[1].gameObject.SetActive(false);
-            dressEditUndoButton[0].gameObject.SetActive(true);
+            dressEditUndoButtons[1].gameObject.SetActive(false);
+            dressEditUndoButtons[0].gameObject.SetActive(true);
             dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
             dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(true);
         }
@@ -3313,8 +3696,8 @@ public class SelectDressController : MonoBehaviour {
             ToggleEditSidePanels(dressEditSidePanels[0], 2);
             ToggleEditSidePanels(dressEditSidePanels[1], 1);
 
-            dressEditUndoButton[0].gameObject.SetActive(false);
-            dressEditUndoButton[1].gameObject.SetActive(true);
+            dressEditUndoButtons[0].gameObject.SetActive(false);
+            dressEditUndoButtons[1].gameObject.SetActive(true);
             dressEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
             dressEditButtons[1].transform.GetChild(0).gameObject.SetActive(true);
         }
@@ -3367,6 +3750,64 @@ public class SelectDressController : MonoBehaviour {
             wigEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
         }
         
+    }
+
+
+
+
+
+    public void ToggleShoeColorPanel(bool newState)
+    {
+        if (newState)
+        {
+            shoeEditButtons[1].GetComponent<Toggle>().isOn = false;
+            shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+            shoeEditButtons[0].GetComponent<Toggle>().isOn = true;
+            shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(true);
+
+            ToggleEditSidePanels(shoeEditSidePanels[1], 2);
+            ToggleEditSidePanels(shoeEditSidePanels[0], 1);
+
+            shoeEditUndoButtons[1].gameObject.SetActive(false);
+            shoeEditUndoButtons[0].gameObject.SetActive(true);
+
+            shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+            shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(true);
+        }
+        else
+        {
+            ToggleEditSidePanels(shoeEditSidePanels[0], 2);
+            shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+            shoeEditButtons[0].GetComponent<Toggle>().isOn = false;
+        }
+    }
+    public void ToggleShoeBrightnessPanel(bool newState)
+    {
+
+        if (newState)
+        {
+
+            shoeEditButtons[0].GetComponent<Toggle>().isOn = false;
+            shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+            shoeEditButtons[1].GetComponent<Toggle>().isOn = true;
+            shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(true);
+
+
+            ToggleEditSidePanels(shoeEditSidePanels[0], 2);
+            ToggleEditSidePanels(shoeEditSidePanels[1], 1);
+
+            shoeEditUndoButtons[0].gameObject.SetActive(false);
+            shoeEditUndoButtons[1].gameObject.SetActive(true);
+
+            shoeEditButtons[0].transform.GetChild(0).gameObject.SetActive(false);
+            shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(true);
+        }
+        else
+        {
+            ToggleEditSidePanels(shoeEditSidePanels[1], 2);
+            shoeEditButtons[1].transform.GetChild(0).gameObject.SetActive(false);
+        }
+
     }
 
 

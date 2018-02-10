@@ -1,5 +1,5 @@
 
-	#if UNITY_ANDROID 
+#if UNITY_ANDROID 
 
 using System.Collections;
 using System.Collections.Generic;
@@ -858,10 +858,10 @@ public class CameraController : MonoBehaviour
     }
 }
 
-#elif UNITY_IOS
+#elif UNITY_IOS || UNITY_EDITOR
 
 
-	using System.Collections;
+using System.Collections;
 	using System.Collections.Generic;
 	using UnityEngine;
 	using UnityEngine.UI;
@@ -1160,7 +1160,7 @@ OpenAndroidNativeCamera();
 
 		public void OnImageSaved(string path , ImageOrientation orientation=ImageOrientation.UP)
 		{
-
+		print("image orientation : " + orientation);
 #if UNITY_EDITOR
 			gameController.ShowLoading();
 
@@ -1330,12 +1330,21 @@ Texture2D t2d = ((DownloadHandlerTexture)www.downloadHandler).texture as Texture
 t2d.Apply();
 
 				if (orientation == ImageOrientation.LEFT) {
-					t2d = RotateImageTest(t2d, 90f);
+					print(string.Format("image orientation is : {0}  : {1} rotating 90", "Left", orientation));
+					t2d = RotateImageDegree(t2d, 90f);
 					t2d.Apply();
 				} else if (orientation == ImageOrientation.RIGHT) {
-t2d = RotateImageTest(t2d, -90f);
+					print(string.Format("image orientation is : {0}  : {1} rotating -90", "Right", orientation));
+					t2d = RotateImageDegree(t2d, -90f);
+					t2d.Apply();
+				} else if (orientation == ImageOrientation.DOWN) {
+t2d = RotateImageDegree(t2d, 180f);
 t2d.Apply();
 				}
+else {
+print(string.Format("image orientation is : {0} ",  orientation));
+				}
+                
 
 
 try
@@ -1424,8 +1433,8 @@ cam = null;
 cameraIsOpen = false;
 }
 
-
-Texture2D RotateImageTest(Texture2D originTexture, float angle)
+    
+Texture2D RotateImageDegree(Texture2D originTexture, float angle)
 {
 Texture2D result;
 result = new Texture2D(originTexture.width, originTexture.height);
@@ -1492,7 +1501,7 @@ Debug.Log("camera playing");
 photoTaken = new Texture2D(background.texture.width, background.texture.height);
 photoTaken.SetPixels(cam.GetPixels());
 photoTaken.Apply();
-photoTaken = RotateImageTest(photoTaken, 90);
+photoTaken = RotateImageDegree(photoTaken, 90);
 photoTaken.Apply();
 CloseCamera();
 processingImage.sprite = Sprite.Create(photoTaken, new Rect(0, 0, photoTaken.width, photoTaken.height), new Vector2(0.5f, 0.5f), 100f);
