@@ -76,6 +76,8 @@ public  class ResourceFileManager : MonoBehaviour {
 
     bool sceneIsNotLoaded = true;
 
+    public int httpErrorCount = 0;
+
     private void Awake()
     {
 
@@ -106,7 +108,7 @@ public  class ResourceFileManager : MonoBehaviour {
         dataPathDict["thumb_ornamentFemaleDataPath"] = Path.Combine(dataPathDict["ornamentFemaleDataPath"], "thumb");
         dataPathDict["thumb_shoeFemaleDataPath"] = Path.Combine(dataPathDict["shoeFemaleDataPath"], "thumb");
         dataPathDict["thumb_tieMaleDataPath"] = Path.Combine(dataPathDict["tieMaleDataPath"], "thumb");
-
+        
         dataPathDict["resourceDataPath"] = resourceDataPath;
 
 
@@ -119,9 +121,11 @@ public  class ResourceFileManager : MonoBehaviour {
     downloadInfoString = "Downloading : {0} %\n[{2}/{1}]";
 
         isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
+        httpErrorCount = 0;
     }
     // Use this for initialization
     void Start () {
+
         if(!updateDownloader)
         {
             StartCoroutine(CreateDirectories());
@@ -145,7 +149,7 @@ public  class ResourceFileManager : MonoBehaviour {
                 //    checkForUpdatePanel.SetActive(false);
                 //    firstInstallPanel.SetActive(true);
                 //}
-                StartCoroutine(CreateDirectories());
+                //StartCoroutine(CreateDirectories());
                 StartCoroutine(DownloadAllFile0());
 
             }
@@ -189,12 +193,34 @@ public  class ResourceFileManager : MonoBehaviour {
     {
         if(fileChecked==totalDownloadableFile && sceneIsNotLoaded)
         {
-            PlayerPrefs.SetInt("NewUpdateAvailable", 0);
-            if (updateDownloader)
+            if(httpErrorCount<=0)
             {
                 PlayerPrefs.SetInt("NewUpdateAvailable", 0);
             }
-            SendFileDownloadedMessageToServer();
+            else
+            {
+                PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+            }
+            if (updateDownloader)
+            {
+                if (httpErrorCount <= 0)
+                {
+                    PlayerPrefs.SetInt("NewUpdateAvailable", 0);
+                }
+                else
+                {
+                    PlayerPrefs.SetInt("NewUpdateAvailable", 1);
+                }
+            }
+            if (httpErrorCount <= 0)
+            {
+                SendFileDownloadedMessageToServer();
+            }
+            else
+            {
+                
+            }
+            
             StartCoroutine(LoadMainSceneAsync());
             sceneIsNotLoaded = false;
         }
@@ -223,7 +249,11 @@ public  class ResourceFileManager : MonoBehaviour {
             string dataextractionPath = Path.Combine(Application.persistentDataPath, "resources/images.zip");
             print(string.Format("extraction path : {0} ", dataextractionPath));
             //Directory.Move(preloadData, dataextractionDir);
-
+            if(File.Exists(dataextractionPath))
+            {
+                print("Zip File Already Exists. Deleting old Zip File");
+                File.Delete(dataextractionPath);
+            }
             if (Application.platform == RuntimePlatform.Android)
             {
 
@@ -241,6 +271,7 @@ public  class ResourceFileManager : MonoBehaviour {
 
             //ZipManager.Decompress(new FileInfo(dataextractionPath));
             //ZipUtil.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
+            print(string.Format("Unzipping zip file to : {0} ", Path.Combine(Application.persistentDataPath, "resources/")));
             SharpUnzip.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
 
             //File.Delete(preloadData);
@@ -289,6 +320,7 @@ public  class ResourceFileManager : MonoBehaviour {
 #region ZERO
     public IEnumerator DownloadAllFile0()
     {
+        httpErrorCount = 0;
         isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
         WWWForm form = new WWWForm();
         string device_id="";
@@ -304,6 +336,7 @@ public  class ResourceFileManager : MonoBehaviour {
         device_type = "A";
         device_id = SystemInfo.deviceUniqueIdentifier;
 #endif
+        print(string.Format("Device id : {0}     Device Type : {1} ", device_id, device_type));
         form.AddField("device_id", device_id);
         form.AddField("device_type", device_type);
 
@@ -504,6 +537,7 @@ public  class ResourceFileManager : MonoBehaviour {
 
     public IEnumerator DownloadAllFile02()
     {
+        httpErrorCount = 0;
         isNewInstall = PlayerPrefs.GetInt("isNewInstall", 1);
         WWWForm form = new WWWForm();
         string device_id = "";
@@ -894,6 +928,7 @@ public  class ResourceFileManager : MonoBehaviour {
                 if (www.isNetworkError || www.isHttpError)
                 {
                     Debug.Log(www.error);
+                    httpErrorCount += 1;
                 }
                 else
                 {

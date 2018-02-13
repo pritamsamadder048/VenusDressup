@@ -134,8 +134,14 @@ public class MaleController : MonoBehaviour {
     {
         ResetMalePanel(true);
         StopAllCoroutines();
-        DiscardEditMaleWig();
-        DiscardEditMaleTie();
+        if(isWearingWig)
+        {
+            DiscardEditMaleWig();
+        }
+        if(isWearingShoe)
+        {
+            DiscardEditMaleTie();
+        }
     }
 
     public void SetCurrentMaleIndexAndRotation()

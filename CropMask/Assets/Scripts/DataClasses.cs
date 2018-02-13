@@ -435,6 +435,7 @@ public class SaveData
 
     public void Initialize(int modelindex,float modelrotation, string model, string bodytone, string eye, GameController gameController, DressProperties dressproperty = null, FemaleWigProperties wigproperty = null, OrnamentProperties ornamentproperty = null, ShoeProperties shoeproperty = null)
     {
+        Debug.Log("Initializing started");
         dressData = new DressData();
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
@@ -461,8 +462,8 @@ public class SaveData
         {
 
             maleData.maleIsShowing = true;
-            maleWigProperty = gameController.currentMaleWigProperty;
-            maleTieProperty = gameController.currentMaleTieProperty;
+            maleWigProperty.Clone( gameController.currentMaleWigProperty);
+            maleTieProperty.Clone(gameController.currentMaleTieProperty);
 
             maleData.EncodeData(gameController);
 
@@ -473,7 +474,7 @@ public class SaveData
         }
         if (dressProperty!=null)
         {
-            
+            Debug.Log("dress property  initialized");
             dressData.EncodeData(dressProperty,gameController.currentDressColor);
 
             dressName = dressProperty.imgName;
@@ -501,12 +502,12 @@ public class SaveData
             shoeName = shoeProperty.imgName;
         }
         backgroundData.EncodeData(backgroundProperty);
-
+        Debug.Log("Initialize completed");
     }
 
     public void ReCheckData(GameController gameController)
     {
-
+        Debug.Log("Recheck started");
         dressData = new DressData();
         femaleWigData = new FemaleWigData();
         ornamentData = new OrnamentData();
@@ -517,9 +518,10 @@ public class SaveData
         maleData.maleIsShowing=isShowingMale = gameController.isShowingMale;
         this.bodyToneColor = new float[] { 0.5f, gameController.femaleModelImageObject.GetComponent<Image>().color.g, 0.5f, 1f };
 
+        
         try
         {
-
+            Debug.Log("checking dress property");
             if (dressProperty != null || dressProperty.imgName != "" || dressProperty.imgName != null)
             {
 
@@ -527,16 +529,19 @@ public class SaveData
                 Debug.Log(string.Format("Dress color is {0} {1} {2} {3}", dressData.pColor[0], dressData.pColor[1], dressData.pColor[2], dressData.pColor[3]));
                 dressName = dressProperty.imgName;
             }
-
+            Debug.Log("after if checking dress property");
         }
-        catch (Exception e)
+        catch //(Exception e)
         {
-            Debug.Log(string.Format("Dress recheck Error : {0}",e.Message));
+            Debug.Log("error checking dress property");
+            Debug.Log(string.Format("Dress recheck Error : "));// {0}",e.Message));
             
         }
 
+        
         try
         {
+            Debug.Log("checking female wig property");
             if (femaleWigProperty != null || femaleWigProperty.imgName != "" || femaleWigProperty.imgName != null)
             {
 
@@ -545,14 +550,17 @@ public class SaveData
                 wigName = femaleWigProperty.imgName;
             }
         }
-        catch (Exception e)
+        catch// (Exception e)
         {
 
-            Debug.Log(string.Format("Wig rechec Error : {0}", e.Message));
+            Debug.Log(string.Format("Wig rechec Error : "));// {0}",e.Message));
         }
 
+
+        
         try
         {
+            Debug.Log("checking ornament property");
             if (ornamentProperty != null || ornamentProperty.imgName != "" || ornamentProperty.imgName != null)
             {
 
@@ -562,15 +570,17 @@ public class SaveData
                 ornamentName = ornamentProperty.imgName;
             }
         }
-        catch (Exception e)
+        catch //(Exception e)
         {
 
-            Debug.Log(string.Format("Ornament rechec Error : {0}", e.Message));
+            Debug.Log(string.Format("Ornament rechec Error : "));// {0}",e.Message));
 
         }
 
+       
         try
         {
+            Debug.Log("checking shoe property");
             if (shoeProperty != null || shoeProperty.imgName != "" || shoeProperty.imgName != null)
             {
 
@@ -579,15 +589,19 @@ public class SaveData
                 shoeName = shoeProperty.imgName;
             }
         }
-        catch (Exception e)
+        catch //(Exception e)
         {
 
-            Debug.Log(string.Format("Shoe recheck Error : {0}", e.Message));
+
+            Debug.Log("error checking shoe property");
+            Debug.Log(string.Format("Shoe recheck Error "));// {0}",e.Message));
         }
 
 
+        Debug.Log("Encoding male data");
         maleData.EncodeData(gameController);
 
+        Debug.Log("Encoding background property");
         backgroundData.EncodeData(backgroundProperty);
         //Debug.Log(string.Format("Recheck data : background name :{0}  background path {1} ", backgroundData.backGroundName, backgroundData.backGroundPath));
         Debug.Log(string.Format("male data : male showing : {0}  Wearing wig : {1}  wearing tie : {2}", maleData.maleIsShowing, maleData.isWearingWig, maleData.isWearingTie));

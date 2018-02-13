@@ -495,7 +495,9 @@ public class GameController : MonoBehaviour
 
 	private void Start()
 	{
-        
+
+
+
         this.SetPreviousActiveRootPanel(this.homePanel);
         this.SetPreviousActive(this.sideMenuPanel);
         this.IsPaidUser = (PlayerPrefs.GetInt("isPaidUser", 0) == 1);
@@ -2216,11 +2218,13 @@ public class GameController : MonoBehaviour
 
 	public void SaveDataToDisk(bool newSave = true)
 	{
+        print("Saving data to disk");
 		if (this.IsPaidUser)
 		{
 
             SaveData sd = new SaveData();
-            sceneEditorController.gameObject.SetActive(false);
+            print("New Save Data Created");
+            DeActiveSceneEditorController();
 
             sd.Initialize(mainModelIndex,mainCarouselRotation,mainBodyShape, mainBodyTone, mainEyeColor,this);
             if (wig.gameObject.activeSelf && wig.transform.parent.gameObject.activeSelf && wig.color.a > 0.5f && selectDressController.isWearingWig)
@@ -2259,12 +2263,13 @@ public class GameController : MonoBehaviour
             {
                 //sd.shoeName = shoe.sprite.texture.name;
                 print("shoe property set");
-                sd.shoeProperty = currentShoeProperty;
+                sd.shoeProperty.Clone( currentShoeProperty);
             }
 
+            print("Recheck started from gamecontroller");
             sd.ReCheckData(this);
             //print("After dress property set dress color is : " + sd.dressProperty.dressColor[0] + " " + sd.dressProperty.dressColor[1] + " " + sd.dressProperty.dressColor[2] + " " + sd.dressProperty.dressColor[3]);
-
+            print("Recheck completed");
            int savestatus= SaveData.SaveWearings("wearingsdata.dat", sd, this);
             print("save status : " + savestatus);
             if(savestatus==0)
@@ -2290,6 +2295,7 @@ public class GameController : MonoBehaviour
 	{
         
         DeactiveCurrentActive(true, true);
+        ToggleOptionSideMenu(2);
         print(string.Format("Full Path : {0} ", fullPath));
         
 
@@ -4462,14 +4468,74 @@ public class GameController : MonoBehaviour
 
     public void OnClickShareButton()
     {
-        Share();
+        GoToHome();
     }
 
     public void Share()
     {
         GoToHome();
+
     }
 
+
+    public IEnumerator TakeScreenshotForShare(string fullPath,Action callBack)
+    {
+
+        DeactiveCurrentActive(true, true);
+        print(string.Format("Full Path : {0} ", fullPath));
+
+
+        yield return new WaitForSecondsRealtime(.5f);
+        ScreenCapture.CaptureScreenshot(fullPath);
+        //yield return new WaitForSecondsRealtime(1f);
+        //yield return new WaitForEndOfFrame();
+        Texture2D ttx2d = new Texture2D(320, 480);
+        if (Application.isMobilePlatform)
+        {
+            fullPath = Path.Combine(Application.persistentDataPath, fullPath);
+        }
+
+        print("full path now is : " + fullPath);
+        int maxWait = 30;
+        int currentWaitTime = 0;
+        while (!File.Exists(fullPath))
+        {
+            yield return new WaitForSecondsRealtime(.3f);
+            currentWaitTime += 1;
+            if (currentWaitTime > maxWait)
+            {
+                break;
+            }
+        }
+
+        if (!File.Exists(fullPath))
+        {
+            InstantiateInfoPopup("Could not Save Screenshot");
+
+        }
+        else
+        {
+            yield return new WaitForSecondsRealtime(1f);
+            ttx2d.LoadImage(File.ReadAllBytes(fullPath));
+            ttx2d.Apply();
+            ttx2d = cameraController.ResizeTexture2D(ttx2d, 600, 800);
+            ttx2d.Apply();
+            //File.WriteAllBytes(fullPath, ttx2d.EncodeToJPG(50));
+            //ttx2d = RTImage(MAINCAMERA, 320, 480);
+            //ttx2d.Apply();
+            //File.WriteAllBytes(fullPath, ttx2d.EncodeToJPG(50));
+
+            //RenderTexture rt = MAINCAMERA.activeTexture;
+            //rt.Create();
+
+            //ScreenCapture.CaptureScreenshot()
+        }
+
+        yield return new WaitForSecondsRealtime(.5f);
+        //Destroy(ttx2d, 2f);
+        //ActiveCurrentActive(true, true);
+        GoToHome();
+    }
 
 
     #endregion

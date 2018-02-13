@@ -536,7 +536,7 @@ public class Gallery : MonoBehaviour {
     }
     public void OnCancel()
     {
-        gameController.InstantiateInfoPopup("you cancelled gallery");
+        //gameController.InstantiateInfoPopup("you cancelled gallery");
         gameController.ToggleHomeSideMenu(1);
         gameController.panels[0].SetActive(true);
     }
@@ -1284,7 +1284,7 @@ gameController.ToggleHomeSideMenu(1);
 }
 public void OnCancel()
 {
-gameController.InstantiateInfoPopup("you cancelled gallery");
+//gameController.InstantiateInfoPopup("you cancelled gallery");
 //gameController.ToggleHomeSideMenu(1);
 }
 

@@ -1,4 +1,13 @@
-﻿using System;
+﻿
+/// <summary>
+///  Resource Link : http://www.theappguruz.com/blog/general-sharing-in-android-ios-in-unity
+///  Resource Link : https://github.com/tejas123/general-sharing-in-android-ios-in-unity/blob/master/General%20Sharing/Assets/Scripts/GeneralSharing.cs
+/// </summary>
+
+
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,15 +20,16 @@ using UnityEngine;
 class ShareManager
 {
 #if UNITY_IOS
-    [DllImport("__Internal")]
-    private static extern void IosShareImageAndTextualData(string iosPath, string message);
-    [DllImport("__Internal")]
-    private static extern void IosShareTextualData(string message);
+    //[DllImport("__Internal")]
+    //private static extern void IosShareImageAndTextualData(string iosPath, string message);
+    //[DllImport("__Internal")]
+    //private static extern void IosShareTextualData(string message);
 #endif
-
+    
 
     public static void AndroidShareTextualData(string subject,string title,string textToShare)
     {
+        
         #if UNITY_ANDROID // || UNITY_EDITOR
         // Create Refernece of AndroidJavaClass class for intent
         AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");

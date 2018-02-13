@@ -382,7 +382,10 @@ public class SelectShapeController : MonoBehaviour {
             //femaleSprite.sprite = rotationController.GetSelectedShape().GetComponent<SpriteRenderer>().sprite;
             ToggleSideMenuSelectShape(0, 2);
             ToggleSideMenuSelectShape(1, 1, shapeButtonObjects[2]);
-            gameController.ShowFemaleModelAndAppearings();
+            if(!gameController.femaleModelAndAllAppearingsAreShown)
+            {
+                gameController.ShowFemaleModelAndAppearings();
+            }
             gameController.ZoomInFemaleModel();
 
 			shapeButtonObjects[0].GetComponent<Toggle>().isOn = false;

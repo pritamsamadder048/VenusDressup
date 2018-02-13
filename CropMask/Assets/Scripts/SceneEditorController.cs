@@ -33,10 +33,11 @@ public class SceneEditorController : MonoBehaviour {
     public int tapTime = 0;
 
     
-    public int maxTapTime = 30;
+    public int maxTapTime = 1;
+    public int editorMaxTapTime = 5;
 
 
-    
+
     public GameObject editPopup;
 
     public GameObject sceneObjectFacePrefab;
@@ -238,7 +239,11 @@ public class SceneEditorController : MonoBehaviour {
                     {
 
                         tapTime += 1;
+#if !UNITY_EDITOR
                         if (tapTime >= maxTapTime)
+#elif UNITY_EDITOR
+                        if (tapTime >= editorMaxTapTime)
+#endif
                         {
                             isShowingSceneObjectsPanel = true;
                             tapTime = 0;
@@ -499,7 +504,7 @@ public class SceneEditorController : MonoBehaviour {
     public void RemoveMaleTieFromScene()
     {
         gameController.maleController.RemoveMaleTie();
-        Destroy(sceneObjectMaleTie.gameObject);
+        Destroy(sceneObjectMaleTie.transform.parent.gameObject);
 
         totalObjects -= 1;
         if (totalObjects <= 0)

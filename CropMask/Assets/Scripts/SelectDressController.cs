@@ -212,9 +212,18 @@ public class SelectDressController : MonoBehaviour {
     private void OnDisable()
     {
         StopAllCoroutines();
-        DiscardEditDress();
-        DiscardEditWig();
-        DiscardEditShoe();
+        if(isWearingDress)
+        {
+            DiscardEditDress();
+        }
+        if(isWearingWig)
+        {
+            DiscardEditWig();
+        }
+        if(isWearingShoe)
+        {
+            DiscardEditShoe();
+        }
     }
 
     public IEnumerator ReloadDresses()
