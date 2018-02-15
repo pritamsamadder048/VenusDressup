@@ -2263,7 +2263,7 @@ public class GameController : MonoBehaviour
             {
                 //sd.shoeName = shoe.sprite.texture.name;
                 print("shoe property set");
-                sd.shoeProperty.Clone( currentShoeProperty);
+                sd.shoeProperty= currentShoeProperty;
             }
 
             print("Recheck started from gamecontroller");
@@ -2275,7 +2275,7 @@ public class GameController : MonoBehaviour
             if(savestatus==0)
             {
                 InstantiateInfoPopup("Maximum Save Data Reached");
-                sceneEditorController.gameObject.SetActive(true);
+                ActiveSceneEditorController();
             }
         }
 		else
@@ -2325,7 +2325,6 @@ public class GameController : MonoBehaviour
         if(!File.Exists(fullPath))
         {
             InstantiateInfoPopup("Could not Save Data");
-            
         }
         else
         {

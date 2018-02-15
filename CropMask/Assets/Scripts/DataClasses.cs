@@ -462,8 +462,10 @@ public class SaveData
         {
 
             maleData.maleIsShowing = true;
-            maleWigProperty.Clone( gameController.currentMaleWigProperty);
-            maleTieProperty.Clone(gameController.currentMaleTieProperty);
+            //maleWigProperty.Clone(gameController.currentMaleWigProperty);
+            //maleTieProperty.Clone(gameController.currentMaleTieProperty);
+
+            
 
             maleData.EncodeData(gameController);
 

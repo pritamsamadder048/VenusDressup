@@ -1086,7 +1086,7 @@ Debug.Log ("filePath : " + filePath);
 gameController.ShowLoading();
 //StartCoroutine(DownloadImage("http://i.telegraph.co.uk/multimedia/archive/03249/archetypal-female-_3249633c.jpg",orientation));
 //StartCoroutine(DownloadImage("https://i.pinimg.com/originals/a0/1c/0e/a01c0e0c42c83752ea1533121174db34.jpg"));
-		StartCoroutine(DownloadImage("https://www.specktra.net/images/a/a1/a1e176fc_20150530_145845.jpeg"));
+		StartCoroutine(DownloadImage("https://www.specktra.net/images/a/a1/a1e176fc_20150530_145845.jpeg",ImageOrientation.UP));
 
 #elif UNITY_IPHONE
 StartCoroutine(DownloadImage(filePath,orientation));
@@ -1222,7 +1222,7 @@ gameController.HideLoadingPanelOnly();
 
 }
 
-	Texture2D RotateImageDegree(Texture2D originTexture, float angle)
+	Texture2D RotateImageDegreeCrop(Texture2D originTexture, float angle)
 	{
 		Texture2D result;
 		result = new Texture2D(originTexture.width, originTexture.height);
@@ -1246,7 +1246,55 @@ gameController.HideLoadingPanelOnly();
 		return result;
 	}
 
-	Color32[] rotateSquare(Color32[] arr, float phi, Texture2D originTexture)
+    Texture2D RotateImageDegree(Texture2D originTexture, float angle)
+    {
+        int originalTextureWidth = originTexture.width;
+        int originalTextureHeight = originTexture.height;
+        int newSize = Mathf.Max(originalTextureWidth, originalTextureHeight) + 10;
+        Texture2D result;
+        Texture2D mergedOriginalTexture;
+        if (angle < 180f)
+        {
+            Texture2D backgroundTexture = new Texture2D(newSize, newSize);
+            //Color[] clr= Enumerable.Repeat(Color.clear, newSize * newSize).ToArray();
+            backgroundTexture.SetPixels(Enumerable.Repeat(Color.clear, newSize * newSize).ToArray());
+            backgroundTexture.Apply();
+            mergedOriginalTexture = JustMergeImage(originTexture, backgroundTexture);
+            mergedOriginalTexture.Apply();
+            result = new Texture2D(newSize, newSize);
+        }
+        else
+        {
+
+            mergedOriginalTexture = new Texture2D(originalTextureWidth, originalTextureHeight);
+            mergedOriginalTexture.SetPixels(originTexture.GetPixels());
+            mergedOriginalTexture.Apply();
+            result = new Texture2D(originalTextureWidth, originalTextureHeight);
+        }
+
+
+        Color32[] pix1 = result.GetPixels32();
+        Color32[] pix2 = mergedOriginalTexture.GetPixels32();
+        int W = mergedOriginalTexture.width;
+        int H = mergedOriginalTexture.height;
+        int x = 0;
+        int y = 0;
+        Color32[] pix3 = rotateSquare(pix2, (Mathf.PI / 180 * angle), mergedOriginalTexture);
+        for (int j = 0; j < H; j++)
+        {
+            for (var i = 0; i < W; i++)
+            {
+                //pix1[result.width/2 - originTexture.width/2 + x + i + result.width*(result.height/2-originTexture.height/2+j+y)] = pix2[i + j*originTexture.width];
+                pix1[result.width / 2 - W / 2 + x + i + result.width * (result.height / 2 - H / 2 + j + y)] = pix3[i + j * W];
+            }
+        }
+        result.SetPixels32(pix1);
+        result.Apply();
+        return result;
+    }
+
+
+    Color32[] rotateSquare(Color32[] arr, float phi, Texture2D originTexture)
 	{
 		int x;
 		int y;
@@ -1336,88 +1384,134 @@ return destTex;
 
 
 
-private Texture2D MergeImage(Texture2D Overlay, Texture2D Background = null, Texture2D newTexture = null)
-{
-//print(string.Format("overlay width : {0}  overlay height{1}  pimg rect trnsfrm width : {2} pimg rect trnsfrm Height : {3} ", Overlay.width, Overlay.height, processingImage.rectTransform.rect.width, processingImage.rectTransform.rect.height));
-if ((Overlay.width > processingImage.rectTransform.rect.width) || (Overlay.height > processingImage.rectTransform.rect.height))
-{
-//			Overlay.Resize (1300,1300, Overlay.format, false);
-//			Overlay.Apply ();
-int resizeHeight = Overlay.height;
-int resizeWidth = Overlay.width;
+    private Texture2D MergeImage(Texture2D Overlay, Texture2D Background = null, Texture2D newTexture = null)
+    {
+        //print(string.Format("overlay width : {0}  overlay height{1}  pimg rect trnsfrm width : {2} pimg rect trnsfrm Height : {3} ", Overlay.width, Overlay.height, processingImage.rectTransform.rect.width, processingImage.rectTransform.rect.height));
+        if ((Overlay.width > processingImage.rectTransform.rect.width) || (Overlay.height > processingImage.rectTransform.rect.height))
+        {
+            //			Overlay.Resize (1300,1300, Overlay.format, false);
+            //			Overlay.Apply ();
+            int resizeHeight = Overlay.height;
+            int resizeWidth = Overlay.width;
 
-if (Overlay.width > processingImage.rectTransform.rect.width)
-{
-resizeWidth = (int)processingImage.rectTransform.rect.width;
-float r = (float)Overlay.width / (float)resizeWidth;
-resizeHeight = (int)(Overlay.height / r);
-print(string.Format("Width is big Resize width : {0} resize hight {1} when r is : {2}", resizeWidth, resizeHeight, r));
-}
-/*
-if (Overlay.height > processingImage.rectTransform.rect.height) {
-resizeHeight =(int) processingImage.rectTransform.rect.height;
-float r = (float)Overlay.height / (float)resizeHeight;
-resizeWidth = (int)(Overlay.width / r);
-print(string.Format("Height is big Resize width : {0} resize hight {1} when r is : {2}", resizeWidth, resizeHeight, r));
-}
-*/
-
-
-
-Texture2D resizedOverlay = ResizeTexture2D(Overlay, resizeWidth, resizeHeight);
-Overlay.Resize(resizeWidth, resizeHeight);
-Overlay.Apply();
-//			Overlay=ResizeTexture2D (Overlay, resizeWidth, resizeHeight);
-Overlay.SetPixels(resizedOverlay.GetPixels());
-Overlay.Apply();
-}
-
-if (Background == null)
-{
-Background = new Texture2D((int)processingImage.rectTransform.rect.width, (int)processingImage.rectTransform.rect.height, TextureFormat.ARGB32, false);
-Color fillColor = Color.clear;
-//Color[] fillPixels = new Color[Background.width * Background.height];
-
-//for (int i = 0; i < fillPixels.Length; i++)
-//{
-//	fillPixels[i] = fillColor;
-//}
-
-Color[] fillPixels = Enumerable.Repeat(Color.clear, Background.width * Background.height).ToArray();
-
-Background.SetPixels(fillPixels);
-Background.Apply();
-
-}
-if (newTexture == null)
-{
-newTexture = new Texture2D((int)processingImage.rectTransform.rect.width, (int)processingImage.rectTransform.rect.height, TextureFormat.ARGB32, false);
-//print ("big image rect : "+processingImage.rectTransform.rect);
-}
-
-
-Vector2 offset = new Vector2(((newTexture.width - Overlay.width) / 2), ((newTexture.height - Overlay.height) / 2));
-
-newTexture.SetPixels(Background.GetPixels());
-
-for (int y = 0; y < Overlay.height; y++)
-{
-for (int x = 0; x < Overlay.width; x++)
-{
-Color PixelColorFore = Overlay.GetPixel(x, y) * Overlay.GetPixel(x, y).a;
-Color PixelColorBack = Background.GetPixel((int)(x + offset.x), (int)(y + offset.y)) * (1 - PixelColorFore.a);
-newTexture.SetPixel((int)(x + offset.x), (int)(y + offset.y), PixelColorBack + PixelColorFore);
-}
-}
-
-newTexture.Apply();
-return newTexture;
-}
+            if (Overlay.width > processingImage.rectTransform.rect.width)
+            {
+                resizeWidth = (int)processingImage.rectTransform.rect.width;
+                float r = (float)Overlay.width / (float)resizeWidth;
+                resizeHeight = (int)(Overlay.height / r);
+                print(string.Format("Width is big Resize width : {0} resize hight {1} when r is : {2}", resizeWidth, resizeHeight, r));
+            }
+            /*
+            if (Overlay.height > processingImage.rectTransform.rect.height) {
+            resizeHeight =(int) processingImage.rectTransform.rect.height;
+            float r = (float)Overlay.height / (float)resizeHeight;
+            resizeWidth = (int)(Overlay.width / r);
+            print(string.Format("Height is big Resize width : {0} resize hight {1} when r is : {2}", resizeWidth, resizeHeight, r));
+            }
+            */
 
 
 
+            Texture2D resizedOverlay = ResizeTexture2D(Overlay, resizeWidth, resizeHeight);
+            Overlay.Resize(resizeWidth, resizeHeight);
+            Overlay.Apply();
+            //			Overlay=ResizeTexture2D (Overlay, resizeWidth, resizeHeight);
+            Overlay.SetPixels(resizedOverlay.GetPixels());
+            Overlay.Apply();
+        }
 
-Texture2D rotateTexture(Texture2D originalTexture, bool clockwise)
+        if (Background == null)
+        {
+            Background = new Texture2D((int)processingImage.rectTransform.rect.width, (int)processingImage.rectTransform.rect.height, TextureFormat.ARGB32, false);
+            Color fillColor = Color.clear;
+            //Color[] fillPixels = new Color[Background.width * Background.height];
+
+            //for (int i = 0; i < fillPixels.Length; i++)
+            //{
+            //	fillPixels[i] = fillColor;
+            //}
+
+            Color[] fillPixels = Enumerable.Repeat(Color.clear, Background.width * Background.height).ToArray();
+
+            Background.SetPixels(fillPixels);
+            Background.Apply();
+
+        }
+        if (newTexture == null)
+        {
+            newTexture = new Texture2D((int)processingImage.rectTransform.rect.width, (int)processingImage.rectTransform.rect.height, TextureFormat.ARGB32, false);
+            //print ("big image rect : "+processingImage.rectTransform.rect);
+        }
+
+
+        Vector2 offset = new Vector2(((newTexture.width - Overlay.width) / 2), ((newTexture.height - Overlay.height) / 2));
+
+        newTexture.SetPixels(Background.GetPixels());
+
+        for (int y = 0; y < Overlay.height; y++)
+        {
+            for (int x = 0; x < Overlay.width; x++)
+            {
+                Color PixelColorFore = Overlay.GetPixel(x, y) * Overlay.GetPixel(x, y).a;
+                Color PixelColorBack = Background.GetPixel((int)(x + offset.x), (int)(y + offset.y)) * (1 - PixelColorFore.a);
+                newTexture.SetPixel((int)(x + offset.x), (int)(y + offset.y), PixelColorBack + PixelColorFore);
+            }
+        }
+
+        newTexture.Apply();
+        return newTexture;
+    }
+
+    private Texture2D JustMergeImage(Texture2D Overlay, Texture2D Background = null, Texture2D newTexture = null)
+    {
+
+
+        if (Background == null)
+        {
+            Background = new Texture2D((int)Overlay.width, (int)Overlay.height, TextureFormat.ARGB32, false);
+            Color fillColor = Color.clear;
+            //Color[] fillPixels = new Color[Background.width * Background.height];
+
+            //for (int i = 0; i < fillPixels.Length; i++)
+            //{
+            //	fillPixels[i] = fillColor;
+            //}
+
+            Color[] fillPixels = Enumerable.Repeat(Color.clear, Background.width * Background.height).ToArray();
+
+            Background.SetPixels(fillPixels);
+            Background.Apply();
+
+        }
+        if (newTexture == null)
+        {
+            newTexture = new Texture2D((int)Background.width, (int)Background.height, TextureFormat.ARGB32, false);
+            //print ("big image rect : "+processingImage.rectTransform.rect);
+        }
+
+
+        Vector2 offset = new Vector2(((newTexture.width - Overlay.width) / 2), ((newTexture.height - Overlay.height) / 2));
+
+        newTexture.SetPixels(Background.GetPixels());
+
+        for (int y = 0; y < Overlay.height; y++)
+        {
+            for (int x = 0; x < Overlay.width; x++)
+            {
+                Color PixelColorFore = Overlay.GetPixel(x, y) * Overlay.GetPixel(x, y).a;
+                Color PixelColorBack = Background.GetPixel((int)(x + offset.x), (int)(y + offset.y)) * (1 - PixelColorFore.a);
+                newTexture.SetPixel((int)(x + offset.x), (int)(y + offset.y), PixelColorBack + PixelColorFore);
+            }
+        }
+
+        newTexture.Apply();
+        Destroy(Background);
+
+        return newTexture;
+    }
+
+
+    Texture2D rotateTexture(Texture2D originalTexture, bool clockwise)
 {
 Color32[] original = originalTexture.GetPixels32();
 Color32[] rotated = new Color32[original.Length];

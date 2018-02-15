@@ -5,8 +5,8 @@
 // Shifts from rgb to hsv color space
 half3 rgb2hsv(half3 c) {
 	half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-	half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
-	half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+	float4 p = c.g < c.b ? float4(c.bg, K.wz) : float4(c.gb, K.xy);
+	float4 q = c.r < p.x ? float4(p.xyw, c.r) : float4(c.r, p.yzx);
 
 	half d = q.x - min(q.w, q.y);
 	half e = 1.0e-10;
