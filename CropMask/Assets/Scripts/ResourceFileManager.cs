@@ -242,11 +242,13 @@ public  class ResourceFileManager : MonoBehaviour {
         {
             string preloadData = Path.Combine(Application.streamingAssetsPath, "PreparedData");
             //string preloadData = Path.Combine(Application.persistentDataPath, "resources.zip");
-            preloadData = Path.Combine(preloadData, "resources/images.zip");
+            //preloadData = Path.Combine(preloadData, "resources/images.zip");
+            preloadData = Path.Combine(preloadData, "resources/images.7z");
             //preloadData = Path.Combine(preloadData, "resources/images");
             print(string.Format("datapath : {0}", preloadData));
             print(string.Format("preloadable data Exists : {0}", File.Exists(preloadData)));
-            string dataextractionPath = Path.Combine(Application.persistentDataPath, "resources/images.zip");
+            //string dataextractionPath = Path.Combine(Application.persistentDataPath, "resources/images.zip");
+            string dataextractionPath = Path.Combine(Application.persistentDataPath, "resources/images.7z");
             print(string.Format("extraction path : {0} ", dataextractionPath));
             //Directory.Move(preloadData, dataextractionDir);
             if(File.Exists(dataextractionPath))
@@ -272,7 +274,8 @@ public  class ResourceFileManager : MonoBehaviour {
             //ZipManager.Decompress(new FileInfo(dataextractionPath));
             //ZipUtil.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
             print(string.Format("Unzipping zip file to : {0} ", Path.Combine(Application.persistentDataPath, "resources/")));
-            SharpUnzip.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
+            //SharpUnzip.Unzip(dataextractionPath, Path.Combine(Application.persistentDataPath, "resources/"));
+            SharpCompressExtractor.Un7Zip(dataextractionPath,Path.Combine(Application.persistentDataPath, "resources/"));
 
             //File.Delete(preloadData);
             File.Delete(dataextractionPath);
