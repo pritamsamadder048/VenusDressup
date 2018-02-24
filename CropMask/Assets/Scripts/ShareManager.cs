@@ -19,13 +19,7 @@ using UnityEngine;
 
 class ShareManager
 {
-#if UNITY_IOS
-    //[DllImport("__Internal")]
-    //private static extern void IosShareImageAndTextualData(string iosPath, string message);
-    //[DllImport("__Internal")]
-    //private static extern void IosShareTextualData(string message);
-#endif
-    
+
 
     public static void AndroidShareTextualData(string subject,string title,string textToShare)
     {
@@ -51,10 +45,13 @@ class ShareManager
         AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
         AndroidJavaObject currentActivity = unity.GetStatic< AndroidJavaObject>("currentActivity");
         // Invoke android activity for passing intent to share data
-        currentActivity.Call("startActivity", intentObject);
-    
+        //currentActivity.Call("startActivity", intentObject);
 
-        #endif
+        AndroidJavaObject jChooser = intentClass.CallStatic<AndroidJavaObject>("createChooser", intentObject, "Would you like to share?");
+        currentActivity.Call("startActivity", jChooser);
+
+
+#endif
 
     }
 
@@ -65,35 +62,51 @@ class ShareManager
 #if UNITY_ANDROID // || UNITY_EDITOR
         // Save your image on designate path
         byte[] bytes = imageToPost.EncodeToPNG();
-        string path = Application.persistentDataPath + "/MyImage.png";
+        string path = Application.persistentDataPath +"shared/"+ "/sharedimage.png";
+
+        if(!Directory.Exists(Path.GetDirectoryName(path)))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+        }
         File.WriteAllBytes(path, bytes);
- 
+        Debug.Log("File saved for share in shared directory");
         AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
         AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent");
- 
-        intentObject.Call("setAction", intentClass.GetStatic<string>("ACTION_SEND"));
-        intentObject.Call("setType", "image/*");
-        intentObject.Call("putExtra", intentClass.GetStatic<string>("EXTRA_SUBJECT"), subject);
-        intentObject.Call("putExtra", intentClass.GetStatic<string>("EXTRA_TITLE"), title);
-        intentObject.Call("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), textToShare);
- 
+
+        Debug.Log("Set intent class and object");
+
+        intentObject.Call<AndroidJavaObject>("setAction", intentClass.GetStatic<string>("ACTION_SEND"));
+        Debug.Log("Set ACTION_SEND");
+        intentObject.Call<AndroidJavaObject>("setType", "image/*");
+        Debug.Log("Set type image");
+        intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_SUBJECT"), "Media Sharing ");
+        Debug.Log("Set putextra Extra_Subject");
+        intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TITLE"), "Media Sharing ");
+        Debug.Log("Set Extra_Title");
+        intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), "Media Sharing Android Demo");
+        Debug.Log("Set Extra_Text");
+
         AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri");
         AndroidJavaClass fileClass = new AndroidJavaClass("java.io.File");
- 
+        Debug.Log("Set uriclass and file class");
         AndroidJavaObject fileObject = new AndroidJavaObject("java.io.File", path);// Set Image Path Here
+
         AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("fromFile", fileObject);
- 
-        // string uriPath =  uriObject.Call("getPath");
+
+        Debug.Log("Set uri object and file object");
+        //			string uriPath =  uriObject.Call<string>("getPath");
         bool fileExist = fileObject.Call<bool>("exists");
         Debug.Log("File exist : " + fileExist);
-        // Attach image to intent
         if (fileExist)
-        {
-            intentObject.Call("putExtra", intentClass.GetStatic<string>("EXTRA_STREAM"), uriObject);
-        }
+            intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_STREAM"), uriObject);
+
         AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
         AndroidJavaObject currentActivity = unity.GetStatic<AndroidJavaObject>("currentActivity");
-        currentActivity.Call("startActivity", intentObject);
+        Debug.Log("Starting native sharing activity for android");
+        //currentActivity.Call("startActivity", intentObject);
+
+        AndroidJavaObject jChooser = intentClass.CallStatic<AndroidJavaObject>("createChooser", intentObject, "Would you like to share?");
+        currentActivity.Call("startActivity", jChooser);
 #endif
     }
 }

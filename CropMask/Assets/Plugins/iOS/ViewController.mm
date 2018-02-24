@@ -1,5 +1,13 @@
-// Method for image sharing
+//
+//  ViewController.m
+//  
+//
+//  Created by Nikunj on 14/09/15.
+//
+//
+
 @implementation ViewController : UIViewController
+
 -(void) shareMethod: (const char *) path Message : (const char *) shareMessage
 {
     NSString *imagePath = [NSString stringWithUTF8String:path];
@@ -21,18 +29,7 @@
     else
         [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:activityVc animated:YES completion:nil];
     [activityVc release];
-} 
- 
-// globally declare image sharing method
-extern "C"{
-    void _TAG_ShareTextWithImage(const char * path, const char * message){
-        ViewController *vc = [[ViewController alloc] init];
-        [vc shareMethod:path Message:message];
-        [vc release];
-    }
 }
-
-//Method for only text sharing
 -(void) shareOnlyTextMethod: (const char *) shareMessage
 {
     
@@ -53,8 +50,18 @@ extern "C"{
         [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:activityVc animated:YES completion:nil];
     [activityVc release];
 }
- 
-// Globally declare text sharing method
+
+@end
+
+
+
+extern "C"{
+    void _TAG_ShareTextWithImage(const char * path, const char * message){
+        ViewController *vc = [[ViewController alloc] init];
+        [vc shareMethod:path Message:message];
+        [vc release];
+    }
+}
 extern "C"{
     void _TAG_ShareSimpleText(const char * message){
         ViewController *vc = [[ViewController alloc] init];

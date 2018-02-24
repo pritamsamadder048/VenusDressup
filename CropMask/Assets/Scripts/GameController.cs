@@ -592,9 +592,9 @@ public class GameController : MonoBehaviour
 		{
 			this.InstantiateInfoPopup(message);
 			this.InstantiateInfoPopup("Demo All Features Unlocked");
-            this.PaidUserDetected("");
-            this.selectDressController.CheckForChanges();
-            this.maleController.CheckForChanges();
+            //this.PaidUserDetected("");
+            //this.selectDressController.CheckForChanges();
+            //this.maleController.CheckForChanges();
         }
 	}
 
@@ -621,8 +621,11 @@ public class GameController : MonoBehaviour
 
 	public void PurchaseFullVersionApp()
 	{
-        //SmartIAPListener.INSTANCE.Purchase("android.test.purchased", new Action<bool, string>(this.PurchaseCallBack));
+#if (UNITY_ANDROID || UNITY_IOS) && (!UNITY_EDITOR)
+        SmartIAPListener.INSTANCE.Purchase("android.test.purchased", new Action<bool, string>(this.PurchaseCallBack));
+#else
         PurchaseCallBack(true, "Purchase Completed");
+#endif
 
     }
 
@@ -2928,7 +2931,7 @@ public class GameController : MonoBehaviour
 
 
 
-    #region MALEFEMALETOGGLESCENE
+#region MALEFEMALETOGGLESCENE
     public void ShowMaleFemaleSelectionPopup()
     {
         if(isShowingMale)
@@ -4457,27 +4460,56 @@ public class GameController : MonoBehaviour
             //ZoomInMaleModel();
         }
     }
-    #endregion MALEFEMALETOGGLESCENE
+#endregion MALEFEMALETOGGLESCENE
 
 
 
 
-    #region SHARING
+#region SHARING
 
 
     public void OnClickShareButton()
     {
         GoToHome();
+        Share();
     }
 
     public void Share()
     {
-        GoToHome();
-
+        //GoToHome();
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+        string tsn = string.Format("tmp/screenshots/{0}", "screenshot.png");
+        DeActiveSceneEditorController();
+        base.StartCoroutine(this.TakeScreenshotForShare(tsn, CallBackForSharing));
+#else
+        string tsn = string.Format("tmp/screenshots/{0}", "screenshot.png");
+        tsn = Path.Combine(Application.persistentDataPath, tsn);
+        DeActiveSceneEditorController();
+        base.StartCoroutine(this.TakeScreenshotForShare(tsn, CallBackForSharing));
+#endif
     }
 
-
-    public IEnumerator TakeScreenshotForShare(string fullPath,Action callBack)
+    public void CallBackForSharing(Texture2D screenshot,string imagePath, bool success)
+    {
+        if (success)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            Debug.Log("Trying to share image");
+            ShareManager.AndroidShareImageAndTextualData(screenshot, "My Venus Look", "My Venus Look", "See my new dressup look! Use Venus DressUp For More Fun");
+#elif UNITY_IOS && !UNITY_EDITOR
+             Debug.Log("Trying to share image");
+             GeneralSharingiOSBridge.IosShareImageAndTextualData(imagePath,"See my new dressup look! Use Venus DressUp For More Fun");
+#else
+            Debug.Log("Success from share image save screenshot");
+#endif
+        }
+        else
+        {
+            Debug.Log("Error from share image save screenshot");
+        }
+        ActiveSceneEditorController();
+    }
+    public IEnumerator TakeScreenshotForShare(string fullPath, Action<Texture2D,string, bool> callBack)
     {
 
         DeactiveCurrentActive(true, true);
@@ -4492,6 +4524,12 @@ public class GameController : MonoBehaviour
         if (Application.isMobilePlatform)
         {
             fullPath = Path.Combine(Application.persistentDataPath, fullPath);
+        }
+
+        string dir = Path.GetDirectoryName(fullPath);
+        if (!Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
         }
 
         print("full path now is : " + fullPath);
@@ -4510,34 +4548,39 @@ public class GameController : MonoBehaviour
         if (!File.Exists(fullPath))
         {
             InstantiateInfoPopup("Could not Save Screenshot");
-
+            callBack(null,"", false);
         }
         else
         {
             yield return new WaitForSecondsRealtime(1f);
             ttx2d.LoadImage(File.ReadAllBytes(fullPath));
             ttx2d.Apply();
-            ttx2d = cameraController.ResizeTexture2D(ttx2d, 600, 800);
-            ttx2d.Apply();
-            //File.WriteAllBytes(fullPath, ttx2d.EncodeToJPG(50));
-            //ttx2d = RTImage(MAINCAMERA, 320, 480);
-            //ttx2d.Apply();
-            //File.WriteAllBytes(fullPath, ttx2d.EncodeToJPG(50));
-
-            //RenderTexture rt = MAINCAMERA.activeTexture;
-            //rt.Create();
-
-            //ScreenCapture.CaptureScreenshot()
+            callBack(ttx2d,fullPath, true);
+            
         }
 
         yield return new WaitForSecondsRealtime(.5f);
         //Destroy(ttx2d, 2f);
-        //ActiveCurrentActive(true, true);
-        GoToHome();
+        ActiveCurrentActive(true, true);
+        //GoToHome();
     }
+
 
 
     #endregion
 
+#region RATING
+    public void RateUs()
+    {
+#if  UNITY_EDITOR
+
+        Application.OpenURL("https://play.google.com/store/apps/details?id=com.dressup.venus");
+#elif UNITY_ANDROID
+        Application.OpenURL("market://details?id=com.dressup.venus");
+#elif UNITY_IOS
+        Application.OpenURL("itms-apps://itunes.apple.com/app/com.facebook.lite");
+#endif
+    }
+    #endregion RATING
 
 }
